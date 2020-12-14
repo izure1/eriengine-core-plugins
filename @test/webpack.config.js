@@ -26,7 +26,7 @@ module.exports = {
         extensions: ['.ts', '.js', '.json'],
         modules: [
             path.resolve(__dirname, 'node_modules'),
-            path.resolve(__dirname, '../', 'common', 'node_modules')
+            path.resolve(__dirname, '../', '@common', 'node_modules')
         ]
     },
     devServer: {

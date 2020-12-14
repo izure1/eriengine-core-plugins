@@ -26,11 +26,11 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js', '.json'],
         alias: {
-            '@common': path.resolve(__dirname, '../common')
+            '@common': path.resolve(__dirname, '../@common')
         },
         modules: [
             path.resolve(__dirname, 'node_modules'),
-            path.resolve(__dirname, '../', 'common', 'node_modules')
+            path.resolve(__dirname, '../', '@common', 'node_modules')
         ]
     }
 }

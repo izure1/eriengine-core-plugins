@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { IntervalManager } from '@common/Phaser/IntervalManager'
 
 type Transition = 'slide'|'fade'|'default'
 type Position = 'left'|'center'|'right'
@@ -59,7 +60,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return this
     }
 
-    skip(): this {  
+    skip(): this {
         return this
     }
 

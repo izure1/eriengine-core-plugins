@@ -1,0 +1,25 @@
+{
+  "name": "eriengine-core-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/eriengine-core-test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx webpack-cli serve"
+  },
+  "dependencies": {
+    "phaser": "3.24.1"
+  },
+  "devDependencies": {
+    "@webpack-cli/serve": "^1.1.0",
+    "html-webpack-plugin": "4.5.0",
+    "add-asset-html-webpack-plugin": "3.1.3",
+    "ts-loader": "8.0.4",
+    "typescript": "4.1.2",
+    "webpack": "5.8.0",
+    "webpack-cli": "4.2.0",
+    "webpack-dev-server": "3.11.0"
+  },
+  "author": "",
+  "license": "MIT"
+}

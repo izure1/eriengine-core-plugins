@@ -1,8 +1,8 @@
 import Phaser from 'phaser'
-import { Plugin as ActorPlugin, Actor } from '../../actor'
-import { Plugin as IsomScenePlugin } from '../../isometric-scene'
-import { Plugin as IsomCursorPlugin } from '../../isometric-cursor'
-import { Plugin as DialoguePlugin } from '../../dialogue'
+import { Plugin as ActorPlugin, Actor } from '~/actor'
+import { Plugin as IsomScenePlugin } from '~/isometric-scene'
+import { Plugin as IsomCursorPlugin } from '~/isometric-cursor'
+import { Plugin as DialoguePlugin } from '~/dialogue'
 
 class User extends Actor {
     private hp: number = 100

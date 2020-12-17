@@ -21,10 +21,6 @@ export class IntervalManager extends TypedEmitter<Events> {
         this.registUpdateHandler()
     }
 
-    private get now(): number {
-        return this.scene.time.now
-    }
-
     start(interval: number, maxiumStep: number): void {
         this.currentStep = 0
         this.maxiumStep = maxiumStep

@@ -1,36 +1,19 @@
 import Phaser from 'phaser'
 import { Actor } from './Actor'
 import { Point2 } from '@common/Math/MathUtil'
-import { IntervalManager } from '@common/Phaser/IntervalManager'
+import { TypingText } from '@common/Phaser/TypingText'
 
-class ActorBubbleTyper {
+class ActorBubbleTyper extends TypingText {
     private actor: Actor|null = null
-    private textContent: string = ''
-    private textObject: Phaser.GameObjects.Text|null = null
-    private originX: number = 0.5
-    private originY: number = 0.5
     private offset: Point2 = { x: 0, y: 0 }
     private baseStyle: Phaser.Types.GameObjects.Text.TextStyle = { fontSize: '15px', color: 'white', strokeThickness: 3, stroke: 'black' }
     private appendStyle: Phaser.Types.GameObjects.Text.TextStyle = {}
-    private stepper: IntervalManager|null = null
-
-    static update(typer: ActorBubbleTyper, time: number, delta: number): void {
-        typer.update(time, delta)
-    }
-
-    static destroy(typer: ActorBubbleTyper): void {
-        typer.destroy()
-    }
 
     constructor(actor: Actor) {
+        super(actor.world.scene, 0, 0, '', {})
         this.actor = actor
         this.generateTextObject()
-        this.setStyle()
-    }
-
-    private get scene(): Phaser.Scene|null {
-        if (!this.actor) return null
-        return this.actor.world.scene
+        this.setStyle(this.currentStyle)
     }
 
     private get currentStyle(): Phaser.Types.GameObjects.Text.TextStyle {
@@ -38,24 +21,14 @@ class ActorBubbleTyper {
     }
 
     private generateTextObject(): void {
-        this.textObject = this.scene?.add.text(0, 0, this.textContent)!
-        this.textObject.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
-        this.textObject.setOrigin(0.5, 0.5)
-    }
-
-    private setStyle(): void {
-        this.textObject?.setStyle(this.currentStyle)
+        this.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
+        this.setOrigin(0.5, 0.5)
     }
 
     private updatePosition(): void {
         const x: number = this.actor!.x + this.offset.x
         const y: number = this.actor!.y + this.offset.y
-        this.textObject?.setPosition(x, y)
-    }
-
-    private setOrigin(): void {
-        const { originX, originY } = this
-        this.textObject?.setOrigin(originX, originY)
+        this.setPosition(x, y)
     }
 
     setAlign(align: 'left'|'center'|'right'): this {
@@ -70,7 +43,6 @@ class ActorBubbleTyper {
                 this.originX = 1
                 break
         }
-        this.setOrigin()
         return this
     }
 
@@ -86,19 +58,18 @@ class ActorBubbleTyper {
                 this.originY = 1
                 break
         }
-        this.setOrigin()
         return this
     }
 
     setBaseTextStyle(style: Phaser.Types.GameObjects.Text.TextStyle): this {
         this.baseStyle = style
-        this.setStyle()
+        this.setStyle(this.currentStyle)
         return this
     }
 
     clearBaseTextStyle(): this {
         this.baseStyle = {}
-        this.setStyle()
+        this.setStyle(this.currentStyle)
         return this
     }
 
@@ -107,62 +78,38 @@ class ActorBubbleTyper {
         return this
     }
 
-    private destroyStepper(): void {
-        if (!this.stepper) {
-            return
-        }
-        this.stepper.stop()
-        this.stepper.destroy()
-        this.stepper = null
-    }
-
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.appendStyle = style
-        this.textContent = text
 
-        if (this.stepper) {
-            this.destroyStepper()
-            this.textObject?.setText('')
-        }
+        this.setStyle(this.currentStyle)
+        this.typingText(text, speed)
 
-        this.setStyle()
-
-        this.stepper = new IntervalManager(this.scene!)
-        this.stepper
-        .on('step', (current: number): void => {
-            const content: string = this.textContent.substr(0, current)
-            this.textObject?.setText(content)
-        })
-        .on('done', (): void => {
-            this.textObject?.setText(this.textContent)
-            this.destroyStepper()
+        // .on('done', (): void => {
+        //     this.textObject?.setText(this.textContent)
+        //     this.destroyStepper()
             
-            this.stepper = new IntervalManager(this.scene!)
-            this.stepper.on('done', (): void => {
-                this.textObject?.setText('')
-                this.destroyStepper()
-            }).start(2500, 1)
-        })
-        .start(speed, this.textContent.length)
+        //     this.stepper = new IntervalManager(this.scene!)
+        //     this.stepper.on('done', (): void => {
+        //         this.textObject?.setText('')
+        //         this.destroyStepper()
+        //     }).start(2500, 1)
+        // })
+        // .start(speed, this.textContent.length)
         return this
     }
 
     notice(text: string, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.appendStyle = style
-        this.destroyStepper()
-        this.setStyle()
-        this.textObject?.setText(text)
+        this.setStyle(this.currentStyle)
+        this.setText(text)
         return this
     }
 
-    private update(time: number, delta: number): void {
+    update(time: number, delta: number): void {
         this.updatePosition()
     }
 
-    private destroy(): void {
-        this.destroyStepper()
-        this.textObject?.destroy()
-        this.textObject = null
+    destroy(): void {
         this.actor = null
     }
 }
@@ -197,7 +144,7 @@ export class ActorBubble {
 
     private updateTypers(time: number, delta: number): void {
         for (const bubble of this.textmap.values()) {
-            ActorBubbleTyper.update(bubble, time, delta)
+            bubble.update(time, delta)
         }
     }
 
@@ -207,7 +154,7 @@ export class ActorBubble {
 
     private destroy(): void {
         for (const typer of this.textmap.values()) {
-            ActorBubbleTyper.destroy(typer)
+            typer.destroy()
         }
         this.textmap.clear()
         this.actor = null

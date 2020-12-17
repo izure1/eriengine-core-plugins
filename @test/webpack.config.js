@@ -1,4 +1,5 @@
 const path = require('path')
+const tsTransformPaths = require('@zerollup/ts-transform-paths')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const AddAsset = require('add-asset-html-webpack-plugin')
 const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
@@ -18,7 +19,17 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                loader: 'ts-loader'
+                loader: 'ts-loader',
+                options: {
+                    getCustomTransformers: (program) => {
+                        const transformer = tsTransformPaths(program)
+            
+                        return {
+                            before: [transformer.before], // for updating paths in generated code
+                            afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                        }
+                    }
+                }
             }
         ]
     },
@@ -27,7 +38,10 @@ module.exports = {
         modules: [
             path.resolve(__dirname, 'node_modules'),
             path.resolve(__dirname, '../', '@common', 'node_modules')
-        ]
+        ],
+        alias: {
+            '~': path.resolve(__dirname, '../')
+        }
     },
     devServer: {
         port: 8002

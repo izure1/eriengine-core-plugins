@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import * as EasyStar from 'easystarjs'
-import { Point2, getCoordFromPoint, toCartesianCoord, toIsometricCoord, GridObject, create2DArray, fillItemInArray } from './Utils/MathUtil'
+import { Point2, getCoordFromPoint, toCartesianCoord, toIsometricCoord, GridObject, create2DArray, fillItemInArray } from '@common/Math/MathUtil'
 
 type IsometricObject = Phaser.GameObjects.GameObject&GridObject
 

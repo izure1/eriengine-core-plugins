@@ -1,4 +1,5 @@
 const path = require('path')
+const tsTransformPaths = require('@zerollup/ts-transform-paths')
 const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
 
 module.exports = {
@@ -7,7 +8,7 @@ module.exports = {
         'eriengine-core-plugin-isometric-scene': path.resolve(__dirname, 'src', 'eriengine-core-plugin-isometric-scene.ts')
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'dist', 'isometric-scene', 'src'),
         filename: '[name].js',
         library: 'eriengine-core-plugin-isometric-scene',
         libraryTarget: 'umd'
@@ -19,7 +20,17 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                loader: 'ts-loader'
+                loader: 'ts-loader',
+                options: {
+                    getCustomTransformers: (program) => {
+                        const transformer = tsTransformPaths(program)
+            
+                        return {
+                            before: [transformer.before], // for updating paths in generated code
+                            afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                        }
+                    }
+                }
             }
         ]
     },

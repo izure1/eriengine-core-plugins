@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { TypingText } from '@common/Phaser/TypingText'
 import { IntervalManager } from '@common/Phaser/IntervalManager'
 
 type Transition = 'slide'|'fade'|'default'
@@ -6,8 +7,10 @@ type Position = 'left'|'center'|'right'
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
     private charactermap: Map<string, Phaser.GameObjects.Sprite> = new Map
-    private dialogueFrameObject: Phaser.GameObjects.Image|null = null
-    private dialogueTexture: Phaser.Textures.Texture|string|null = null
+    private frameObject: Phaser.GameObjects.Image|null = null
+    private textObject: TypingText|null = null
+    private texture: Phaser.Textures.Texture|string|null = null
+    private stepper: IntervalManager|null = null
     private dialogues: string[] = []
     private speed: number = 35
 
@@ -32,39 +35,61 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     setDialogueTexture(texture: Phaser.Textures.Texture|string): this {
-        this.dialogueTexture = texture
-        this.generateDialogueFrame()
+        this.texture = texture
+        this.generateFrame()
         return this
     }
 
-    private generateDialogueFrame(): void {
-        if (!this.dialogueTexture) {
+    private generateFrame(): void {
+        if (!this.texture) {
             return
         }
-        if (this.dialogueFrameObject) {
-            this.dialogueFrameObject.destroy()
+        if (this.frameObject) {
+            this.frameObject.destroy()
         }
         else {
-            this.dialogueFrameObject = this.scene.add.image(0, 0, this.dialogueTexture)
+            this.frameObject = this.scene.add.image(0, 0, this.texture)
         }
         const { width, height } = this.game.canvas
-        this.dialogueFrameObject.setDisplaySize(width, height)
+        this.frameObject.setDisplaySize(width, height)
     }
 
     print(dialogues: string|string[], speed: number = 35, sound?: string): this {
         if (!Array.isArray(dialogues)) {
             dialogues = [dialogues]
         }
+        this.destroyStepper()
+        this.generateStepper(dialogues)
         this.dialogues = dialogues
         this.speed = speed
         return this
     }
 
+    private generateStepper(dialogues: string[]): void {
+        this.stepper = new IntervalManager(this.scene)
+        this.stepper
+            .on('step', (currentStep: number): void => {
+                //t
+            })
+            .on('done', (currentStep: number): void => {
+
+            })
+    }
+
+    private destroyStepper(): void {
+        if (!this.stepper) {
+            return
+        }
+        this.stepper.destroy()
+    }
+
     skip(): this {
+        this.destroyStepper()
         return this
     }
 
     next(): this {
+        this.destroyStepper()
         return this
     }
 
@@ -75,12 +100,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.charactermap.clear()
     }
 
-    private destroyDialogueFrame(): void {
-        if (!this.dialogueFrameObject) {
+    private destroyFrame(): void {
+        if (!this.frameObject) {
             return
         }
-        this.dialogueFrameObject.destroy()
-        this.dialogueFrameObject = null
+        this.frameObject.destroy()
+        this.frameObject = null
     }
 
     boot(): void {
@@ -89,12 +114,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     update(time: number, delta: number): void {
-
     }
 
     destroy(): void {
+        this.destroyStepper()
         this.destroyCharacter()
-        this.destroyDialogueFrame()
+        this.destroyFrame()
     }
 }
 

@@ -26,7 +26,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
     destroy(): void {
         for (const actor of this.actorset) {
-            actor.destroy(true)
+            actor.destroy()
         }
     }
 

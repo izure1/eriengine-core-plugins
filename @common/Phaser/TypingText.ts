@@ -8,6 +8,7 @@ class TypingText extends Phaser.GameObjects.Text {
     constructor(scene: Phaser.Scene, x: number, y: number, text: string|string[], style: Phaser.Types.GameObjects.Text.TextStyle) {
         super(scene, x, y, text, style)
         this.registDestroy()
+        this.scene.add.existing(this)
     }
 
     private registDestroy(): void {
@@ -21,7 +22,7 @@ class TypingText extends Phaser.GameObjects.Text {
         this.stepper = null
     }
 
-    typingText(text: string, speed: number = 35): this {
+    protected startTyping(text: string, speed: number = 35): IntervalManager {
         this.textContent = text
 
         if (this.stepper) {
@@ -31,16 +32,16 @@ class TypingText extends Phaser.GameObjects.Text {
 
         this.stepper = new IntervalManager(this.scene)
         this.stepper
-        .on('step', (current: number): void => {
-            const content: string = this.textContent.substr(0, current)
-            this.setText(content)
-        })
-        .on('done', (): void => {
-            this.setText(this.textContent)
-            this.destroyStepper()
-        })
-        .start(speed, this.textContent.length)
-        return this
+            .on('step', (current: number): void => {
+                const content: string = this.textContent.substr(0, current)
+                this.setText(content)
+            })
+            .on('done', (): void => {
+                this.setText(this.textContent)
+                this.destroyStepper()
+            })
+            .start(speed, this.textContent.length)
+        return this.stepper
     }
 }
 

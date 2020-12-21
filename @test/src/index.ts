@@ -120,8 +120,8 @@ class CoordinateSystem extends Phaser.Scene {
     }
 
     create(): void {
-        this.plugins.installScenePlugin('isometricScenePlugin', IsomScenePlugin, 'map', this)
         this.text = this.add.text(10, 10, '')
+        console.log(this)
     }
 
     update(): void {
@@ -138,8 +138,8 @@ fps: ${this.game.loop.actualFps}
 class Test extends Phaser.Scene {
     private player: Player|null = null
     private map!: IsomScenePlugin
-    private isoCursorPlugin!: IsomCursorPlugin
-    private dialoguePlugin!: DialoguePlugin
+    private cursor!: IsomCursorPlugin
+    private dialogue!: DialoguePlugin
     private actor!: ActorPlugin
 
     constructor() {
@@ -156,10 +156,8 @@ class Test extends Phaser.Scene {
     }
 
     create(): void {
-        this.plugins.installScenePlugin('actorPlugin', ActorPlugin, 'actor', this)
-        this.plugins.installScenePlugin('isomScenePlugin', IsomScenePlugin, 'map', this)
-        this.plugins.installScenePlugin('isomCursorPlugin', IsomCursorPlugin, 'isoCursor', this)
-        this.plugins.installScenePlugin('dialoguePlugin', DialoguePlugin, 'dialogue', this)
+
+        this.cursor.enable(true)
 
         this.anims.create({
             key: 'hannah-stand',
@@ -183,6 +181,7 @@ class Test extends Phaser.Scene {
         })
 
         this.input.mouse.disableContextMenu()
+        this.dialogue.addCharacter('character', 100, 400, 'sprite-hannah-stand')
 
         this.player = this.actor.add(Player, this, 'izure', 100, 100, 'sprite-hannah-stand')
         console.log(this.player, this)
@@ -190,8 +189,7 @@ class Test extends Phaser.Scene {
         this.input.on(Phaser.Input.Events.POINTER_DOWN, async (e: Phaser.Input.Pointer): Promise<void> => {
             if (e.button === 2) {
                 if (this.player) {
-                    const pointer = this.map.toSceneCoord(e)
-                    this.player.run.to(await this.map.getRoutes(this.player, pointer))
+                    this.player.run.to(await this.map.getRoutes(this.player, this.cursor.pointer))
                 }
             }
         })
@@ -204,8 +202,8 @@ class Test extends Phaser.Scene {
         }
 
         if (this.input.mousePointer.leftButtonDown()) {
-            const { x, y } = this.map.toSceneCoord(this.input.mousePointer.position)
-            const user: User = this.actor.add(User, this, this.time.now.toString(), 0, 0, 'sprite-hannah-stand')
+            const { x, y } = this.cursor.pointer
+            const user: User = this.actor.add(User, this, ~~this.time.now.toString(), 0, 0, 'sprite-hannah-stand')
             user.setPosition(x, y)
             user.run.useMoveKey('wasd')
         }
@@ -216,6 +214,33 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     scene: [ Test, CoordinateSystem ],
+    plugins: {
+        global: [
+            {
+                key: 'dialoguePlugin',
+                mapping: 'dialogue',
+                plugin: DialoguePlugin
+            }
+        ],
+        scene: [
+            {
+                key: 'actorPlugin',
+                mapping: 'actor',
+                plugin: ActorPlugin
+            },
+            {
+                key: 'isomScenePlugin',
+                mapping: 'map',
+                plugin: IsomScenePlugin,
+                start: false
+            },
+            {
+                key: 'isomCursorPlugin',
+                mapping: 'cursor',
+                plugin: IsomCursorPlugin
+            },
+        ]
+    },
     physics: {
         default: 'matter',
         matter: {

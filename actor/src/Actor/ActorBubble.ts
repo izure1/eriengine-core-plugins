@@ -82,19 +82,11 @@ class ActorBubbleTyper extends TypingText {
         this.appendStyle = style
 
         this.setStyle(this.currentStyle)
-        this.typingText(text, speed)
-
-        // .on('done', (): void => {
-        //     this.textObject?.setText(this.textContent)
-        //     this.destroyStepper()
-            
-        //     this.stepper = new IntervalManager(this.scene!)
-        //     this.stepper.on('done', (): void => {
-        //         this.textObject?.setText('')
-        //         this.destroyStepper()
-        //     }).start(2500, 1)
-        // })
-        // .start(speed, this.textContent.length)
+        this.startTyping(text, speed).on('done', (): void => {
+            this.scene.time.delayedCall(2500, (): void => {
+                this.setText('')
+            })
+        })
         return this
     }
 

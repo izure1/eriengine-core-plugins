@@ -9,12 +9,12 @@
   "author": "izure <admin@izure.org>",
   "license": "MIT",
   "peerDependencies": {
-    "phaser": "3.24.1"
+    "phaser": "^3.50.0"
   },
   "dependencies": {
     "tiny-typed-emitter": "2.0.3"
   },
   "devDependencies": {
-    "phaser": "^3.24.1"
+    "phaser": "^3.50.0"
   }
 }

@@ -1,126 +1,131 @@
 import Phaser from 'phaser'
-import { TypingText } from '@common/Phaser/TypingText'
-import { IntervalManager } from '@common/Phaser/IntervalManager'
+import { DialogueScene, Transition } from './Dialogue/DialogueScene'
 
-type Transition = 'slide'|'fade'|'default'
-type Position = 'left'|'center'|'right'
-
-class Plugin extends Phaser.Plugins.ScenePlugin {
-    private charactermap: Map<string, Phaser.GameObjects.Sprite> = new Map
-    private frameObject: Phaser.GameObjects.Image|null = null
-    private textObject: TypingText|null = null
-    private texture: Phaser.Textures.Texture|string|null = null
-    private stepper: IntervalManager|null = null
-    private dialogues: string[] = []
-    private speed: number = 35
-
-    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
-        super(scene, pluginManager)
+class Plugin extends Phaser.Plugins.BasePlugin {
+    constructor(pluginManager: Phaser.Plugins.PluginManager) {
+        super(pluginManager)
     }
 
-    showCharacter(key: string, texture: Phaser.Textures.Texture|string, frame?: string|number, position: Position = 'left', method: Transition = 'slide'): this {
-        if (!this.charactermap.has(key)) {
-            const character: Phaser.GameObjects.Sprite = this.scene.add.sprite(0, 0, texture, frame)
-            this.charactermap.set(key, character)
+    init(): void {
+        this.generateDialogueScene()
+    }
+
+    get scene(): DialogueScene {
+        return this.game.scene.getScene(DialogueScene.SCENE_KEY) as DialogueScene
+    } 
+
+    private generateDialogueScene(): void {
+        this.game.scene.add(DialogueScene.SCENE_KEY, DialogueScene, true) as DialogueScene
+        return
+    }
+
+    private destroyDialogueScene(): void {
+        if (this.scene) {
+            this.scene.destroy()
+            this.game.scene.remove(DialogueScene.SCENE_KEY)
         }
+    }
+
+    bringToTop(): this {
+        this.scene.bringToTop()
+        return this
+    }
+
+    addCharacter(key: string, x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.addCharacter(key, x, y, texture, frame)
+        return this
+    }
+
+    showCharacter(key: string, method: Transition = 'slide'): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.showCharacter(key, method)
         return this
     }
 
     hideCharacter(key: string): this {
-        if (!this.charactermap.has(key)) {
+        if (!this.scene) {
             return this
         }
-        const character: Phaser.GameObjects.Sprite = this.charactermap.get(key)!
+        this.scene.hideCharacter(key)
+        return this
+    }
+
+    removeCharacter(key: string): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.removeCharacter(key)
+        return this
+    }
+
+    playCharacterAnimation(key: string, animation: string|Phaser.Animations.Animation|Phaser.Types.Animations.PlayAnimationConfig, ignoreIfPlaying: boolean = false): this {
+        this.scene.playCharacterAnimation(key, animation, ignoreIfPlaying)
+        return this
+    }
+
+    stopCharacterAnimation(key: string): this {
+        this.scene.stopCharacterAnimation(key)
         return this
     }
 
     setDialogueTexture(texture: Phaser.Textures.Texture|string): this {
-        this.texture = texture
-        this.generateFrame()
+        if (!this.scene) {
+            return this
+        }
+        this.scene.setDialogueTexture(texture)
         return this
     }
 
-    private generateFrame(): void {
-        if (!this.texture) {
-            return
-        }
-        if (this.frameObject) {
-            this.frameObject.destroy()
-        }
-        else {
-            this.frameObject = this.scene.add.image(0, 0, this.texture)
-        }
-        const { width, height } = this.game.canvas
-        this.frameObject.setDisplaySize(width, height)
+    setDialoguePosition(x: number, y: number): this {
+        this.scene.setDialoguePosition(x, y)
+        return this
+    }
+
+    setDialogueSize(width: number, height: number): this {
+        this.scene.setDialogueSize(width, height)
+        return this
     }
 
     print(dialogues: string|string[], speed: number = 35, sound?: string): this {
-        if (!Array.isArray(dialogues)) {
-            dialogues = [dialogues]
+        if (!this.scene) {
+            return this
         }
-        this.destroyStepper()
-        this.generateStepper(dialogues)
-        this.dialogues = dialogues
-        this.speed = speed
+        this.scene.print(dialogues, speed, sound)
         return this
     }
 
-    private generateStepper(dialogues: string[]): void {
-        this.stepper = new IntervalManager(this.scene)
-        this.stepper
-            .on('step', (currentStep: number): void => {
-                //t
-            })
-            .on('done', (currentStep: number): void => {
-
-            })
-    }
-
-    private destroyStepper(): void {
-        if (!this.stepper) {
-            return
+    clearPrint(): this {
+        if (!this.scene) {
+            return this
         }
-        this.stepper.destroy()
+        this.scene.clearPrint()
+        return this
     }
 
     skip(): this {
-        this.destroyStepper()
+        if (!this.scene) {
+            return this
+        }
+        this.scene.skip()
         return this
     }
 
     next(): this {
-        this.destroyStepper()
+        if (!this.scene) {
+            return this
+        }
+        this.scene.next()
         return this
     }
 
-    private destroyCharacter(): void {
-        for (const character of this.charactermap.values()) {
-            character.destroy()
-        }
-        this.charactermap.clear()
-    }
-
-    private destroyFrame(): void {
-        if (!this.frameObject) {
-            return
-        }
-        this.frameObject.destroy()
-        this.frameObject = null
-    }
-
-    boot(): void {
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
-        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-    }
-
-    update(time: number, delta: number): void {
-    }
-
-    destroy(): void {
-        this.destroyStepper()
-        this.destroyCharacter()
-        this.destroyFrame()
-    }
+    // destroy(): void {
+    //     this.destroyDialogueScene()
+    // }
 }
 
 export { Plugin }

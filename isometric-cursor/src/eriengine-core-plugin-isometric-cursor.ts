@@ -18,6 +18,11 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         super(scene, pluginManager)
     }
 
+    boot(): void {
+        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
+        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
+    }
+
     private get isoRad(): number {
         return Math.PI / 180 * ISOMETRIC_ANGLE
     }
@@ -36,7 +41,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return { x, y }
     }
 
-    get cursor(): Point2 {
+    get pointer(): Point2 {
         const { worldX, worldY } = this.scene.input.activePointer
 
         if (!this.activity) {
@@ -61,12 +66,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return { x, y }
     }
 
-    get cursorX(): number {
-        return this.cursor.x
+    get pointerX(): number {
+        return this.pointer.x
     }
 
-    get cursorY(): number {
-        return this.cursor.y
+    get pointerY(): number {
+        return this.pointer.y
     }
 
     private destroyObject(): void {
@@ -117,14 +122,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private updateCursor(): void {
-        const { x, y } = this.cursor
+        const { x, y } = this.pointer
         this.cursorObject?.setPosition(x, y)
-    }
-
-    boot(): void {
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
-        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-        this.enable(true)
     }
 
     update(): void {

@@ -13,15 +13,15 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return [ ...this.actorset ]
     }
 
-    boot(): void {
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
-        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-    }
-
     private update(time: number, delta: number): void {
         for (const actor of this.actorset) {
             actor.update(time, delta)
         }
+    }
+
+    boot(): void {
+        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
+        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
     }
 
     destroy(): void {

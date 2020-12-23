@@ -1,5 +1,6 @@
 const path = require('path')
 const tsTransformPaths = require('@zerollup/ts-transform-paths')
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
 
 module.exports = {
@@ -19,9 +20,17 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    esModule: false
+                }
+            },
+            {
                 test: /\.ts$/,
                 loader: 'ts-loader',
                 options: {
+                    appendTsSuffixTo: [/\.vue$/],
                     getCustomTransformers: (program) => {
                         const transformer = tsTransformPaths(program)
             
@@ -31,17 +40,38 @@ module.exports = {
                         }
                     }
                 }
+            },
+            {
+                test: /\.scss$/,
+                use: [
+                    'vue-style-loader',
+                    {
+                        loader: 'css-loader',
+                        options: {
+                            esModule: false
+                        }
+                    },
+                    'sass-loader'
+                ]
+            },
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader'
             }
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js', '.json'],
+        extensions: ['.ts', '.js', '.vue', '.json', '.jpg', '.jpeg', '.png', '.gif', '.svg'],
         alias: {
-            '@common': path.resolve(__dirname, '../@common')
+            '@common': path.resolve(__dirname, '../@common'),
+            '@assets': path.resolve(__dirname, 'src', 'Components', 'Assets')
         },
         modules: [
             path.resolve(__dirname, 'node_modules'),
             path.resolve(__dirname, '../', '@common', 'node_modules')
         ]
-    }
+    },
+    plugins: [
+        new VueLoaderPlugin
+    ]
 }

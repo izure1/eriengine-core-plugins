@@ -153,6 +153,7 @@ class Test extends Phaser.Scene {
         this.load.spritesheet('sprite-hannah-stand', '/assets/img/sprite-hannah-stand.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.image('particle-flash', '/assets/img/particle-flash.png')
         this.load.image('particle-red', '/assets/img/particle-red.png')
+        this.load.image('character-sample', '/assets/img/character-sample.png')
     }
 
     create(): void {
@@ -181,7 +182,11 @@ class Test extends Phaser.Scene {
         })
 
         this.input.mouse.disableContextMenu()
-        this.dialogue.addCharacter('character', 100, 400, 'sprite-hannah-stand')
+
+        this.dialogue.addCharacter('character-sample', -150, 50)
+        setTimeout(() => {
+            this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
+        }, 1000)
 
         this.player = this.actor.add(Player, this, 'izure', 100, 100, 'sprite-hannah-stand')
         console.log(this.player, this)
@@ -203,7 +208,7 @@ class Test extends Phaser.Scene {
 
         if (this.input.mousePointer.leftButtonDown()) {
             const { x, y } = this.cursor.pointer
-            const user: User = this.actor.add(User, this, ~~this.time.now.toString(), 0, 0, 'sprite-hannah-stand')
+            const user: User = this.actor.add(User, this, this.time.now.toString(), 0, 0, 'sprite-hannah-stand')
             user.setPosition(x, y)
             user.run.useMoveKey('wasd')
         }
@@ -214,6 +219,14 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     scene: [ Test, CoordinateSystem ],
+    scale: {
+        parent: '#game',
+        fullscreenTarget: '#game',
+        zoom: 1
+    },
+    dom: {
+        createContainer: true
+    },
     plugins: {
         global: [
             {

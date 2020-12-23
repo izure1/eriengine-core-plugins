@@ -9,12 +9,24 @@
   },
   "author": "izure <admin@izure.org>",
   "license": "MIT",
+  "dependencies": {
+    "vue": "2.6.12",
+    "vue-class-component": "7.2.6",
+    "vue-property-decorator": "9.0.0"
+  },
   "devDependencies": {
     "ts-loader": "^8.0.7",
     "typescript": "^4.0.5",
     "webpack": "^5.8.0",
     "webpack-cli": "^4.2.0",
     "phaser": "^3.50.0",
+    "vue-template-compiler": "2.6.12",
+    "vue-loader": "15.9.5",
+    "css-loader": "4.3.0",
+    "vue-style-loader": "4.1.2",
+    "node-sass": "4.14.1",
+    "sass-loader": "10.1.0",
+    "url-loader": "4.1.1",
     "@zerollup/ts-transform-paths": "1.7.18"
   },
   "peerDependencies": {

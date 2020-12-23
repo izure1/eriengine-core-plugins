@@ -73,6 +73,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite {
 
         const updateBound = (time: number, delta: number): void => {
             if (this.active) {
+                this.update(time, delta)
                 this.updateDefaultPlugins(time, delta)
                 this.sortDepth()
             }

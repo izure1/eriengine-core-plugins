@@ -1,49 +1,100 @@
 import Phaser from 'phaser'
-import { DialogueScene, Transition } from './Dialogue/DialogueScene'
+import { DialogueScene } from './Dialogue/DialogueScene'
 
 class Plugin extends Phaser.Plugins.BasePlugin {
+    private scene: DialogueScene|null = null
+
     constructor(pluginManager: Phaser.Plugins.PluginManager) {
         super(pluginManager)
     }
 
     init(): void {
-        this.generateDialogueScene()
+        this.game.events.once(Phaser.Core.Events.READY, (): void => {
+            this.generateScene()
+        })
     }
 
-    get scene(): DialogueScene {
-        return this.game.scene.getScene(DialogueScene.SCENE_KEY) as DialogueScene
-    } 
-
-    private generateDialogueScene(): void {
-        this.game.scene.add(DialogueScene.SCENE_KEY, DialogueScene, true) as DialogueScene
-        return
-    }
-
-    private destroyDialogueScene(): void {
+    private generateScene(): void {
         if (this.scene) {
-            this.scene.destroy()
-            this.game.scene.remove(DialogueScene.SCENE_KEY)
+            return
         }
+        const sceneKey: string = '__ERIENGINE_CORE_PLUGIN_DIALOGUE_SCENE_KEY__'
+        this.scene = this.game.scene.add(sceneKey, DialogueScene, true) as DialogueScene
     }
 
-    bringToTop(): this {
-        this.scene.bringToTop()
-        return this
-    }
-
-    addCharacter(key: string, x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number): this {
+    say(characterKey: string|null, text: string, speed?: number, autoClean?: number): this {
         if (!this.scene) {
             return this
         }
-        this.scene.addCharacter(key, x, y, texture, frame)
+        this.scene.say(characterKey, text, speed, autoClean)
         return this
     }
 
-    showCharacter(key: string, method: Transition = 'slide'): this {
+    stop(): this {
         if (!this.scene) {
             return this
         }
-        this.scene.showCharacter(key, method)
+        this.scene.stop()
+        return this
+    }
+
+    skip(): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.skip()
+        return this
+    }
+
+    clean(withCharacters?: boolean): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.clean(withCharacters)
+        return this
+    }
+
+    addCharacter(key: string, x: number, y: number, width?: number, height?: number): this {
+        if (!this.scene) {
+            return this
+        }
+
+        const texture: Phaser.Textures.Texture = this.scene.textures.get(key)
+        const source: Phaser.Textures.TextureSource = texture.source[0]
+        if (!source) {
+            return this
+        }
+        if (width === undefined) {
+            width = source.width
+        }
+        if (height === undefined) {
+            height = source.height
+        }
+        this.scene.addCharacter(key, x, y, width, height)
+        return this
+    }
+
+    setCharacterPosition(key: string, x: number, y: number): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.setCharacterPosition(key, x, y)
+        return this
+    }
+
+    setCharacterSize(key: string, width: number, height: number): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.setCharacterSize(key, width, height)
+        return this
+    }
+
+    showCharacter(key: string, x?: number, y?: number): this {
+        if (!this.scene) {
+            return this
+        }
+        this.scene.showCharacter(key, x, y)
         return this
     }
 
@@ -63,69 +114,21 @@ class Plugin extends Phaser.Plugins.BasePlugin {
         return this
     }
 
-    playCharacterAnimation(key: string, animation: string|Phaser.Animations.Animation|Phaser.Types.Animations.PlayAnimationConfig, ignoreIfPlaying: boolean = false): this {
-        this.scene.playCharacterAnimation(key, animation, ignoreIfPlaying)
-        return this
-    }
-
-    stopCharacterAnimation(key: string): this {
-        this.scene.stopCharacterAnimation(key)
-        return this
-    }
-
-    setDialogueTexture(texture: Phaser.Textures.Texture|string): this {
+    showDialogue(): this {
         if (!this.scene) {
             return this
         }
-        this.scene.setDialogueTexture(texture)
+        this.scene.showDialogue()
         return this
     }
 
-    setDialoguePosition(x: number, y: number): this {
-        this.scene.setDialoguePosition(x, y)
-        return this
-    }
-
-    setDialogueSize(width: number, height: number): this {
-        this.scene.setDialogueSize(width, height)
-        return this
-    }
-
-    print(dialogues: string|string[], speed: number = 35, sound?: string): this {
+    hideDialogue(): this {
         if (!this.scene) {
             return this
         }
-        this.scene.print(dialogues, speed, sound)
+        this.scene.hideDialogue()
         return this
     }
-
-    clearPrint(): this {
-        if (!this.scene) {
-            return this
-        }
-        this.scene.clearPrint()
-        return this
-    }
-
-    skip(): this {
-        if (!this.scene) {
-            return this
-        }
-        this.scene.skip()
-        return this
-    }
-
-    next(): this {
-        if (!this.scene) {
-            return this
-        }
-        this.scene.next()
-        return this
-    }
-
-    // destroy(): void {
-    //     this.destroyDialogueScene()
-    // }
 }
 
 export { Plugin }

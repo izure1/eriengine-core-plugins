@@ -37,6 +37,12 @@ export class IntervalManager extends TypedEmitter<Events> {
         this.isRunning = false
     }
 
+    finish(): void {
+        this.remainTime = 0
+        this.currentStep = this.maxiumStep
+        this.onUpdate(0, 0)
+    }
+
     private onUpdate(time: number, delta: number): void {
         if (!this.isRunning) {
             return

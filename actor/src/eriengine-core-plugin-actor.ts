@@ -14,9 +14,13 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private update(time: number, delta: number): void {
-        for (const actor of this.actorset) {
-            actor.update(time, delta)
-        }
+        // for (const actor of this.actorset) {
+        //     if (!actor.active) {
+        //         continue
+        //     }
+        //     actor.update(time, delta)
+        //     actor.setDepth(actor.y)
+        // }
     }
 
     boot(): void {

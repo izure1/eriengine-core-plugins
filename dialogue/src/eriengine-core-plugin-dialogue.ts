@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { DialogueScene } from './Dialogue/DialogueScene'
+import { Point2 } from '@common/Math/MathUtil'
 
 class Plugin extends Phaser.Plugins.BasePlugin {
     private scene: DialogueScene|null = null

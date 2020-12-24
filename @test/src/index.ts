@@ -24,7 +24,7 @@ class User extends Actor {
             .add('effect', 'particle-red', true, { speed: 1500 })
             .add('explode', 'particle-flash')
             .add('dead', 'sprite-hannah-stand', true, { speed: 500, lifespan: 100 })
-            .pause('dead').pause('effect')
+            .pause('explode').pause('dead').pause('effect')
     }
 
     private initBattle(): void {
@@ -78,6 +78,7 @@ class Player extends User {
         super.start()
         this.initRun()
         this.followCamera()
+        this.particle.play('explode')
         this.scene.cameras.main.zoomTo(0.7, 500, Phaser.Math.Easing.Expo.Out)
 
         this.battle
@@ -94,7 +95,6 @@ class Player extends User {
                 })
                 return {}
             })
-
     }
 
     update(): void {

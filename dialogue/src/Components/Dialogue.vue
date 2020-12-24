@@ -14,7 +14,8 @@
                             height: `${character.height}px`,
                             left: `${character.x}px`,
                             top: `${character.y}px`
-                        }">
+                        }"
+                    >
                 </transition>
             </div>
         </section>
@@ -27,14 +28,24 @@
                     backgroundImage: `url(${frameTexture})`,
                     left: `${frameX}px`,
                     top: `${frameY}px`
-                }">
+                }"
+            >
                 <div class="frame-text"
-                :style="{
-                    fontSize: `${fontSize}px`,
-                    fontFamily: `${fontFamily}`,
-                    fontWeight: `${fontWeight}`,
-                    color: `${color}`
-                }">{{ currentText }}</div>
+                    :style="{
+                        fontSize: `${fontSize}px`,
+                        fontFamily: `${fontFamily}`,
+                        fontWeight: `${fontWeight}`,
+                        color: `${color}`
+                    }"
+                >
+                    <transition-group name="font-fade">
+                        <span
+                            class="frame-text-letter"
+                            v-for="(letter, i) in currentText"
+                            :key="`dialogue-letter-${i}`"
+                        >{{ letter }}</span>
+                    </transition-group>
+                </div>
             </section>
         </transition>
     </section>
@@ -94,7 +105,7 @@ export default class DialogueComponent extends Vue {
     private color!: string
 
     private text: string = ''
-    private currentText: string = ''
+    private currentText: string[] = []
     private frameVisible: boolean = false
     private stepper: IntervalManager|null = null
 
@@ -157,7 +168,7 @@ export default class DialogueComponent extends Vue {
             this.hideAllCharacter()
         }
         this.text = ''
-        this.currentText = ''
+        this.currentText = []
     }
 
     private skip(): void {
@@ -183,11 +194,11 @@ export default class DialogueComponent extends Vue {
         this.stepper = new IntervalManager(this.scene)
         this.stepper
         .on('step', (currentStep: number): void => {
-            this.currentText = this.text.substr(0, currentStep)
+            this.currentText = this.text.substr(0, currentStep).split('')
         })
         .on('done', (): void => {
             this.destroyStepper()
-            this.currentText = this.text
+            this.currentText = this.text.split('')
             this.text = ''
             if (!this.scene) {
                 return
@@ -195,12 +206,13 @@ export default class DialogueComponent extends Vue {
             if (autoClean < 0) {
                 return
             }
-            this.scene.time.delayedCall(autoClean, (): void => {
+            this.stepper = new IntervalManager(this.scene)
+            this.stepper.on('done', (): void => {
                 if (characterKey !== null) {
                     this.hideCharacter(characterKey)
                 }
                 this.clean()
-            })
+            }).start(autoClean, 1)
         })
         .start(speed, this.text.length)
         return
@@ -303,9 +315,14 @@ export default class DialogueComponent extends Vue {
 </script>
 
 <style lang="scss" scoped>
-@import url(//fonts.googleapis.com/earlyaccess/nanumgothic.css);
-
 $fade-duration: 0.5s;
+$font-fade-duration: 0.3s;
+$font-fade-transform-duration: 1s;
+
+@font-face {
+    font-family: 'Nanum Gothic';
+    src: url('@assets/nanum-gothic-v17-latin_korean-regular.woff2');
+}
 
 .layer {
     width: 100%;
@@ -330,10 +347,16 @@ $fade-duration: 0.5s;
         height: 100%;
         padding: 20px;
         box-sizing: border-box;
+
+        .frame-text-letter {
+            min-width: 10px;
+            display: inline-block;
+        }
     }
 }
-.fade-leave-active,
-.fade-enter-active {
+
+.fade-enter-active,
+.fade-leave-active {
     transition: opacity $fade-duration linear;
 }
 .fade-enter,
@@ -342,6 +365,19 @@ $fade-duration: 0.5s;
 }
 .fade-leave,
 .fade-enter-to {
+    opacity: 1;
+}
+
+.font-fade-leave-active,
+.font-fade-enter-active {
+    transition: opacity $font-fade-duration linear, transform $font-fade-transform-duration cubic-bezier(0, 1, 0, 1);
+}
+.font-fade-enter {
+    transform: translateX(-10px);
+    opacity: 0;
+}
+.font-fade-enter-to {
+    transform: translateX(0);
     opacity: 1;
 }
 </style>

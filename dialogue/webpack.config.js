@@ -15,12 +15,12 @@ module.exports = {
         libraryTarget: 'umd'
     },
     externals: {
-        phaser: 'Phaser'
+        phaser: 'phaser'
     },
     module: {
         rules: [
             {
-                test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
+                test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
                 loader: 'url-loader',
                 options: {
                     esModule: false

@@ -60,7 +60,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             y: Math.round(isoOffset.y),
         }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
 
-        const x: number = sceneOffset.x + (this.isoW / 2)
+        const x: number = sceneOffset.x
         const y: number = sceneOffset.y
 
         return { x, y }
@@ -118,7 +118,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
         this.cursorObject = this.scene.add.polygon(0, 0, [ p1, p2, p3, p4 ], 0, 0)
             .setStrokeStyle(this.thickness, this.strokeColor, 1)
-            .setOrigin(0.5, 0.5)
+            .setOrigin(0.25, 0.5)
     }
 
     private updateCursor(): void {

@@ -127,6 +127,19 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite {
         ActorParticle.destroy(this.particle)
     }
 
+    // Fix bug matter.js setStatic removes body issue (#https://github.com/liabru/matter-js/issues/641)
+    /**
+     * Changes the physics body to be either static `true` or dynamic `false`.
+     * @param value `true` to set the body as being static, or `false` to make it dynamic.
+     */
+    setStatic(value: boolean): this {
+        if (value === this.isStatic()) {
+            return this
+        }
+        super.setStatic(value)
+        return this
+    }
+
     followCamera(lerpX: number = 1, lerpY: number = lerpX): this {
         this.scene.cameras.main.startFollow(this, undefined, lerpX, lerpY)
         return this

@@ -14,7 +14,7 @@ module.exports = {
         libraryTarget: 'umd'
     },
     externals: {
-        phaser: 'Phaser'
+        phaser: 'phaser'
     },
     module: {
         rules: [

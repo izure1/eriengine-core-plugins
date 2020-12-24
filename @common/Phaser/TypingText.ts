@@ -22,7 +22,7 @@ class TypingText extends Phaser.GameObjects.Text {
         this.stepper = null
     }
 
-    protected startTyping(text: string, speed: number = 35): IntervalManager {
+    startTyping(text: string, speed: number = 35): IntervalManager {
         this.textContent = text
 
         if (this.stepper) {

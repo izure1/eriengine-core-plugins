@@ -3,59 +3,88 @@ import { Actor } from './Actor'
 import { Point2 } from '@common/Math/MathUtil'
 import { TypingText } from '@common/Phaser/TypingText'
 
-class ActorBubbleTyper extends TypingText {
+class ActorBubbleEmitter {
     private actor: Actor|null = null
     private offset: Point2 = { x: 0, y: 0 }
     private baseStyle: Phaser.Types.GameObjects.Text.TextStyle = { fontSize: '15px', color: 'white', strokeThickness: 3, stroke: 'black' }
     private appendStyle: Phaser.Types.GameObjects.Text.TextStyle = {}
+    private image: Phaser.GameObjects.Sprite|null = null
+    private text: TypingText|null = null
 
     constructor(actor: Actor) {
-        super(actor.world.scene, 0, 0, '', {})
         this.actor = actor
-        this.generateTextObject()
-        this.setStyle(this.currentStyle)
+        this.generateObjects()
+    }
+
+    private get scene(): Phaser.Scene|null {
+        if (!this.actor) {
+            return null
+        }
+        return this.actor.scene
     }
 
     private get currentStyle(): Phaser.Types.GameObjects.Text.TextStyle {
         return { ...this.baseStyle, ...this.appendStyle }
     }
 
-    private generateTextObject(): void {
-        this.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
-        this.setOrigin(0.5, 0.5)
+    private generateObjects(): void {
+        if (!this.scene) {
+            return
+        }
+        this.text = new TypingText(this.scene, 0, 0, '', {})
+        this.text.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
+        this.text.setOrigin(0.5, 0.5)
+        this.text?.setStyle(this.currentStyle)
+
+        this.image = this.scene.add.sprite(0, 0, this.scene.textures.get('asdfasdf'))
+        this.image.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
+        this.image.setOrigin(0.5, 0.5)
     }
 
     private updatePosition(): void {
         const x: number = this.actor!.x + this.offset.x
         const y: number = this.actor!.y + this.offset.y
-        this.setPosition(x, y)
+        this.text?.setPosition(x, y)
+        this.image?.setPosition(x, y)
     }
 
     setAlign(align: 'left'|'center'|'right'): this {
+        if (!this.text || !this.image) {
+            return this
+        }
         switch(align) {
             case 'left':
-                this.originX = 0
+                this.text.originX = 0
+                this.image.originX = 0
                 break
             case 'center':
-                this.originX = 0.5
+                this.text.originX = 0.5
+                this.image.originX = 0.5
                 break
             case 'right':
-                this.originX = 1
+                this.text.originX = 1
+                this.image.originX = 1
                 break
         }
         return this
     }
 
     setVertical(vertical: 'top'|'middle'|'bottom'): this {
+        if (!this.text || !this.image) {
+            return this
+        }
         switch(vertical) {
             case 'top':
-                this.originY = 0
+                this.text.originY = 0
+                this.image.originY = 0
                 break
             case 'middle':
-                this.originY = 0.5
+                this.text.originY = 0.5
+                this.image.originY = 0.5
                 break
             case 'bottom':
-                this.originY = 1
+                this.text.originY = 1
+                this.image.originY = 1
                 break
         }
         return this
@@ -63,13 +92,13 @@ class ActorBubbleTyper extends TypingText {
 
     setBaseTextStyle(style: Phaser.Types.GameObjects.Text.TextStyle): this {
         this.baseStyle = style
-        this.setStyle(this.currentStyle)
+        this.text?.setStyle(this.currentStyle)
         return this
     }
 
     clearBaseTextStyle(): this {
         this.baseStyle = {}
-        this.setStyle(this.currentStyle)
+        this.text?.setStyle(this.currentStyle)
         return this
     }
 
@@ -79,21 +108,42 @@ class ActorBubbleTyper extends TypingText {
     }
 
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
+        this.text?.setVisible(true)
+        this.image?.setVisible(false)
+        
         this.appendStyle = style
-
-        this.setStyle(this.currentStyle)
-        this.startTyping(text, speed).on('done', (): void => {
-            this.scene.time.delayedCall(2500, (): void => {
-                this.setText('')
+        this.text?.setStyle(this.currentStyle)
+        this.text?.startTyping(text, speed).on('done', (): void => {
+            this.scene?.time.delayedCall(2500, (): void => {
+                this.text?.setText('')
             })
         })
         return this
     }
 
     notice(text: string, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
+        this.text?.setVisible(true)
+        this.image?.setVisible(false)
+
         this.appendStyle = style
-        this.setStyle(this.currentStyle)
-        this.setText(text)
+        this.text?.setStyle(this.currentStyle)
+        this.text?.setText(text)
+        return this
+    }
+
+    emotion(animationKey: Phaser.Animations.Animation|Phaser.Types.Animations.PlayAnimationConfig|string, duration: number = 2500): this {
+        this.text?.setActive(false)
+        this.image?.setVisible(true)
+
+        this.image?.play(animationKey, true)
+
+        if (duration < 0) {
+            return this
+        }
+        var a = this.scene?.time.delayedCall(duration, (): void => {
+            this.image?.setVisible(false)
+        })
+        a.re
         return this
     }
 
@@ -108,7 +158,7 @@ class ActorBubbleTyper extends TypingText {
 
 export class ActorBubble {
     private actor: Actor|null = null
-    private textmap: Map<string, ActorBubbleTyper> = new Map
+    private emitters: Map<string, ActorBubbleEmitter> = new Map
 
     static update(bubble: ActorBubble, time: number, delta: number): void {
         bubble.update(time, delta)
@@ -127,15 +177,15 @@ export class ActorBubble {
         return this.actor.world.scene
     }
 
-    of(key: string): ActorBubbleTyper {
-        if (!this.textmap.has(key)) {
-            this.textmap.set(key, new ActorBubbleTyper(this.actor!))
+    of(key: string): ActorBubbleEmitter {
+        if (!this.emitters.has(key)) {
+            this.emitters.set(key, new ActorBubbleEmitter(this.actor!))
         }
-        return this.textmap.get(key)!
+        return this.emitters.get(key)!
     }
 
     private updateTypers(time: number, delta: number): void {
-        for (const bubble of this.textmap.values()) {
+        for (const bubble of this.emitters.values()) {
             bubble.update(time, delta)
         }
     }
@@ -145,10 +195,10 @@ export class ActorBubble {
     }
 
     private destroy(): void {
-        for (const typer of this.textmap.values()) {
+        for (const typer of this.emitters.values()) {
             typer.destroy()
         }
-        this.textmap.clear()
+        this.emitters.clear()
         this.actor = null
     }
 }

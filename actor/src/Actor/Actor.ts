@@ -85,7 +85,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite {
             this.end()
             this.stopFollowCamera()
             this.destroyDefaultPlugins()
-            this.plugin.drop(this)
+            this.plugin.dropActor(this)
         })
     }
 

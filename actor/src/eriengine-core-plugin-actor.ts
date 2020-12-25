@@ -24,31 +24,39 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private actorset: Set<Actor> = new Set
 
     private static isTextureGenerated: boolean = false
+
+    private static createImage(src: string): HTMLImageElement {
+        const image: HTMLImageElement = document.createElement('img')
+        image.src = src
+        return image
+    }
+
     private static generateTexture(scene: Phaser.Scene): void {
         if (Plugin.isTextureGenerated) {
             return
         }
 
         Plugin.isTextureGenerated = true
-
-        scene.textures.addBase64(BubbleEmotion.BUBBLE, bubbleTexture)
-        scene.textures.addBase64(BubbleEmotion.EXCLAMATION, bubbleExclamation)
-
-        scene.textures.on(Phaser.Textures.Events.LOAD, (key: string): void => {
+        
+        // 애니메이션 생성
+        scene.textures.on(Phaser.Textures.Events.ADD, (key: string): void => {
             switch(key) {
                 case BubbleEmotion.EXCLAMATION:
-                    Plugin.generateAnimation(scene, key, 0, 6, 7, 1)
+                    Plugin.generateAnimation(scene, BubbleEmotion.EXCLAMATION, 0, 6, 7, 0)
                     break
             }
         })
+            
+        // 스프라이트 로드
+        scene.textures.addSpriteSheet(BubbleEmotion.EXCLAMATION, Plugin.createImage(bubbleExclamation), { frameWidth: 50, frameHeight: 50 })
     }
 
-    private static generateAnimation(scene: Phaser.Scene, key: string, start: number, end: number, frameRate: number, repeat: number): void {
+    private static generateAnimation(scene: Phaser.Scene, key: string, start: number, end: number, frameRate: number, repeat: number): false|Phaser.Animations.Animation {
         if (scene.anims.exists(key)) {
-            return
+            return false
         }
         const frames = scene.anims.generateFrameNumbers(key, { start, end })
-        scene.anims.create({ key, frames, frameRate, repeat })
+        return scene.anims.create({ key, frames, frameRate, repeat })
     }
 
     constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
@@ -64,9 +72,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
     boot(): void {
         Plugin.generateTexture(this.scene)
+
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-        //this.scene.events.once(Phaser.Scenes.Events.CREATE, this.generateTexture.bind(this))
+        //this.scene.events.on(Phaser.Scenes.Events.CREATE, Plugin.generateTexture.bind(null, this.scene))
     }
 
     destroy(): void {
@@ -75,7 +84,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
     }
 
-    add<Child extends Actor>(CustomActor: { new (...args: any): Child }, ...args: ConstructorParameters<typeof CustomActor>): Child {
+    addActor<Child extends Actor>(CustomActor: { new (...args: any): Child }, ...args: ConstructorParameters<typeof CustomActor>): Child {
         const actor = new CustomActor(...Array.from(args))
 
         this.actorset.add(actor)
@@ -87,7 +96,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return actor
     }
 
-    drop(actor: Actor): void {
+    dropActor(actor: Actor): void {
         this.actorset.delete(actor)
     }
 

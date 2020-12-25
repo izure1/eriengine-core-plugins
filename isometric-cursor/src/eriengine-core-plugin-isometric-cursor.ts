@@ -108,7 +108,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return this
     }
     
-    enableText(activity: boolean = true): this {
+    enableCoordinate(activity: boolean = true): this {
         this.text?.setVisible(activity)
         return this
     }
@@ -132,7 +132,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.text = this.scene.add.text(0, 0, '', {
             fontSize: `${ getBigger(16, this.side/10) }px`,
             color: Phaser.Display.Color.ValueToColor(this.strokeColor).rgba
-        }).setOrigin(0, 1)
+        }).setOrigin(0, 1).setVisible(false)
     }
 
     private updateText(): void {

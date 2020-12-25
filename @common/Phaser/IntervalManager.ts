@@ -10,69 +10,50 @@ export class IntervalManager extends TypedEmitter<Events> {
     private scene: Phaser.Scene
     private currentStep: number = 0
     private maxiumStep: number = 0
-    private remainTime: number = 0
     private intervalTime: number = 0
-    private isRunning: boolean = false
-    private onUpdateCallback: ((time: number, delta: number) => void)|null = null
+    private timeEvent: Phaser.Time.TimerEvent|null = null
 
     constructor(scene: Phaser.Scene) {
         super()
         this.scene = scene
-        this.registUpdateHandler()
     }
 
     start(interval: number, maxiumStep: number): void {
         this.currentStep = 0
         this.maxiumStep = maxiumStep
-        this.remainTime = interval
         this.intervalTime = interval
-        this.isRunning = true
-    }
-
-    stop(): void {
-        this.currentStep = 0
-        this.maxiumStep = 0
-        this.remainTime = 0
-        this.intervalTime = 0
-        this.isRunning = false
+        this.setTimeout()
     }
 
     finish(): void {
-        this.remainTime = 0
         this.currentStep = this.maxiumStep
-        this.onUpdate(0, 0)
+        this.setTimeout()
     }
 
-    private onUpdate(time: number, delta: number): void {
-        if (!this.isRunning) {
+    private destroyTimeEvent(): void {
+        if (!this.timeEvent) {
             return
         }
-        this.remainTime -= delta
-        if (this.remainTime <= 0) {
-            this.remainTime = this.intervalTime
+        this.timeEvent.remove()
+        this.timeEvent = null
+    }
+
+    private setTimeout(): void {
+        this.destroyTimeEvent()
+        this.timeEvent = this.scene.time.delayedCall(this.intervalTime, (): void => {
             this.emit('step', this.currentStep++, this.maxiumStep)
-        }
+            this.setTimeout()
+        })
         if (this.currentStep >= this.maxiumStep) {
-            this.stop()
             this.emit('done', this.currentStep, this.maxiumStep)
             this.destroy()
         }
     }
 
-    private registUpdateHandler(): void {
-        this.onUpdateCallback = this.onUpdate.bind(this)
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.onUpdateCallback)
-    }
-
-    private removeUpdateHandler(): void {
-        if (!this.onUpdateCallback) {
-            return
-        }
-        this.scene.events.off(Phaser.Scenes.Events.UPDATE, this.onUpdateCallback)
-    }
-
     destroy(): void {
-        this.stop()
-        this.removeUpdateHandler()
+        this.destroyTimeEvent()
+        this.currentStep = 0
+        this.maxiumStep = 0
+        this.intervalTime = 0
     }
 }

@@ -18,6 +18,7 @@
     "webpack-cli": "^4.2.0",
     "phaser": "^3.50.0",
     "ttypescript": "1.5.12",
+    "url-loader": "4.1.1",
     "@zerollup/ts-transform-paths": "1.7.18"
   },
   "dependencies": {

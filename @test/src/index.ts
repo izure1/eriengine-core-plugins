@@ -157,7 +157,6 @@ class Test extends Phaser.Scene {
     }
 
     create(): void {
-
         this.cursor.enable(true)
 
         this.anims.create({

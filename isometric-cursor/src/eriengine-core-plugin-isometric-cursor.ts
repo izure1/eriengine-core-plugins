@@ -1,14 +1,16 @@
 import Phaser from 'phaser'
-import { ISOMETRIC_ANGLE, getCoordFromPoint, toCartesianCoord, toIsometricCoord, Point2 } from '@common/Math/MathUtil'
+import { ISOMETRIC_ANGLE, getBigger, getCoordFromPoint, toCartesianCoord, toIsometricCoord, Point2 } from '@common/Math/MathUtil'
 
-interface RGB {
+interface RGBA {
     red: number
     green: number
     blue: number
+    alpha: number
 }
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
-    private cursorObject: Phaser.GameObjects.Polygon|null = null
+    private polygon: Phaser.GameObjects.Polygon|null = null
+    private text: Phaser.GameObjects.Text|null = null
     private side: number = 100
     private activity: boolean = true
     private thickness: number = 2
@@ -75,11 +77,11 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private destroyObject(): void {
-        if (!this.cursorObject) {
+        if (!this.polygon) {
             return
         }
-        this.cursorObject.destroy()
-        this.cursorObject = null
+        this.polygon.destroy()
+        this.polygon = null
     }
 
     setGridSide(side: number): this {
@@ -94,8 +96,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return this
     }
 
-    setStrokeColor({ red, green, blue }: RGB): this {
-        this.strokeColor = Phaser.Display.Color.GetColor(red, green, blue)
+    setStrokeColor({ red, green, blue, alpha = 1 }: RGBA): this {
+        this.strokeColor = Phaser.Display.Color.GetColor32(red, green, blue, alpha)
         this.generateGridObject()
         return this
     }
@@ -105,9 +107,16 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.generateGridObject()
         return this
     }
+    
+    enableText(activity: boolean = true): this {
+        this.text?.setVisible(activity)
+        return this
+    }
 
     private generateGridObject(): void {
-        this.cursorObject?.destroy()
+        this.polygon?.destroy()
+        this.text?.destroy()
+
         if (!this.activity) {
             return
         }
@@ -116,17 +125,33 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         const p3: Point2 = getCoordFromPoint(p2, 180 - ISOMETRIC_ANGLE, this.side)
         const p4: Point2 = getCoordFromPoint(p3, 180 + ISOMETRIC_ANGLE, this.side)
 
-        this.cursorObject = this.scene.add.polygon(0, 0, [ p1, p2, p3, p4 ], 0, 0)
+        this.polygon = this.scene.add.polygon(0, 0, [ p1, p2, p3, p4 ], 0, 0)
             .setStrokeStyle(this.thickness, this.strokeColor, 1)
             .setOrigin(0.25, 0.5)
+
+        this.text = this.scene.add.text(0, 0, '', {
+            fontSize: `${ getBigger(16, this.side/10) }px`,
+            color: Phaser.Display.Color.ValueToColor(this.strokeColor).rgba
+        }).setOrigin(0, 1)
+    }
+
+    private updateText(): void {
+        let { x, y } = this.pointer
+
+        this.text?.setText(`${~~x},${~~y}`)
+        x += (this.isoW / 4) * 3
+        y -= (this.isoH / 4) * 3
+
+        this.text?.setPosition(~~x, ~~y)
     }
 
     private updateCursor(): void {
         const { x, y } = this.pointer
-        this.cursorObject?.setPosition(x, y)
+        this.polygon?.setPosition(x, y)
     }
 
     update(): void {
+        this.updateText()
         this.updateCursor()
     }
 

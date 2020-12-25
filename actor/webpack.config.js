@@ -19,6 +19,13 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    esModule: false
+                }
+            },
+            {
                 test: /\.ts$/,
                 loader: 'ts-loader',
                 options: {
@@ -33,9 +40,10 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js', '.json'],
+        extensions: ['.ts', '.js', '.json', '.png'],
         alias: {
-            '@common': path.resolve(__dirname, '../@common')
+            '@common': path.resolve(__dirname, '../@common'),
+            '@assets': path.resolve(__dirname, 'src', 'Assets')
         },
         modules: [
             path.resolve(__dirname, 'node_modules'),

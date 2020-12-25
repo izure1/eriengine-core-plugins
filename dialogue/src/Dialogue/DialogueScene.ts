@@ -25,12 +25,12 @@ class DialogueScene extends Phaser.Scene {
         this.component = main.$children[0] as DialogueComponent
     }
 
-    say(characterKey: string|null, text: string, speed?: number, autoClean?: number): this {
+    async say(characterKey: string|null, text: string, speed?: number, autoClean?: number): Promise<void> {
         if (!this.component) {
-            return this
+            return
         }
-        this.component.$emit('say', characterKey, text ,speed, autoClean)
-        return this
+        this.component.$emit('say', characterKey, text, speed, autoClean)
+        //this.component.$once('say', characterKey)
     }
 
     stop(): this {

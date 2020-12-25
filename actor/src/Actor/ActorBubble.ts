@@ -10,6 +10,8 @@ class ActorBubbleEmitter {
     private appendStyle: Phaser.Types.GameObjects.Text.TextStyle = {}
     private image: Phaser.GameObjects.Sprite|null = null
     private text: TypingText|null = null
+    private imageTimeEvent: Phaser.Time.TimerEvent|null = null
+    private textTimeEvent: Phaser.Time.TimerEvent|null = null
 
     constructor(actor: Actor) {
         this.actor = actor
@@ -107,15 +109,37 @@ class ActorBubbleEmitter {
         return this
     }
 
+    private clearTextTimeEvent(dispatchCallback: boolean = false): void {
+        if (!this.textTimeEvent) {
+            return
+        }
+        this.textTimeEvent.remove(dispatchCallback)
+        this.textTimeEvent = null
+    }
+
+    private clearImageTimeEvent(dispatchCallback: boolean = false): void {
+        if (!this.imageTimeEvent) {
+            return
+        }
+        this.imageTimeEvent.remove(dispatchCallback)
+        this.imageTimeEvent = null
+    }
+
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.text?.setVisible(true)
         this.image?.setVisible(false)
+
+        this.clearTextTimeEvent()
         
         this.appendStyle = style
         this.text?.setStyle(this.currentStyle)
         this.text?.startTyping(text, speed).on('done', (): void => {
-            this.scene?.time.delayedCall(2500, (): void => {
+            if (!this.scene) {
+                return
+            }
+            this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
                 this.text?.setText('')
+                this.clearTextTimeEvent()
             })
         })
         return this
@@ -125,6 +149,8 @@ class ActorBubbleEmitter {
         this.text?.setVisible(true)
         this.image?.setVisible(false)
 
+        this.clearTextTimeEvent()
+
         this.appendStyle = style
         this.text?.setStyle(this.currentStyle)
         this.text?.setText(text)
@@ -132,18 +158,23 @@ class ActorBubbleEmitter {
     }
 
     emotion(animationKey: Phaser.Animations.Animation|Phaser.Types.Animations.PlayAnimationConfig|string, duration: number = 2500): this {
+        if (!this.scene) {
+            return this
+        }
         this.text?.setActive(false)
         this.image?.setVisible(true)
+
+        this.clearImageTimeEvent()
 
         this.image?.play(animationKey, true)
 
         if (duration < 0) {
             return this
         }
-        var a = this.scene?.time.delayedCall(duration, (): void => {
+        this.imageTimeEvent = this.scene?.time.delayedCall(duration, (): void => {
             this.image?.setVisible(false)
+            this.clearImageTimeEvent()
         })
-        a.re
         return this
     }
 
@@ -152,6 +183,8 @@ class ActorBubbleEmitter {
     }
 
     destroy(): void {
+        this.clearTextTimeEvent()
+        this.clearImageTimeEvent()
         this.actor = null
     }
 }

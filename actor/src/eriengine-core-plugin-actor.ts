@@ -5,6 +5,7 @@ import bubbleAha from '@assets/bubble-aha.png'
 import bubbleAngry from '@assets/bubble-angry.png'
 import bubbleAnnoy from '@assets/bubble-annoy.png'
 import bubbleDepress from '@assets/bubble-depress.png'
+import bubbleDoya from '@assets/bubble-doya.png'
 import bubbleEllipsis from '@assets/bubble-ellipsis.png'
 import bubbleEmbarrass from '@assets/bubble-embarrass.png'
 import bubbleExclamation from '@assets/bubble-exclamation.png'
@@ -18,17 +19,18 @@ import bubbleSleep from '@assets/bubble-sleep.png'
 enum BubbleEmotion {
     '?'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__',
     '!'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__',
-    AHA             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_AHA__',
-    ANGRY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANGRY__',
-    ANNOY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANNOY__',
-    DEPRESS         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DEPRESS__',
-    ELLIPSIS        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ELLIPSIS__',
-    EMBARRASS       = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EMBARRASSED__',
-    HAPPY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_HAPPY__',
-    LIKE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LIKE__',
-    LOVE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LOVE__',
-    SHAME           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SHAME__',
-    SLEEP           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
+    'AHA'           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_AHA__',
+    'ANGRY'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANGRY__',
+    'ANNOY'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANNOY__',
+    'DEPRESS'       = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DEPRESS__',
+    'DOYA'          = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DOYA__',
+    'ELLIPSIS'      = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ELLIPSIS__',
+    'EMBARRASS'     = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EMBARRASSED__',
+    'HAPPY'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_HAPPY__',
+    'LIKE'          = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LIKE__',
+    'LOVE'          = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LOVE__',
+    'SHAME'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SHAME__',
+    'SLEEP'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
 }
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
@@ -50,6 +52,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         scene.textures.addBase64(BubbleEmotion.ANGRY, bubbleAngry)
         scene.textures.addBase64(BubbleEmotion.ANNOY, bubbleAnnoy)
         scene.textures.addBase64(BubbleEmotion.DEPRESS, bubbleDepress)
+        scene.textures.addBase64(BubbleEmotion.DOYA, bubbleDoya)
         scene.textures.addBase64(BubbleEmotion.ELLIPSIS, bubbleEllipsis)
         scene.textures.addBase64(BubbleEmotion.EMBARRASS, bubbleEmbarrass)
         scene.textures.addBase64(BubbleEmotion.HAPPY, bubbleHappy)

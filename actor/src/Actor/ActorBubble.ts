@@ -249,15 +249,28 @@ class ActorBubbleEmitter {
         return this
     }
 
-    private openEmotion(key: keyof typeof BubbleEmotion, callback?: () => void): void {
+    private openEmotion(key: string|keyof typeof BubbleEmotion|Phaser.Textures.Texture, callback?: () => void): void {
         if (!this.scene) {
             return
         }
+
         this.clearImageTween()
+
         this.text?.setVisible(false)
         this.image?.setVisible(true)
         this.image?.setScale(0)
-        this.image?.setTexture(BubbleEmotion[key])
+
+        const emotions: string[] = Object.keys(BubbleEmotion)
+        if (key instanceof Phaser.Textures.Texture) {
+            this.image?.setTexture(key.key)
+        }
+        else if (emotions.indexOf(key) !== -1) {
+            this.image?.setTexture(BubbleEmotion[key as keyof typeof BubbleEmotion])
+        }
+        else {
+            this.image?.setTexture(key)
+        }
+
         this.imageTween = this.scene.tweens.add({
             targets: this.image,
             scale: 1,
@@ -300,7 +313,7 @@ class ActorBubbleEmitter {
         }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, after)
     }
 
-    emotion(key: keyof typeof BubbleEmotion, duration: number = 2500): this {
+    emotion(key: keyof typeof BubbleEmotion|string|Phaser.Textures.Texture, duration: number = 2500): this {
         if (!this.scene) {
             return this
         }

@@ -16,17 +16,17 @@ import bubbleShame from '@assets/bubble-shame.png'
 import bubbleSleep from '@assets/bubble-sleep.png'
 
 enum BubbleEmotion {
+    '?'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__',
+    '!'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__',
     AHA             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_AHA__',
     ANGRY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANGRY__',
     ANNOY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANNOY__',
     DEPRESS         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DEPRESS__',
     ELLIPSIS        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ELLIPSIS__',
     EMBARRASS       = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EMBARRASSED__',
-    EXCLAMATION     = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__',
     HAPPY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_HAPPY__',
     LIKE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LIKE__',
     LOVE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LOVE__',
-    QUESTION        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__',
     SHAME           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SHAME__',
     SLEEP           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
 }
@@ -44,17 +44,17 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         Plugin.isTextureGenerated = true
             
         // 이미지 로드
+        scene.textures.addBase64(BubbleEmotion['?'], bubbleQuestion)
+        scene.textures.addBase64(BubbleEmotion['!'], bubbleExclamation)
         scene.textures.addBase64(BubbleEmotion.AHA, bubbleAha)
         scene.textures.addBase64(BubbleEmotion.ANGRY, bubbleAngry)
         scene.textures.addBase64(BubbleEmotion.ANNOY, bubbleAnnoy)
         scene.textures.addBase64(BubbleEmotion.DEPRESS, bubbleDepress)
         scene.textures.addBase64(BubbleEmotion.ELLIPSIS, bubbleEllipsis)
         scene.textures.addBase64(BubbleEmotion.EMBARRASS, bubbleEmbarrass)
-        scene.textures.addBase64(BubbleEmotion.EXCLAMATION, bubbleExclamation)
         scene.textures.addBase64(BubbleEmotion.HAPPY, bubbleHappy)
         scene.textures.addBase64(BubbleEmotion.LIKE, bubbleLike)
         scene.textures.addBase64(BubbleEmotion.LOVE, bubbleLove)
-        scene.textures.addBase64(BubbleEmotion.QUESTION, bubbleQuestion)
         scene.textures.addBase64(BubbleEmotion.SHAME, bubbleShame)
         scene.textures.addBase64(BubbleEmotion.SLEEP, bubbleSleep)
     }

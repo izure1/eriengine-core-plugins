@@ -24,6 +24,7 @@ class ActorBubbleEmitter {
     private text: TypingText|null = null
     private imageTween: Phaser.Tweens.Tween|null = null
     private textTimeEvent: Phaser.Time.TimerEvent|null = null
+    private isNotice: boolean = false
 
     constructor(actor: Actor) {
         this.actor = actor
@@ -51,7 +52,7 @@ class ActorBubbleEmitter {
         this.text?.setStyle(this.currentStyle)
         this.text.setVisible(false)
 
-        this.image = this.scene.add.sprite(0, 0, this.scene.textures.get('asdfasdf'))
+        this.image = this.scene.add.image(0, 0, '')
         this.image.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
         this.image.setOrigin(0.5, 0.5)
         this.image.setVisible(false)
@@ -200,35 +201,103 @@ class ActorBubbleEmitter {
         this.imageTween = null
     }
 
-    say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
-        this.text?.setVisible(true)
+    private destroyText(): void {
+        this.text?.destroy()
+        this.text = null
+    }
 
-        this.clearTextTimeEvent()
+    private destroyImage(): void {
+        this.image?.destroy()
+        this.image = null
+    }
+
+    say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
+        this.isNotice = false
+        this.text?.setVisible(false)
         
-        this.appendStyle = style
-        this.text?.setStyle(this.currentStyle)
-        this.text?.startTyping(text, speed).on('done', (): void => {
-            if (!this.scene) {
-                return
-            }
-            this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
-                this.text?.setText('')
-                this.text?.setVisible(false)
-                this.clearTextTimeEvent()
+        this.clearTextTimeEvent()
+        this.closeEmotion(0, (): void => {
+            this.appendStyle = style
+            this.text?.setText('')
+            this.text?.setStyle(this.currentStyle)
+            this.text?.setVisible(true)
+            this.text?.startTyping(text, speed).on('done', (): void => {
+                if (!this.scene) {
+                    return
+                }
+                this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
+                    this.text?.setText('')
+                    this.text?.setVisible(false)
+                    this.clearTextTimeEvent()
+                })
             })
         })
         return this
     }
 
     notice(text: string, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
-        this.text?.setVisible(true)
-
+        this.isNotice = true
+        
+        this.text?.setVisible(false)
         this.clearTextTimeEvent()
-
-        this.appendStyle = style
-        this.text?.setStyle(this.currentStyle)
-        this.text?.setText(text)
+        this.closeEmotion(0, (): void => {
+            this.appendStyle = style
+            this.text?.setText(text)
+            this.text?.setStyle(this.currentStyle)
+            this.text?.setVisible(true)
+        })
         return this
+    }
+
+    private openEmotion(key: keyof typeof BubbleEmotion, callback?: () => void): void {
+        if (!this.scene) {
+            return
+        }
+        this.clearImageTween()
+        this.text?.setVisible(false)
+        this.image?.setVisible(true)
+        this.image?.setScale(0)
+        this.image?.setTexture(BubbleEmotion[key])
+        this.imageTween = this.scene.tweens.add({
+            targets: this.image,
+            scale: 1,
+            duration: 300,
+            ease: Phaser.Math.Easing.Back.Out
+        }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
+            if (callback) {
+                callback()
+            }
+        })
+    }
+
+    private closeEmotion(delay: number = 0, callback?: () => void): void {
+        if (!this.scene) {
+            return
+        }
+
+        this.clearImageTween()
+
+        const after = (): void => {
+            this.image?.setVisible(false)
+            this.clearImageTween()
+
+            if (callback) {
+                callback()
+            }
+        }
+
+        if (!this.image?.visible) {
+            after()
+            return
+        }
+
+        this.imageTween = this.scene.tweens.add({
+            targets: this.image,
+            scale: 0,
+            duration: 300,
+            delay,
+            ease: Phaser.Math.Easing.Back.In
+        }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, after)
     }
 
     emotion(key: keyof typeof BubbleEmotion, duration: number = 2500): this {
@@ -236,34 +305,14 @@ class ActorBubbleEmitter {
             return this
         }
 
-        this.clearImageTween()
-        this.image?.setVisible(true)
-        this.image?.setScale(0)
-        this.image?.setTexture(BubbleEmotion[key])
+        this.text?.setVisible(false)
 
-        this.imageTween = this.scene.tweens.add({
-            targets: this.image,
-            scale: 1,
-            duration: 300,
-            ease: Phaser.Math.Easing.Back.Out
-        }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
-            this.clearImageTween()
-
-            if (!this.scene) {
-                return
-            }
-
-            this.imageTween = this.scene.tweens.add({
-                targets: this.image,
-                scale: 0,
-                duration: 300,
-                delay: duration,
-                ease: Phaser.Math.Easing.Back.In
-            }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
-                this.clearImageTween()
-                this.image?.setVisible(false)
+        this.openEmotion(key, (): void => {
+            this.closeEmotion(duration, (): void => {
+                if (this.isNotice) {
+                    this.text?.setVisible(true)
+                }
             })
-
         })
         return this
     }
@@ -275,6 +324,8 @@ class ActorBubbleEmitter {
     destroy(): void {
         this.clearTextTimeEvent()
         this.clearImageTween()
+        this.destroyText()
+        this.destroyImage()
         this.actor = null
     }
 }

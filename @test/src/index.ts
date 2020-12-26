@@ -177,16 +177,14 @@ class Test extends Phaser.Scene {
         this.input.mouse.disableContextMenu()
 
         this.dialogue.addCharacter('character-sample', -150, 50)
-        setTimeout(() => {
-            this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
-        }, 1000)
+        //this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
 
-        this.player = this.actor.addActor(Player, this, 'izure', 100, 100, 'sprite-hannah-stand')
+        this.player = this.actor.addActor(Player, this, 'izureasdfasdfasdfasdfasdf', 100, 100, 'sprite-hannah-stand')
         console.log(this.player, this)
 
         this.input.on(Phaser.Input.Events.POINTER_DOWN, async (e: Phaser.Input.Pointer): Promise<void> => {
             if (e.button === 2) {
-                if (this.player) {
+                if (this.player && this.player.active) {
                     this.player.run.to(await this.map.getRoutes(this.player, this.cursor.pointer))
                 }
             }
@@ -194,7 +192,7 @@ class Test extends Phaser.Scene {
     }
 
     update(): void {
-        if (this.player) {
+        if (this.player && this.player.active) {
             x = ~~this.player.x
             y = ~~this.player.y
         }

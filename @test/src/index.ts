@@ -9,11 +9,11 @@ class User extends Actor {
 
     private initBubble(): void {
         this.bubble.of('name')
-            .setOffset({ x: 0, y: -this.displayHeight })
+            .setOffset('top')
             .setAlign('center')
             .notice(this.id, { fontSize: '20px', fontStyle: 'bold', align: 'center' })
         this.bubble.of('message')
-            .setOffset({ x: 50, y: 0 })
+            .setOffset('right')
             .setAlign('left')
             .setVertical('middle')
             .say(`내 이름은 ${this.id}! 내가 돌아왔다!`, undefined, { align: 'left' })
@@ -55,10 +55,12 @@ class User extends Actor {
             this.play('hannah-stand', true)
         }
         else if (this.run.isMovingLeft) {
-            this.play('hannah-run-left', true)
+            this.flipX = false
+            this.play('hannah-run', true)
         }
         else if (this.run.isMovingRight) {
-            this.play('hannah-run-right', true)
+            this.flipX = true
+            this.play('hannah-run', true)
         }
     }
 
@@ -148,8 +150,7 @@ class Test extends Phaser.Scene {
 
     preload(): void {
         this.load.image('tile', '/assets/img/tile.png')
-        this.load.spritesheet('sprite-hannah-runl', '/assets/img/sprite-hannah-runl.webp', { frameWidth: 170, frameHeight: 210 })
-        this.load.spritesheet('sprite-hannah-runr', '/assets/img/sprite-hannah-runr.webp', { frameWidth: 170, frameHeight: 210 })
+        this.load.spritesheet('sprite-hannah-run', '/assets/img/sprite-hannah-run.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.spritesheet('sprite-hannah-stand', '/assets/img/sprite-hannah-stand.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.image('particle-flash', '/assets/img/particle-flash.png')
         this.load.image('particle-red', '/assets/img/particle-red.png')
@@ -167,15 +168,8 @@ class Test extends Phaser.Scene {
         })
 
         this.anims.create({
-            key: 'hannah-run-left',
-            frames: this.anims.generateFrameNumbers('sprite-hannah-runl', { start: 0, end: 14 }),
-            frameRate: 18,
-            repeat: -1
-        })
-
-        this.anims.create({
-            key: 'hannah-run-right',
-            frames: this.anims.generateFrameNumbers('sprite-hannah-runr', { start: 0, end: 14 }),
+            key: 'hannah-run',
+            frames: this.anims.generateFrameNumbers('sprite-hannah-run', { start: 0, end: 14 }),
             frameRate: 18,
             repeat: -1
         })

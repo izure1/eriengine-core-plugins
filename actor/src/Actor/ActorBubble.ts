@@ -1,16 +1,28 @@
 import Phaser from 'phaser'
 import { Actor } from './Actor'
-import { Point2 } from '@common/Math/MathUtil'
+import { BubbleEmotion } from '../eriengine-core-plugin-actor'
+import { Point2, getIsometricWidth, getIsometricHeight } from '@common/Math/MathUtil'
 import { TypingText } from '@common/Phaser/TypingText'
+
+enum BubbleEmitterOffset {
+    'top',
+    'left',
+    'right',
+    'bottom',
+    'top-left',
+    'top-right',
+    'bottom-left',
+    'bottom-right',
+}
 
 class ActorBubbleEmitter {
     private actor: Actor|null = null
     private offset: Point2 = { x: 0, y: 0 }
     private baseStyle: Phaser.Types.GameObjects.Text.TextStyle = { fontSize: '15px', color: 'white', strokeThickness: 3, stroke: 'black' }
     private appendStyle: Phaser.Types.GameObjects.Text.TextStyle = {}
-    private image: Phaser.GameObjects.Sprite|null = null
+    private image: Phaser.GameObjects.Image|null = null
     private text: TypingText|null = null
-    private imageTimeEvent: Phaser.Time.TimerEvent|null = null
+    private imageTween: Phaser.Tweens.Tween|null = null
     private textTimeEvent: Phaser.Time.TimerEvent|null = null
 
     constructor(actor: Actor) {
@@ -37,10 +49,12 @@ class ActorBubbleEmitter {
         this.text.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
         this.text.setOrigin(0.5, 0.5)
         this.text?.setStyle(this.currentStyle)
+        this.text.setVisible(false)
 
         this.image = this.scene.add.sprite(0, 0, this.scene.textures.get('asdfasdf'))
         this.image.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
         this.image.setOrigin(0.5, 0.5)
+        this.image.setVisible(false)
     }
 
     private updatePosition(): void {
@@ -104,8 +118,69 @@ class ActorBubbleEmitter {
         return this
     }
 
-    setOffset(offset: Point2): this {
-        this.offset = offset
+    setOffset(offset: Point2|keyof typeof BubbleEmitterOffset): this {
+        if (!this.actor) {
+            return this
+        }
+
+        const isoW: number = getIsometricWidth(this.actor.side)
+        const isoH: number = getIsometricHeight(this.actor.side)
+
+        const displayHeight: number     = this.actor.displayHeight
+        
+        const margin: number            = 20
+        const relativeX: number         = Math.abs(isoW + margin)
+        const relativeTop: number       = Math.abs(displayHeight - isoH + margin)
+        const relativeMiddle: number    = Math.abs((displayHeight - isoH)/2)
+        const relativeBottom: number    = Math.abs(isoH + margin)
+
+        let x: number
+        let y: number
+        if (typeof offset === 'string') {
+            switch(offset) {
+                case 'bottom':
+                    x = 0
+                    y = relativeBottom
+                    offset = { x, y }
+                    break
+                case 'bottom-left':
+                    x = relativeX * -1
+                    y = relativeBottom
+                    offset = { x, y }
+                    break
+                case 'bottom-right':
+                    x = relativeX
+                    y = relativeBottom
+                    offset = { x, y }
+                    break
+                case 'left':
+                    x = relativeX * -1
+                    y = relativeMiddle * -1
+                    offset = { x, y }
+                    break
+                case 'right':
+                    x = relativeX
+                    y = relativeMiddle * -1
+                    offset = { x, y }
+                    break
+                case 'top':
+                    x = 0
+                    y = relativeTop * -1
+                    offset = { x, y }
+                    break
+                case 'top-left':
+                    x = relativeX * -1
+                    y = relativeTop * -1
+                    offset = { x, y }
+                    break
+                case 'top-right':
+                    x = relativeX
+                    y = relativeTop * -1
+                    offset = { x, y }
+                    break
+            }
+        }
+        this.offset = offset as Point2
         return this
     }
 
@@ -117,17 +192,16 @@ class ActorBubbleEmitter {
         this.textTimeEvent = null
     }
 
-    private clearImageTimeEvent(dispatchCallback: boolean = false): void {
-        if (!this.imageTimeEvent) {
+    private clearImageTween(): void {
+        if (!this.imageTween) {
             return
         }
-        this.imageTimeEvent.remove(dispatchCallback)
-        this.imageTimeEvent = null
+        this.imageTween.remove()
+        this.imageTween = null
     }
 
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.text?.setVisible(true)
-        this.image?.setVisible(false)
 
         this.clearTextTimeEvent()
         
@@ -139,6 +213,7 @@ class ActorBubbleEmitter {
             }
             this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
                 this.text?.setText('')
+                this.text?.setVisible(false)
                 this.clearTextTimeEvent()
             })
         })
@@ -147,7 +222,6 @@ class ActorBubbleEmitter {
 
     notice(text: string, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.text?.setVisible(true)
-        this.image?.setVisible(false)
 
         this.clearTextTimeEvent()
 
@@ -157,23 +231,39 @@ class ActorBubbleEmitter {
         return this
     }
 
-    emotion(animationKey: Phaser.Animations.Animation|Phaser.Types.Animations.PlayAnimationConfig|string, duration: number = 2500): this {
+    emotion(key: keyof typeof BubbleEmotion, duration: number = 2500): this {
         if (!this.scene) {
             return this
         }
-        this.text?.setActive(false)
+
+        this.clearImageTween()
         this.image?.setVisible(true)
+        this.image?.setScale(0)
+        this.image?.setTexture(BubbleEmotion[key])
 
-        this.clearImageTimeEvent()
+        this.imageTween = this.scene.tweens.add({
+            targets: this.image,
+            scale: 1,
+            duration: 300,
+            ease: Phaser.Math.Easing.Back.Out
+        }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
+            this.clearImageTween()
 
-        this.image?.play(animationKey, true)
+            if (!this.scene) {
+                return
+            }
 
-        if (duration < 0) {
-            return this
-        }
-        this.imageTimeEvent = this.scene?.time.delayedCall(duration, (): void => {
-            this.image?.setVisible(false)
-            this.clearImageTimeEvent()
+            this.imageTween = this.scene.tweens.add({
+                targets: this.image,
+                scale: 0,
+                duration: 300,
+                delay: duration,
+                ease: Phaser.Math.Easing.Back.In
+            }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
+                this.clearImageTween()
+                this.image?.setVisible(false)
+            })
+
         })
         return this
     }
@@ -184,7 +274,7 @@ class ActorBubbleEmitter {
 
     destroy(): void {
         this.clearTextTimeEvent()
-        this.clearImageTimeEvent()
+        this.clearImageTween()
         this.actor = null
     }
 }

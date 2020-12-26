@@ -1,23 +1,34 @@
 import Phaser from 'phaser'
 import { isInsideFromCircle, getDistanceBetween } from '@common/Math/MathUtil'
 import { Actor } from './Actor/Actor'
-import bubbleTexture from '@assets/bg-bubble.png'
-import bubbleExclamation from '@assets/ico-bubble-exclamation.png'
+import bubbleAha from '@assets/bubble-aha.png'
+import bubbleAngry from '@assets/bubble-angry.png'
+import bubbleAnnoy from '@assets/bubble-annoy.png'
+import bubbleDepress from '@assets/bubble-depress.png'
+import bubbleEllipsis from '@assets/bubble-ellipsis.png'
+import bubbleEmbarrass from '@assets/bubble-embarrass.png'
+import bubbleExclamation from '@assets/bubble-exclamation.png'
+import bubbleHappy from '@assets/bubble-happy.png'
+import bubbleLike from '@assets/bubble-like.png'
+import bubbleLove from '@assets/bubble-love.png'
+import bubbleQuestion from '@assets/bubble-question.png'
+import bubbleShame from '@assets/bubble-shame.png'
+import bubbleSleep from '@assets/bubble-sleep.png'
 
 enum BubbleEmotion {
-    BUBBLE          = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_BUBBLE__',
-    EXCLAMATION     = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__', // 느낌표
-    QUESTION        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__', // 의문
-    ELLIPSIS        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ELLIPSIS__', // 말줄임
-    LIKE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LIKE__', // 좋아함
-    AHA             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_AHA__', // 깨달음 (전구)
-    EMBARRASSED     = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EMBARRASSED__', // 당황함 (땀)
-    ANNOY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANNOY__', // 속상함 (골머리)
-    ANGRY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANGRY__', // 화남 (빡친표시)
-    HAPPY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_HAPPY__', // 즐거움 (음표)
-    SLEEP           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__', // 졸림
-    SHAME           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SHAME__', // 부끄러움
-    DEPRESS         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DEPRESS__', // 우울 (동숲)
+    AHA             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_AHA__',
+    ANGRY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANGRY__',
+    ANNOY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ANNOY__',
+    DEPRESS         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_DEPRESS__',
+    ELLIPSIS        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_ELLIPSIS__',
+    EMBARRASS       = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EMBARRASSED__',
+    EXCLAMATION     = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__',
+    HAPPY           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_HAPPY__',
+    LIKE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LIKE__',
+    LOVE            = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_LOVE__',
+    QUESTION        = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__',
+    SHAME           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SHAME__',
+    SLEEP           = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
 }
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
@@ -25,38 +36,27 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
     private static isTextureGenerated: boolean = false
 
-    private static createImage(src: string): HTMLImageElement {
-        const image: HTMLImageElement = document.createElement('img')
-        image.src = src
-        return image
-    }
-
     private static generateTexture(scene: Phaser.Scene): void {
         if (Plugin.isTextureGenerated) {
             return
         }
 
         Plugin.isTextureGenerated = true
-        
-        // 애니메이션 생성
-        scene.textures.on(Phaser.Textures.Events.ADD, (key: string): void => {
-            switch(key) {
-                case BubbleEmotion.EXCLAMATION:
-                    Plugin.generateAnimation(scene, BubbleEmotion.EXCLAMATION, 0, 6, 7, 0)
-                    break
-            }
-        })
             
-        // 스프라이트 로드
-        scene.textures.addSpriteSheet(BubbleEmotion.EXCLAMATION, Plugin.createImage(bubbleExclamation), { frameWidth: 50, frameHeight: 50 })
-    }
-
-    private static generateAnimation(scene: Phaser.Scene, key: string, start: number, end: number, frameRate: number, repeat: number): false|Phaser.Animations.Animation {
-        if (scene.anims.exists(key)) {
-            return false
-        }
-        const frames = scene.anims.generateFrameNumbers(key, { start, end })
-        return scene.anims.create({ key, frames, frameRate, repeat })
+        // 이미지 로드
+        scene.textures.addBase64(BubbleEmotion.AHA, bubbleAha)
+        scene.textures.addBase64(BubbleEmotion.ANGRY, bubbleAngry)
+        scene.textures.addBase64(BubbleEmotion.ANNOY, bubbleAnnoy)
+        scene.textures.addBase64(BubbleEmotion.DEPRESS, bubbleDepress)
+        scene.textures.addBase64(BubbleEmotion.ELLIPSIS, bubbleEllipsis)
+        scene.textures.addBase64(BubbleEmotion.EMBARRASS, bubbleEmbarrass)
+        scene.textures.addBase64(BubbleEmotion.EXCLAMATION, bubbleExclamation)
+        scene.textures.addBase64(BubbleEmotion.HAPPY, bubbleHappy)
+        scene.textures.addBase64(BubbleEmotion.LIKE, bubbleLike)
+        scene.textures.addBase64(BubbleEmotion.LOVE, bubbleLove)
+        scene.textures.addBase64(BubbleEmotion.QUESTION, bubbleQuestion)
+        scene.textures.addBase64(BubbleEmotion.SHAME, bubbleShame)
+        scene.textures.addBase64(BubbleEmotion.SLEEP, bubbleSleep)
     }
 
     constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
@@ -75,7 +75,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-        //this.scene.events.on(Phaser.Scenes.Events.CREATE, Plugin.generateTexture.bind(null, this.scene))
     }
 
     destroy(): void {

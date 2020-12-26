@@ -1,6 +1,16 @@
 import Phaser from 'phaser'
 import * as EasyStar from 'easystarjs'
-import { Point2, getCoordFromPoint, toCartesianCoord, toIsometricCoord, GridObject, create2DArray, fillItemInArray } from '@common/Math/MathUtil'
+import {
+    Point2,
+    getIsometricWidth,
+    getIsometricHeight,
+    getCoordFromPoint,
+    toCartesianCoord,
+    toIsometricCoord,
+    GridObject,
+    create2DArray,
+    fillItemInArray
+} from '@common/Math/MathUtil'
 
 type IsometricObject = Phaser.GameObjects.GameObject&GridObject
 
@@ -48,22 +58,18 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }) as IsometricObject[]
     }
 
-    private get isoRad(): number {
-        return Phaser.Math.DegToRad(26.57)
-    }
-
     private get isoOrigin(): Point2 {
         const x: number = this.center.x
-        const y: number = Math.sin(this.isoRad) * -this.side
+        const y: number = getIsometricHeight(this.side) * -1
         return { x, y }
     }
 
     private get isoW(): number {
-        return Math.cos(this.isoRad) * this.gridScale
+        return getIsometricWidth(this.gridScale)
     }
 
     private get isoH(): number {
-        return Math.sin(this.isoRad) * this.gridScale
+        return getIsometricHeight(this.gridScale)
     }
 
     private get gridSize(): number {

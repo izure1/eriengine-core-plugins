@@ -23,6 +23,14 @@ export function radToAngle(rad: number): number {
     return Math.PI * 180 / rad
 }
 
+export function getIsometricHeight(side: number): number {
+    return Math.sin(angleToRad(ISOMETRIC_ANGLE)) * side
+}
+
+export function getIsometricWidth(side: number): number {
+    return Math.cos(angleToRad(ISOMETRIC_ANGLE)) * side
+}
+
 /**
  * 포인트로부터 극좌표의 위치를 반환합니다.
  * @param point 시작 포인트입니다.

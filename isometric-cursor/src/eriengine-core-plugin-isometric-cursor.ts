@@ -1,5 +1,14 @@
 import Phaser from 'phaser'
-import { ISOMETRIC_ANGLE, getBigger, getCoordFromPoint, toCartesianCoord, toIsometricCoord, Point2 } from '@common/Math/MathUtil'
+import {
+    Point2,
+    ISOMETRIC_ANGLE,
+    getIsometricWidth,
+    getIsometricHeight,
+    getBigger,
+    getCoordFromPoint,
+    toCartesianCoord,
+    toIsometricCoord,
+} from '@common/Math/MathUtil'
 
 interface RGBA {
     red: number
@@ -25,16 +34,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
     }
 
-    private get isoRad(): number {
-        return Math.PI / 180 * ISOMETRIC_ANGLE
-    }
-
     private get isoW(): number {
-        return Math.cos(this.isoRad) * this.side
+        return getIsometricWidth(this.side)
     }
 
     private get isoH(): number {
-        return Math.sin(this.isoRad) * this.side
+        return getIsometricHeight(this.side)
     }
 
     private get isoOrigin(): Point2 {

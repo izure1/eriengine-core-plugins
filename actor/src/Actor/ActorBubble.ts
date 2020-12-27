@@ -25,6 +25,7 @@ class ActorBubbleEmitter {
     private imageTween: Phaser.Tweens.Tween|null = null
     private textTimeEvent: Phaser.Time.TimerEvent|null = null
     private isNotice: boolean = false
+    private noticeText: string|string[] = ''
 
     constructor(actor: Actor) {
         this.actor = actor
@@ -185,12 +186,30 @@ class ActorBubbleEmitter {
         return this
     }
 
-    private clearTextTimeEvent(dispatchCallback: boolean = false): void {
-        if (!this.textTimeEvent) {
-            return
+    private appendTextStyle(style: Phaser.Types.GameObjects.Text.TextStyle = {}): void {
+        this.appendStyle = style
+        this.text?.setStyle(this.currentStyle)
+    }
+
+    private showText(text: string|string[] = ''): void {
+        this.text?.setStyle(this.currentStyle)
+        this.text?.setText(text)
+        this.text?.setVisible(true)
+    }
+
+    private clearText(dispatchCallback: boolean = false): void {
+        this.text?.setText('')
+        this.text?.setVisible(false)
+        
+        if (this.textTimeEvent) {
+            this.textTimeEvent.remove(dispatchCallback)
+            this.textTimeEvent = null
         }
-        this.textTimeEvent.remove(dispatchCallback)
-        this.textTimeEvent = null
+    }
+
+    private clearTextStyle(): void {
+        this.appendStyle = {}
+        this.baseStyle = {}
     }
 
     private clearImageTween(): void {
@@ -213,38 +232,31 @@ class ActorBubbleEmitter {
 
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.isNotice = false
-        this.text?.setVisible(false)
         
-        this.clearTextTimeEvent()
+        this.clearText()
         this.closeEmotion(0, (): void => {
-            this.appendStyle = style
-            this.text?.setText('')
-            this.text?.setStyle(this.currentStyle)
-            this.text?.setVisible(true)
+            this.appendTextStyle(style)
+            this.showText()
             this.text?.startTyping(text, speed).on('done', (): void => {
                 if (!this.scene) {
                     return
                 }
                 this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
-                    this.text?.setText('')
-                    this.text?.setVisible(false)
-                    this.clearTextTimeEvent()
+                    this.clearText()
                 })
             })
         })
         return this
     }
 
-    notice(text: string, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
+    notice(text: string|string[], style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.isNotice = true
+        this.noticeText = text
         
-        this.text?.setVisible(false)
-        this.clearTextTimeEvent()
+        this.clearText()
         this.closeEmotion(0, (): void => {
-            this.appendStyle = style
-            this.text?.setText(text)
-            this.text?.setStyle(this.currentStyle)
-            this.text?.setVisible(true)
+            this.appendTextStyle(style)
+            this.showText(text)
         })
         return this
     }
@@ -255,8 +267,8 @@ class ActorBubbleEmitter {
         }
 
         this.clearImageTween()
+        this.clearText()
 
-        this.text?.setVisible(false)
         this.image?.setVisible(true)
         this.image?.setScale(0)
 
@@ -318,12 +330,11 @@ class ActorBubbleEmitter {
             return this
         }
 
-        this.text?.setVisible(false)
-
+        this.clearText()
         this.openEmotion(key, (): void => {
             this.closeEmotion(duration, (): void => {
                 if (this.isNotice) {
-                    this.text?.setVisible(true)
+                    this.showText(this.noticeText)
                 }
             })
         })
@@ -335,7 +346,8 @@ class ActorBubbleEmitter {
     }
 
     destroy(): void {
-        this.clearTextTimeEvent()
+        this.clearText()
+        this.clearTextStyle()
         this.clearImageTween()
         this.destroyText()
         this.destroyImage()

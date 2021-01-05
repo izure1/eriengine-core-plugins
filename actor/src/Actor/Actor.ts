@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { createIsometricDiamondPoints } from '@common/Math/MathUtil'
+import { createIsometricDiamondPoints, getIsometricSide, GridObject } from '@common/Math/MathUtil'
 import { Plugin as ActorPlugin } from '../eriengine-core-plugin-actor'
 import { ActorBattle } from './ActorBattle'
 import { ActorRun } from './ActorRun'
@@ -7,18 +7,16 @@ import { ActorDot } from './ActorDot'
 import { ActorBubble } from './ActorBubble'
 import { ActorParticle } from './ActorParticle'
 
-export abstract class Actor extends Phaser.Physics.Matter.Sprite {
+export abstract class Actor extends Phaser.Physics.Matter.Sprite implements GridObject {
     plugin!: ActorPlugin
-    readonly id: string
     readonly battle: ActorBattle        = new ActorBattle(this)
     readonly bubble: ActorBubble        = new ActorBubble(this)
     readonly particle: ActorParticle    = new ActorParticle(this)
     readonly run: ActorRun              = new ActorRun(this)
     readonly dot: ActorDot              = new ActorDot(this)
 
-    constructor(scene: Phaser.Scene, id: string, x: number, y: number, texture: string|Phaser.Textures.Texture, frame?: string|number, option?: Phaser.Types.Physics.Matter.MatterBodyConfig) {
+    constructor(scene: Phaser.Scene, x: number, y: number, texture: string|Phaser.Textures.Texture, frame?: string|number, option?: Phaser.Types.Physics.Matter.MatterBodyConfig) {
         super(scene.matter.world, x, y, texture, frame, option)
-        this.id = id
         this.initVertices()
 
         return new Proxy(this, {
@@ -36,8 +34,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite {
 
     get side(): number {
         const xHalf: number = this.displayWidth / 2
-        const yHalf: number = this.displayWidth / 4 
-        return Math.sqrt(Math.pow(xHalf, 2) + Math.pow(yHalf, 2))
+        return getIsometricSide(xHalf) * 2
     }
 
     protected PROXY_SETTER(target: Actor, prop: keyof Actor, value: any): true {
@@ -140,8 +137,8 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite {
         return this
     }
 
-    followCamera(lerpX: number = 1, lerpY: number = lerpX): this {
-        this.scene.cameras.main.startFollow(this, undefined, lerpX, lerpY)
+    followCamera(zoom: number = 1, duration: number = 300, lerpX: number = 1, lerpY: number = lerpX): this {
+        this.scene.cameras.main.zoomTo(zoom, duration, Phaser.Math.Easing.Expo.Out).startFollow(this, undefined, lerpX, lerpY)
         return this
     }
 

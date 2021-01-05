@@ -31,6 +31,11 @@ export function getIsometricWidth(side: number): number {
     return Math.cos(angleToRad(ISOMETRIC_ANGLE)) * side
 }
 
+export function getIsometricSide(width: number): number {
+    const height: number = width / 2
+    return getDiagonal(width, height)
+}
+
 /**
  * 포인트로부터 극좌표의 위치를 반환합니다.
  * @param point 시작 포인트입니다.

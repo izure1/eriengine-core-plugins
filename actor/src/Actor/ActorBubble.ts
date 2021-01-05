@@ -47,10 +47,11 @@ class ActorBubbleEmitter {
         if (!this.scene) {
             return
         }
+
         this.text = new TypingText(this.scene, 0, 0, '', {})
         this.text.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
         this.text.setOrigin(0.5, 0.5)
-        this.text?.setStyle(this.currentStyle)
+        this.text.setStyle(this.currentStyle)
         this.text.setVisible(false)
 
         this.image = this.scene.add.image(0, 0, '')

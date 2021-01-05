@@ -42,7 +42,7 @@ export class ActorParticle {
     }
 
     add(key: string, texture: Texture, isTop: boolean = false, config: ParticleEmitterConfig = {}): this {
-        if (!this.actor) {
+        if (!this.actor || !this.scene) {
             return this
         }
 
@@ -54,7 +54,7 @@ export class ActorParticle {
         }
         const configAppended: ParticleEmitterConfig = { ...configDefault, ...config }
 
-        const manager: Phaser.GameObjects.Particles.ParticleEmitterManager = this.scene?.add.particles(texture)!
+        const manager: Phaser.GameObjects.Particles.ParticleEmitterManager = this.scene.add.particles(texture)
         const emitter: Phaser.GameObjects.Particles.ParticleEmitter = manager.createEmitter(configAppended).startFollow(this.actor)
 
         const option: ParticleEmitterOption = ActorParticle.createEmitterOption(emitter, isTop)

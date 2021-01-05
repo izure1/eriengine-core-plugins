@@ -11,6 +11,7 @@ import {
     create2DArray,
     fillItemInArray
 } from '@common/Math/MathUtil'
+import { WallObstacle } from './Tiles/WallObstacle'
 
 type IsometricObject = Phaser.GameObjects.GameObject&GridObject
 
@@ -18,6 +19,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private readonly easystarset: Set<EasyStar.js> = new Set
     private readonly center: Point2 = { x: 0, y: 0 }
     private readonly gridScale: number = 30
+    private readonly tiles: Map<string, Phaser.GameObjects.Sprite> = new Map
+    private readonly walls: Map<string, Phaser.Physics.Matter.Sprite> = new Map
     private side: number = 3000
     private bounds: MatterJS.BodyType|null = null
 
@@ -40,6 +43,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     destroy(): void {
+        this.destroyTiles()
+        this.destroyWalls()
         this.easystarset.clear()
     }
 
@@ -147,6 +152,62 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.side = size
         this.generateBounds()
         return this
+    }
+
+    private getCoordKey(x: number, y: number): string {
+        return `${x}:${y}`
+    }
+
+    setWalltile(x: number, y: number, side: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): this {
+        const wall: WallObstacle = new WallObstacle(this.scene.matter.world, x, y, texture, frame)
+
+        wall.addToScene()
+        wall.setDepth(y)
+        wall.setStatic(true)
+        wall.displayWidth = getIsometricWidth(side) * 2
+
+        if (animation) {
+            wall.play(animation)
+        }
+
+        const key: string = this.getCoordKey(x, y)
+        if (this.walls.has(key)) {
+            this.walls.get(key)?.destroy()
+        }
+        this.walls.set(key, wall)
+        return this
+    }
+
+    setFloortile(x: number, y: number, side: number, texture: Phaser.Textures.Texture|string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): this {
+        const tile: Phaser.GameObjects.Sprite = this.scene.add.sprite(x, y, texture, frame)
+        
+        tile.setDepth(Phaser.Math.MIN_SAFE_INTEGER)
+        tile.setDisplaySize(getIsometricWidth(side)*2, getIsometricHeight(side)*2)
+
+        if (animation) {
+            tile.play(animation, true)
+        }
+
+        const key: string = this.getCoordKey(x, y)
+        if (this.tiles.has(key)) {
+            this.tiles.get(key)?.destroy()
+        }
+        this.tiles.set(key, tile)
+        return this
+    }
+
+    private destroyWalls(): void {
+        for (const wall of this.walls.values()) {
+            wall.destroy()
+        }
+        this.walls.clear()
+    }
+
+    private destroyTiles(): void {
+        for (const tile of this.tiles.values()) {
+            tile.destroy()
+        }
+        this.tiles.clear()
     }
 
     private addPathFinding(easystar: EasyStar.js): void {

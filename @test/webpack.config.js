@@ -44,7 +44,8 @@ module.exports = {
         }
     },
     devServer: {
-        port: 8002
+        host: '192.168.0.12',
+        port: 9002
     },
     plugins: [
         new HtmlWebpackPlugin({ template: 'template.html' }),

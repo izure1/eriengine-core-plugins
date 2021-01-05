@@ -3,20 +3,27 @@ import { Plugin as ActorPlugin, Actor } from '~/actor'
 import { Plugin as IsomScenePlugin } from '~/isometric-scene'
 import { Plugin as IsomCursorPlugin } from '~/isometric-cursor'
 import { Plugin as DialoguePlugin } from '~/dialogue'
+import { Plugin as FowPlugin } from '~/fog-of-war'
+import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
     private hp: number = 100
+
+    constructor(name: string, scene: Phaser.Scene, x: number, y: number, texture: string) {
+        super(scene, x, y, texture)
+        this.setName(name)
+    }
 
     private initBubble(): void {
         this.bubble.of('name')
             .setOffset('top')
             .setAlign('center')
-            .notice(this.id, { fontSize: '20px', fontStyle: 'bold', align: 'center' })
+            .notice(this.name, { fontSize: '20px', fontStyle: 'bold', align: 'center' })
         this.bubble.of('message')
             .setOffset('right')
             .setAlign('left')
             .setVertical('middle')
-            .say(`내 이름은 ${this.id}! 내가 돌아왔다!`, undefined, { align: 'left' })
+            .say(`내 이름은 ${this.name}! 내가 돌아왔다!`, undefined, { align: 'left' })
     }
 
     private initParticle(): void {
@@ -29,9 +36,10 @@ class User extends Actor {
 
     private initBattle(): void {
         this.battle.on('get-hit', (from, { key, damage }): void => {
-            this.bubble.of('message').say(`윽! ${from.id}로부터 ${damage}만큼의 딜을 받았다!`)
+            this.bubble.of('message').say(`윽! ${from.name}로부터 ${damage}만큼의 딜을 받았다!`)
             if (damage) {
-                this.hp -= damage
+                const min: number = Phaser.Math.MinSub(this.hp, damage, 0)
+                this.hp = min
             }
             if (this.hp <= 0) {
                 this.battle.defeat()
@@ -39,7 +47,7 @@ class User extends Actor {
             }
         })
         this.battle.on('win', (from): void => {
-            this.bubble.of('message').say(`와! ${from.id}로부터 승리했다!`)
+            this.bubble.of('message').say(`와! ${from.name}로부터 승리했다!`)
         })
     }
 
@@ -66,7 +74,7 @@ class User extends Actor {
 
     end(): void {
         this.particle.explode('dead', 10)
-        console.log(this.id + ' has been destroied')
+        console.log(this.name + ' has been destroied')
     }
 }
 
@@ -79,9 +87,8 @@ class Player extends User {
     start(): void {
         super.start()
         this.initRun()
-        this.followCamera()
-        this.particle.play('explode')
-        this.scene.cameras.main.zoomTo(0.7, 500, Phaser.Math.Easing.Expo.Out)
+        this.followCamera(0.7)
+        //this.particle.play('explode')
 
         this.battle
             .addSkill('default', (target, dot) => {
@@ -143,30 +150,56 @@ class Test extends Phaser.Scene {
     private cursor!: IsomCursorPlugin
     private dialogue!: DialoguePlugin
     private actor!: ActorPlugin
+    private fow!: FowPlugin
+    private shiftKey!: Phaser.Input.Keyboard.Key
+    private ctrlKey!: Phaser.Input.Keyboard.Key
+    private side: number = getIsometricSide(235/2)
 
     constructor() {
         super({ key: 'test', active: true })
     }
 
     preload(): void {
+        this.load.image('wall-basic-left', '/assets/img/wall-basic-left.png')
+        this.load.image('wall-basic-right', '/assets/img/wall-basic-right.png')
+        this.load.image('tile-basic-1', '/assets/img/tile-basic-1.png')
         this.load.image('tile', '/assets/img/tile.png')
         this.load.spritesheet('sprite-hannah-run', '/assets/img/sprite-hannah-run.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.spritesheet('sprite-hannah-stand', '/assets/img/sprite-hannah-stand.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.image('particle-flash', '/assets/img/particle-flash.png')
         this.load.image('particle-red', '/assets/img/particle-red.png')
         this.load.image('character-sample', '/assets/img/character-sample.png')
+        this.load.image('tile-stone', '/assets/img/stones.png')
     }
-
+    
     create(): void {
-        this.cursor.enable(true)
+        const side: number = getIsometricSide(this.side)
 
+        this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
+        this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
+        this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
+        
+        this.input.mouse.disableContextMenu()
+
+        //this.dialogue.addCharacter('character-sample', -150, 50)
+        //this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
+
+        this.cursor.enable(true)
+        this.cursor.setGridSide(side)
+
+        this.fow.setRevealer(this.player, 0x000000, (object) => {
+            console.log(object.name)
+            if (object.name === 'eriengine-core-plugin-actor-bubble-text') return false
+            return true
+        }).setRadius(500)
+        
         this.anims.create({
             key: 'hannah-stand',
             frames: this.anims.generateFrameNumbers('sprite-hannah-stand', { start: 0, end: 38 }),
             frameRate: 12,
             repeat: -1
         })
-
+        
         this.anims.create({
             key: 'hannah-run',
             frames: this.anims.generateFrameNumbers('sprite-hannah-run', { start: 0, end: 14 }),
@@ -174,13 +207,6 @@ class Test extends Phaser.Scene {
             repeat: -1
         })
 
-        this.input.mouse.disableContextMenu()
-
-        this.dialogue.addCharacter('character-sample', -150, 50)
-        //this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
-
-        this.player = this.actor.addActor(Player, this, 'izure', 100, 100, 'sprite-hannah-stand')
-        console.log(this.player, this)
 
         this.input.on(Phaser.Input.Events.POINTER_DOWN, async (e: Phaser.Input.Pointer): Promise<void> => {
             if (e.button === 2) {
@@ -189,6 +215,8 @@ class Test extends Phaser.Scene {
                 }
             }
         })
+
+        console.log(this.player, this)
     }
 
     update(): void {
@@ -199,9 +227,17 @@ class Test extends Phaser.Scene {
 
         if (this.input.mousePointer.leftButtonDown()) {
             const { x, y } = this.cursor.pointer
-            const user: User = this.actor.addActor(User, this, this.time.now.toString(), 0, 0, 'sprite-hannah-stand')
-            user.setPosition(x, y)
-            user.run.useMoveKey('wasd')
+            if (!this.shiftKey.isDown && !this.ctrlKey.isDown) {
+                const user: User = this.actor.addActor(User, performance.now().toString(), this, 0, 0, 'sprite-hannah-stand')
+                user.setPosition(x, y)
+                user.run.useMoveKey('wasd')
+            }
+            else if (this.shiftKey.isDown) {
+                this.map.setFloortile(x, y, this.side, 'tile-basic-1')
+            }
+            else {
+                this.map.setWalltile(x, y, this.side, 'wall-basic-left')
+            }
         }
     }
 }
@@ -209,11 +245,15 @@ class Test extends Phaser.Scene {
 const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
+    type: Phaser.WEBGL,
     scene: [ Test, CoordinateSystem ],
     scale: {
         parent: '#game',
         fullscreenTarget: '#game',
         zoom: 1
+    },
+    render: {
+        maxLights: 10
     },
     dom: {
         createContainer: true
@@ -243,12 +283,17 @@ const config: Phaser.Types.Core.GameConfig = {
                 mapping: 'cursor',
                 plugin: IsomCursorPlugin
             },
+            {
+                key: 'fogOfWarPlugin',
+                mapping: 'fow',
+                plugin: FowPlugin
+            }
         ]
     },
     physics: {
         default: 'matter',
         matter: {
-            debug: true,
+            // debug: true,
             gravity: {
                 x: 0,
                 y: 0

@@ -1,5 +1,5 @@
 {
-  "name": "eriengine-core-actor-plugin",
+  "name": "eriengine-core-plugin-actor",
   "version": "1.0.0",
   "description": "Actor plugin for Phaser 3",
   "main": "dist/actor/src/eriengine-core-plugin-actor.js",

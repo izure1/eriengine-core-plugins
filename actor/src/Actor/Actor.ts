@@ -25,6 +25,12 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
     }
 
     private get isCameraFollowing(): boolean {
+        if (
+            !this.scene ||
+            !this.scene.cameras ||
+            !this.scene.cameras.main
+        ) return false
+
         return this.scene.cameras.main._follow === this
     }
 
@@ -34,7 +40,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
 
     get side(): number {
         const xHalf: number = this.displayWidth / 2
-        return getIsometricSide(xHalf) * 2
+        return getIsometricSide(xHalf)
     }
 
     protected PROXY_SETTER(target: Actor, prop: keyof Actor, value: any): true {

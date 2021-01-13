@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { isInsideFromCircle, getDistanceBetween } from '@common/Math/MathUtil'
+import { base64Load } from '@common/Phaser/AssetLoader'
 import { Actor } from './Actor/Actor'
 import bubbleAha from '@assets/bubble-aha.png'
 import bubbleAngry from '@assets/bubble-angry.png'
@@ -36,30 +37,21 @@ enum BubbleEmotion {
 class Plugin extends Phaser.Plugins.ScenePlugin {
     private actorset: Set<Actor> = new Set
 
-    private static isTextureGenerated: boolean = false
-
     private static generateTexture(scene: Phaser.Scene): void {
-        if (Plugin.isTextureGenerated) {
-            return
-        }
-
-        Plugin.isTextureGenerated = true
-            
-        // 이미지 로드
-        scene.textures.addBase64(BubbleEmotion['?'], bubbleQuestion)
-        scene.textures.addBase64(BubbleEmotion['!'], bubbleExclamation)
-        scene.textures.addBase64(BubbleEmotion.AHA, bubbleAha)
-        scene.textures.addBase64(BubbleEmotion.ANGRY, bubbleAngry)
-        scene.textures.addBase64(BubbleEmotion.ANNOY, bubbleAnnoy)
-        scene.textures.addBase64(BubbleEmotion.DEPRESS, bubbleDepress)
-        scene.textures.addBase64(BubbleEmotion.DOYA, bubbleDoya)
-        scene.textures.addBase64(BubbleEmotion.ELLIPSIS, bubbleEllipsis)
-        scene.textures.addBase64(BubbleEmotion.EMBARRASS, bubbleEmbarrass)
-        scene.textures.addBase64(BubbleEmotion.HAPPY, bubbleHappy)
-        scene.textures.addBase64(BubbleEmotion.LIKE, bubbleLike)
-        scene.textures.addBase64(BubbleEmotion.LOVE, bubbleLove)
-        scene.textures.addBase64(BubbleEmotion.SHAME, bubbleShame)
-        scene.textures.addBase64(BubbleEmotion.SLEEP, bubbleSleep)
+        base64Load(scene, BubbleEmotion['?'], bubbleQuestion)
+        base64Load(scene, BubbleEmotion['!'], bubbleExclamation)
+        base64Load(scene, BubbleEmotion['AHA'], bubbleAha)
+        base64Load(scene, BubbleEmotion['ANGRY'], bubbleAngry)
+        base64Load(scene, BubbleEmotion['ANNOY'], bubbleAnnoy)
+        base64Load(scene, BubbleEmotion['DEPRESS'], bubbleDepress)
+        base64Load(scene, BubbleEmotion['DOYA'], bubbleDoya)
+        base64Load(scene, BubbleEmotion['ELLIPSIS'], bubbleEllipsis)
+        base64Load(scene, BubbleEmotion['EMBARRASS'], bubbleEmbarrass)
+        base64Load(scene, BubbleEmotion['HAPPY'], bubbleHappy)
+        base64Load(scene, BubbleEmotion['LIKE'], bubbleLike)
+        base64Load(scene, BubbleEmotion['LOVE'], bubbleLove)
+        base64Load(scene, BubbleEmotion['SHAME'], bubbleShame)
+        base64Load(scene, BubbleEmotion['SLEEP'], bubbleSleep)
     }
 
     constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {

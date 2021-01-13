@@ -11,12 +11,15 @@ class DialogueScene extends Phaser.Scene {
         this.wrapper = document.createElement('div')
         this.add.dom(0, 0, this.wrapper)
 
+        const frameWidth: number = this.game.scale.width
+        const frameHeight: number = this.game.scale.height / 3
+
         const main = new Vue({
             render: h => h(DialogueComponent, {
                 props: {
                     scene: this,
-                    frameWidth: 1024,
-                    frameHeight: 170,
+                    frameWidth,
+                    frameHeight,
                     frameTexture: frameTextureImage,
                 }
             }),

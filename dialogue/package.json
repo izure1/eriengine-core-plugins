@@ -1,6 +1,6 @@
 {
   "name": "eriengine-core-plugin-dialogue",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Dialogue plugin for Phaser 3",
   "main": "dist/dialogue/src/eriengine-core-plugin-dialogue.js",
   "scripts": {
@@ -10,9 +10,9 @@
   "author": "izure <admin@izure.org>",
   "license": "MIT",
   "dependencies": {
-    "vue": "2.6.12",
-    "vue-class-component": "7.2.6",
-    "vue-property-decorator": "9.0.0"
+    "vue": "^2.6.12",
+    "vue-class-component": "^7.2.6",
+    "vue-property-decorator": "^9.0.0"
   },
   "devDependencies": {
     "ts-loader": "^8.0.7",
@@ -27,7 +27,14 @@
     "node-sass": "4.14.1",
     "sass-loader": "10.1.0",
     "url-loader": "4.1.1",
-    "@zerollup/ts-transform-paths": "1.7.18"
+    "@zerollup/ts-transform-paths": "1.7.18",
+    "@babel/core": "^7.12.10",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-typescript": "^7.12.7",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
+    "babel-loader": "^8.2.2"
   },
   "peerDependencies": {
     "phaser": "^3.50.0"

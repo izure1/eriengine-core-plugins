@@ -56,6 +56,24 @@ import Phaser from 'phaser'
 import { Vue, Component, Prop } from 'vue-property-decorator'
 import { IntervalManager } from '@common/Phaser/IntervalManager'
 
+const NON_REACTIVITY: WeakMap<Vue, Map<string, any>> = new WeakMap
+
+function setNonReactivity(component: Vue, prop: string, value: any): void {
+    if (NON_REACTIVITY.has(component)) {
+        NON_REACTIVITY.set(component, new Map)
+    }
+    const nonReactivity = NON_REACTIVITY.get(component)!
+    nonReactivity.set(prop, value)
+}
+
+function getNonReactivity(component: Vue, prop: string): any {
+    if (!NON_REACTIVITY.has(component)) {
+        return
+    }
+    const nonReactivity = NON_REACTIVITY.get(component)!
+    return nonReactivity.get(prop)
+}
+
 interface Character {
     key: string
     x: number
@@ -65,50 +83,78 @@ interface Character {
     visible: boolean
 }
 
-@Component
+@Component({
+    props: {
+        scene: {
+            type: Object as () => Phaser.Scene,
+            required: true
+        },
+        frameWidth: {
+            type: Number,
+            required: true
+        },
+        frameHeight: {
+            type: Number,
+            required: true
+        },
+        frameTexture: {
+            type: String,
+            required: true
+        },
+        frameX: {
+            type: Number,
+            default(this: DialogueComponent): number {
+                return (this.scene.scale.width/2) - (this.frameWidth/2)
+            }
+        },
+        frameY: {
+            type: Number,
+            default(this: DialogueComponent): number {
+                return this.scene.scale.height - this.frameHeight
+            }
+        },
+        fontSize: {
+            type: Number,
+            default: 30
+        },
+        fontFamily: {
+            type: String,
+            default: '"Nanum Gothic", sans-serif'
+        },
+        fontWeight: {
+            type: String,
+            default: 'normal'
+        },
+        fontStyle: {
+            type: String,
+            default: 'normal'
+        },
+        color: {
+            type: String,
+            default: 'white'
+        }
+    }
+})
 export default class DialogueComponent extends Vue {
-    @Prop({ type: Phaser.Scene, required: true })
-    private scene!: Phaser.Scene|null
+    private static stepper: IntervalManager|null = null
 
-    @Prop({ type: Number, required: true, default: 0 })
+    // props
+    private scene!: Phaser.Scene
     private frameWidth!: number
-
-    @Prop({ type: Number, required: true, default: 0 })
     private frameHeight!: number
-
-    @Prop({ type: String, required: true, default: '' })
     private frameTexture!: string
-
-    @Prop({ type: Number, default: function(this: DialogueComponent) {
-        return (this.scene!.game.canvas.width/2) - (this.frameWidth/2)
-    } })
     private frameX!: number
-
-    @Prop({ type: Number, default: function(this: DialogueComponent) {
-        return this.scene!.game.canvas.height - this.frameHeight
-    } })
     private frameY!: number
-
-    @Prop({ type: Number, default: 30 })
     private fontSize!: number
-
-    @Prop({ type: String, default: '"Nanum Gothic", sans-serif' })
     private fontFamily!: string
-
-    @Prop({ type: String, default: 'normal' })
     private fontWeight!: string
-
-    @Prop({ type: String, default: 'normal' })
     private fontStyle!: string
-
-    @Prop({ type: String, default: 'white' })
     private color!: string
 
+    // data
     private text: string = ''
     private currentText: string[] = []
     private frameVisible: boolean = false
-    private stepper: IntervalManager|null = null
-
     private characters: Character[] = []
 
     mounted(): void {
@@ -172,10 +218,10 @@ export default class DialogueComponent extends Vue {
     }
 
     private skip(): void {
-        if (!this.stepper) {
+        if (!DialogueComponent.stepper) {
             return
         }
-        this.stepper.finish()
+        DialogueComponent.stepper.finish()
     }
 
     private say(characterKey: string|null, text: string, speed: number = 15, autoClean: number = 2500): void {
@@ -191,8 +237,8 @@ export default class DialogueComponent extends Vue {
         }
 
         this.text = text
-        this.stepper = new IntervalManager(this.scene)
-        this.stepper
+        DialogueComponent.stepper = new IntervalManager(this.scene)
+        DialogueComponent.stepper
         .on('step', (currentStep: number): void => {
             this.currentText = this.text.substr(0, currentStep).split('')
         })
@@ -206,8 +252,8 @@ export default class DialogueComponent extends Vue {
             if (autoClean < 0) {
                 return
             }
-            this.stepper = new IntervalManager(this.scene)
-            this.stepper.on('done', (): void => {
+            DialogueComponent.stepper = new IntervalManager(this.scene)
+            DialogueComponent.stepper.on('done', (): void => {
                 if (characterKey !== null) {
                     this.hideCharacter(characterKey)
                 }
@@ -215,7 +261,6 @@ export default class DialogueComponent extends Vue {
             }).start(autoClean, 1)
         })
         .start(speed, this.text.length)
-        return
     }
 
     private hasCharacter(key: string): boolean {
@@ -302,14 +347,10 @@ export default class DialogueComponent extends Vue {
     }
 
     private destroyStepper(): void {
-        if (!this.stepper) {
+        if (!DialogueComponent.stepper) {
             return
         }
-        this.stepper.destroy()
-    }
-
-    private beforeDestroy(): void {
-        this.scene = null
+        DialogueComponent.stepper.destroy()
     }
 }
 </script>
@@ -340,6 +381,7 @@ $font-fade-transform-duration: 1s;
 }
 .frame {
     background-repeat: no-repeat;
+    background-size: 100% 100%;
     position: absolute;
     
     .frame-text {

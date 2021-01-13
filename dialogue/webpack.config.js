@@ -6,7 +6,10 @@ const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
 module.exports = {
     mode,
     entry: {
-        'eriengine-core-plugin-dialogue': path.resolve(__dirname, 'src', 'eriengine-core-plugin-dialogue.ts')
+        'eriengine-core-plugin-dialogue': [
+            '@babel/polyfill',
+            path.resolve(__dirname, 'src', 'eriengine-core-plugin-dialogue.ts')
+        ]
     },
     output: {
         path: path.resolve(__dirname, 'dist', 'dialogue', 'src'),
@@ -14,49 +17,78 @@ module.exports = {
         library: 'eriengine-core-plugin-dialogue',
         libraryTarget: 'umd'
     },
-    externals: {
-        phaser: 'phaser'
-    },
+    externals: [
+        'phaser'
+    ],
     module: {
         rules: [
             {
                 test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
-                loader: 'url-loader',
-                options: {
-                    esModule: false
-                }
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            esModule: false
+                        }
+                    }
+                ]
             },
             {
                 test: /\.ts$/,
-                loader: 'ts-loader',
-                options: {
-                    appendTsSuffixTo: [/\.vue$/],
-                    getCustomTransformers: (program) => {
-                        const transformer = tsTransformPaths(program)
-            
-                        return {
-                            before: [transformer.before], // for updating paths in generated code
-                            afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                '@babel/preset-env',
+                                '@babel/preset-typescript'
+                            ],
+                            plugins: [
+                                '@babel/plugin-proposal-class-properties',
+                                '@babel/proposal-object-rest-spread'
+                            ]
+                        }
+                    },
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/],
+                            getCustomTransformers: (program) => {
+                                const transformer = tsTransformPaths(program)
+                    
+                                return {
+                                    before: [transformer.before], // for updating paths in generated code
+                                    afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                                }
+                            }
                         }
                     }
-                }
+                ]
             },
             {
                 test: /\.scss$/,
                 use: [
-                    'vue-style-loader',
+                    {
+                        loader: 'vue-style-loader'
+                    },
                     {
                         loader: 'css-loader',
                         options: {
                             esModule: false
                         }
                     },
-                    'sass-loader'
+                    {
+                        loader: 'sass-loader'
+                    }
                 ]
             },
             {
                 test: /\.vue$/,
-                loader: 'vue-loader'
+                use: [
+                    {
+                        loader: 'vue-loader'
+                    }
+                ]
             }
         ]
     },

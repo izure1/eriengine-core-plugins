@@ -5,7 +5,10 @@ const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
 module.exports = {
     mode,
     entry: {
-        'eriengine-core-plugin-actor': path.resolve(__dirname, 'src', 'eriengine-core-plugin-actor.ts')
+        'eriengine-core-plugin-actor': [
+            '@babel/polyfill',
+            path.resolve(__dirname, 'src', 'eriengine-core-plugin-actor.ts')
+        ]
     },
     output: {
         path: path.resolve(__dirname, 'dist', 'actor', 'src'),
@@ -13,9 +16,9 @@ module.exports = {
         library: 'eriengine-core-plugin-actor',
         libraryTarget: 'umd'
     },
-    externals: {
-        phaser: 'phaser'
-    },
+    externals: [
+        'phaser'
+    ],
     module: {
         rules: [
             {
@@ -27,15 +30,35 @@ module.exports = {
             },
             {
                 test: /\.ts$/,
-                loader: 'ts-loader',
-                options: {
-                    getCustomTransformers: (program) => {
-                        const transformer = tsTransformPaths(program)
-                        return {
-                            afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                use: [
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            presets: [
+                                '@babel/preset-env',
+                                '@babel/preset-typescript'
+                            ],
+                            plugins: [
+                                '@babel/plugin-proposal-class-properties',
+                                '@babel/proposal-object-rest-spread'
+                            ]
+                        }
+                    },
+                    {
+                        loader: 'ts-loader',
+                        options: {
+                            getCustomTransformers: (program) => {
+                                const transformer = tsTransformPaths(program)
+                    
+                                return {
+                                    before: [transformer.before], // for updating paths in generated code
+                                    afterDeclarations: [transformer.afterDeclarations] // for updating paths in declaration files
+                                }
+                            }
                         }
                     }
-                }
+                ],
+                exclude: path.resolve(__dirname, 'node_modules')
             }
         ]
     },

@@ -11,7 +11,7 @@ export class WallObstacle extends Phaser.Physics.Matter.Sprite implements GridOb
 
     get side(): number {
         const xHalf: number = this.displayWidth / 2
-        return getIsometricSide(xHalf) * 2
+        return getIsometricSide(xHalf)
     }
 
     private get matterBody(): MatterJS.BodyType {

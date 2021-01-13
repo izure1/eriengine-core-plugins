@@ -1,6 +1,6 @@
 {
   "name": "eriengine-core-plugin-fog-of-war",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Fog of war plugin for Phaser 3",
   "main": "dist/fog-of-war/src/eriengine-core-plugin-fog-of-war.js",
   "scripts": {
@@ -15,7 +15,14 @@
     "webpack": "^5.8.0",
     "webpack-cli": "^4.2.0",
     "phaser": "^3.50.1",
-    "@zerollup/ts-transform-paths": "1.7.18"
+    "@zerollup/ts-transform-paths": "1.7.18",
+    "@babel/core": "^7.12.10",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-typescript": "^7.12.7",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
+    "babel-loader": "^8.2.2"
   },
   "peerDependencies": {
     "phaser": "^3.50.1"

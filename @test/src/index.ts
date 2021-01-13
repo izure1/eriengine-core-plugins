@@ -153,7 +153,7 @@ class Test extends Phaser.Scene {
     private fow!: FowPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
-    private side: number = getIsometricSide(235/2)
+    private side: number = 3000
 
     constructor() {
         super({ key: 'test', active: true })
@@ -173,25 +173,19 @@ class Test extends Phaser.Scene {
     }
     
     create(): void {
-        const side: number = getIsometricSide(this.side)
-
         this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
         
         this.input.mouse.disableContextMenu()
 
-        //this.dialogue.addCharacter('character-sample', -150, 50)
-        //this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
+        this.dialogue.addCharacter('character-sample', -150, 50)
+        this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
 
         this.cursor.enable(true)
-        this.cursor.setGridSide(side)
+        this.cursor.setGridSide(50)
 
-        this.fow.setRevealer(this.player, 0x000000, (object) => {
-            console.log(object.name)
-            if (object.name === 'eriengine-core-plugin-actor-bubble-text') return false
-            return true
-        }).setRadius(500)
+        this.fow.setRevealer(this.player, 0x000000).setRadius(500)
         
         this.anims.create({
             key: 'hannah-stand',
@@ -293,7 +287,7 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            // debug: true,
+            debug: true,
             gravity: {
                 x: 0,
                 y: 0

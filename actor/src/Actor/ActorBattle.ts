@@ -3,8 +3,8 @@ import { Actor } from './Actor'
 import { ActorDot } from './ActorDot'
 import { Vector2 } from '@common/Math/MathUtil'
 
-type ActorForce = 'all'|'all-except-me'|'allies'|'enemies'|'both'|'neutral'
-interface HitInformation {
+export type ActorForce = 'all'|'all-except-me'|'allies'|'enemies'|'both'|'neutral'
+export interface HitInformation {
     name?: string
     isMiss?: boolean
     isImmunity?: boolean
@@ -14,7 +14,7 @@ interface HitInformation {
     duration?: number
     [key: string]: any
 }
-type HitCallback = (targets: Actor, dot: ActorDot) => HitInformation
+export type HitCallback = (targets: Actor, dot: ActorDot) => HitInformation
 
 export interface EventParameter {
     'hit':      (target: Actor, information: HitInformation) => void

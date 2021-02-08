@@ -161,10 +161,13 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     setWalltile(x: number, y: number, side: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): this {
         const wall: WallObstacle = new WallObstacle(this.scene.matter.world, x, y, texture, frame)
 
+        const ratio: number = wall.displayHeight / wall.displayWidth
+        const displayWidth: number = getIsometricWidth(side) * 2
         wall.addToScene()
         wall.setDepth(y)
         wall.setStatic(true)
-        wall.displayWidth = getIsometricWidth(side) * 2
+        wall.setDisplaySize(displayWidth, displayWidth * ratio)
+        wall.initVertices()
 
         if (animation) {
             wall.play(animation)

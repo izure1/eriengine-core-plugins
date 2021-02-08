@@ -24,7 +24,7 @@ export class WallObstacle extends Phaser.Physics.Matter.Sprite implements GridOb
         return vertices
     }
 
-    protected initVertices(): void {
+    initVertices(): void {
         this.scene.matter.body.setVertices(this.matterBody, this.createVertices())
         this.scene.matter.body.setInertia(this.matterBody, Infinity)
         this.setOrigin(0.5, (this.displayHeight - this.displayWidth / 4) / this.displayHeight)

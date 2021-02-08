@@ -170,6 +170,7 @@ class Test extends Phaser.Scene {
         this.load.image('particle-red', '/assets/img/particle-red.png')
         this.load.image('character-sample', '/assets/img/character-sample.png')
         this.load.image('tile-stone', '/assets/img/stones.png')
+        this.load.image('logo', '/assets/img/logo.png')
     }
     
     create(): void {
@@ -227,10 +228,10 @@ class Test extends Phaser.Scene {
                 user.run.useMoveKey('wasd')
             }
             else if (this.shiftKey.isDown) {
-                this.map.setFloortile(x, y, this.side, 'tile-basic-1')
+                this.map.setFloortile(x, y, 50, 'tile-basic-1')
             }
             else {
-                this.map.setWalltile(x, y, this.side, 'wall-basic-left')
+                this.map.setWalltile(x, y, 50, 'logo')
             }
         }
     }
@@ -287,7 +288,7 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            //debug: true,
+            debug: true,
             gravity: {
                 x: 0,
                 y: 0

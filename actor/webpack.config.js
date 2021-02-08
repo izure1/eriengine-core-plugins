@@ -23,13 +23,19 @@ module.exports = {
         rules: [
             {
                 test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
-                loader: 'url-loader',
-                options: {
-                    esModule: false
-                }
+                exclude: path.resolve(__dirname, 'node_modules'),
+                use: [
+                    {
+                        loader: 'url-loader',
+                        options: {
+                            esModule: false
+                        }
+                    }
+                ]
             },
             {
                 test: /\.ts$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'babel-loader',
@@ -57,8 +63,7 @@ module.exports = {
                             }
                         }
                     }
-                ],
-                exclude: path.resolve(__dirname, 'node_modules')
+                ]
             }
         ]
     },

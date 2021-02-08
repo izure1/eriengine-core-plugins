@@ -24,6 +24,7 @@ module.exports = {
         rules: [
             {
                 test: /\.(png|jpe?g|gif|svg|woff2?)(\?.*)?$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'url-loader',
@@ -35,6 +36,7 @@ module.exports = {
             },
             {
                 test: /\.ts$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'babel-loader',
@@ -67,6 +69,7 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'vue-style-loader'
@@ -84,6 +87,7 @@ module.exports = {
             },
             {
                 test: /\.vue$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'vue-loader'

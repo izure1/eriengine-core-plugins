@@ -23,6 +23,7 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
+                exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
                         loader: 'babel-loader',
@@ -50,8 +51,7 @@ module.exports = {
                             }
                         }
                     }
-                ],
-                exclude: path.resolve(__dirname, 'node_modules')
+                ]
             }
         ]
     },

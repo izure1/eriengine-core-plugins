@@ -20,6 +20,7 @@ module.exports = {
             {
                 test: /\.ts$/,
                 loader: 'ts-loader',
+                exclude: path.resolve(__dirname, 'node_modules'),
                 options: {
                     getCustomTransformers: (program) => {
                         const transformer = tsTransformPaths(program)

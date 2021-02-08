@@ -1,5 +1,5 @@
 {
-  "name": "eriengine-core-plugin-isometric-cursor",
+  "name": "@eriengine/plugin-isometric-cursor",
   "version": "1.0.6",
   "description": "Isometric cursor plugin for Phaser 3",
   "main": "dist/isometric-cursor/src/eriengine-core-plugin-isometric-cursor.js",

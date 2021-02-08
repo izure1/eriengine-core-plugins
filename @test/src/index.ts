@@ -164,7 +164,7 @@ class Test extends Phaser.Scene {
         this.load.image('wall-basic-right', '/assets/img/wall-basic-right.png')
         this.load.image('tile-basic-1', '/assets/img/tile-basic-1.png')
         this.load.image('tile', '/assets/img/tile.png')
-        this.load.spritesheet('sprite-hannah-run', '/assets/img/sprite-hannah-run.webp', { frameWidth: 170, frameHeight: 210 })
+        this.load.spritesheet('sprite-hannah-run', '/assets/img/sprite-hannah-run.webp', { frameWidth: 170, frameHeight: 210,  })
         this.load.spritesheet('sprite-hannah-stand', '/assets/img/sprite-hannah-stand.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.image('particle-flash', '/assets/img/particle-flash.png')
         this.load.image('particle-red', '/assets/img/particle-red.png')
@@ -179,8 +179,8 @@ class Test extends Phaser.Scene {
         
         this.input.mouse.disableContextMenu()
 
-        this.dialogue.addCharacter('character-sample', -150, 50)
-        this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
+        // this.dialogue.addCharacter('character-sample', -150, 50)
+        // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)
@@ -240,7 +240,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     type: Phaser.WEBGL,
-    scene: [ Test, CoordinateSystem ],
+    scene: [ Test ],
     scale: {
         parent: '#game',
         fullscreenTarget: '#game',
@@ -254,11 +254,11 @@ const config: Phaser.Types.Core.GameConfig = {
     },
     plugins: {
         global: [
-            {
-                key: 'dialoguePlugin',
-                mapping: 'dialogue',
-                plugin: DialoguePlugin
-            }
+            // {
+            //     key: 'dialoguePlugin',
+            //     mapping: 'dialogue',
+            //     plugin: DialoguePlugin
+            // }
         ],
         scene: [
             {
@@ -287,7 +287,7 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            debug: true,
+            //debug: true,
             gravity: {
                 x: 0,
                 y: 0

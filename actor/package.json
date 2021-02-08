@@ -1,6 +1,6 @@
 {
-  "name": "eriengine-core-plugin-actor",
-  "version": "1.0.3",
+  "name": "@eriengine/plugin-actor",
+  "version": "1.0.4",
   "description": "Actor plugin for Phaser 3",
   "main": "dist/actor/src/eriengine-core-plugin-actor.js",
   "scripts": {
@@ -10,28 +10,28 @@
   "author": "izure <admin@izure.org>",
   "license": "MIT",
   "devDependencies": {
-    "@types/uuid": "3.4.3",
-    "ts-loader": "^8.0.7",
-    "typescript": "^4.0.5",
-    "webpack": "^5.8.0",
-    "webpack-cli": "^4.2.0",
-    "phaser": "^3.50.0",
-    "url-loader": "4.1.1",
-    "@zerollup/ts-transform-paths": "1.7.18",
     "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-typescript": "^7.12.7",
-    "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
-    "babel-loader": "^8.2.2"
+    "@types/uuid": "^3.4.9",
+    "@zerollup/ts-transform-paths": "^1.7.18",
+    "babel-loader": "^8.2.2",
+    "phaser": "^3.52.0",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.3",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.17.0",
+    "webpack-cli": "^4.4.0"
   },
   "dependencies": {
-    "tiny-typed-emitter": "2.0.3",
-    "eventemitter3": "4.0.7",
-    "uuid": "8.3.0"
+    "eventemitter3": "^4.0.7",
+    "tiny-typed-emitter": "^2.0.3",
+    "uuid": "^8.3.2"
   },
   "peerDependencies": {
-    "phaser": "^3.50.0"
+    "phaser": "^3.52.0"
   }
 }

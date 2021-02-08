@@ -30,7 +30,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
     boot(): void {
         this.scene.events.once(Phaser.Scenes.Events.CREATE, (): void => {
-            this.setWorldSize(3000)
+            this.setWorldSize(this.side)
         })
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
@@ -148,8 +148,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         )
     }
 
-    setWorldSize(size: number): this {
-        this.side = size
+    setWorldSize(side: number): this {
+        this.side = side
         this.generateBounds()
         return this
     }

@@ -1,5 +1,5 @@
 {
-  "name": "eriengine-core-plugin-isometric-scene",
+  "name": "@eriengine/plugin-isometric-scene",
   "version": "1.0.3",
   "description": "Isometric scene plugin for Phaser 3",
   "main": "dist/isometric-scene/src/eriengine-core-plugin-isometric-scene.js",

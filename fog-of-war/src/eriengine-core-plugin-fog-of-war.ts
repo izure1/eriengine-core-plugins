@@ -1,7 +1,7 @@
 import { getSmaller } from '@common/Math/MathUtil'
 import Phaser from 'phaser'
 
-type Target = Phaser.GameObjects.GameObject&Phaser.GameObjects.Components.Pipeline
+type Target = Phaser.GameObjects.Sprite&Phaser.GameObjects.Image
 type Revealer = Target&Phaser.GameObjects.Components.Transform
 interface Constructor<T> {
     new (...args: any): T

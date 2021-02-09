@@ -48,6 +48,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return { x, y }
     }
 
+    get isEnabled(): boolean {
+        return this.activity
+    }
+
     get pointer(): Point2 {
         const { worldX, worldY } = this.scene.input.activePointer
 
@@ -141,6 +145,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private updateText(): void {
+        if (!this.activity) {
+            return
+        }
+
         let { x, y } = this.pointer
 
         this.text?.setText(`${~~x},${~~y}`)
@@ -151,6 +159,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private updateCursor(): void {
+        if (!this.activity) {
+            return
+        }
+
         const { x, y } = this.pointer
         this.polygon?.setPosition(x, y)
     }

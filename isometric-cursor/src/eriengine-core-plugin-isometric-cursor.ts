@@ -61,20 +61,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             return { x, y }
         }
 
-        const isoOffset: Point2 = toIsometricCoord({
-            x: worldX,
-            y: worldY,
-        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
-
-        const sceneOffset: Point2 = toCartesianCoord({
-            x: Math.round(isoOffset.x),
-            y: Math.round(isoOffset.y),
-        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
-
-        const x: number = sceneOffset.x
-        const y: number = sceneOffset.y
-
-        return { x, y }
+        return this.calcCursorOffset({ x: worldX, y: worldY })
     }
 
     get pointerX(): number {
@@ -91,6 +78,23 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
         this.polygon.destroy()
         this.polygon = null
+    }
+
+    calcCursorOffset(point: Point2): Point2 {
+        const isoOffset: Point2 = toIsometricCoord({
+            x: point.x,
+            y: point.y,
+        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
+
+        const sceneOffset: Point2 = toCartesianCoord({
+            x: Math.round(isoOffset.x),
+            y: Math.round(isoOffset.y),
+        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
+
+        const x: number = sceneOffset.x
+        const y: number = sceneOffset.y
+
+        return { x, y }
     }
 
     setGridSide(side: number): this {

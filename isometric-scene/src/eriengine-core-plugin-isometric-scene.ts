@@ -19,8 +19,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private readonly easystarset: Set<EasyStar.js> = new Set
     private readonly center: Point2 = { x: 0, y: 0 }
     private readonly gridScale: number = 30
-    private readonly tiles: Map<string, Phaser.GameObjects.Sprite> = new Map
-    private readonly walls: Map<string, Phaser.Physics.Matter.Sprite> = new Map
+    private readonly __tiles: Map<string, Phaser.GameObjects.Sprite> = new Map
+    private readonly __walls: Map<string, WallObstacle> = new Map
     private side: number = 3000
     private bounds: MatterJS.BodyType|null = null
 
@@ -46,6 +46,14 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.destroyTiles()
         this.destroyWalls()
         this.easystarset.clear()
+    }
+
+    get walls(): WallObstacle[] {
+        return [ ...this.__walls.values() ]
+    }
+
+    get tiles(): Phaser.GameObjects.Sprite[] {
+        return [ ...this.__tiles.values() ]
     }
 
     get obstacles(): IsometricObject[] {
@@ -174,10 +182,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
 
         const key: string = this.getCoordKey(x, y)
-        if (this.walls.has(key)) {
-            this.walls.get(key)?.destroy()
+        if (this.__walls.has(key)) {
+            this.__walls.get(key)?.destroy()
         }
-        this.walls.set(key, wall)
+        this.__walls.set(key, wall)
         return this
     }
 
@@ -192,25 +200,25 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
 
         const key: string = this.getCoordKey(x, y)
-        if (this.tiles.has(key)) {
-            this.tiles.get(key)?.destroy()
+        if (this.__tiles.has(key)) {
+            this.__tiles.get(key)?.destroy()
         }
-        this.tiles.set(key, tile)
+        this.__tiles.set(key, tile)
         return this
     }
 
     private destroyWalls(): void {
-        for (const wall of this.walls.values()) {
+        for (const wall of this.__walls.values()) {
             wall.destroy()
         }
-        this.walls.clear()
+        this.__walls.clear()
     }
 
     private destroyTiles(): void {
-        for (const tile of this.tiles.values()) {
+        for (const tile of this.__tiles.values()) {
             tile.destroy()
         }
-        this.tiles.clear()
+        this.__tiles.clear()
     }
 
     private addPathFinding(easystar: EasyStar.js): void {

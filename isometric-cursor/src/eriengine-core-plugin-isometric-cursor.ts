@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { TypedEmitter } from 'tiny-typed-emitter'
 import {
     Point2,
     ISOMETRIC_ANGLE,
@@ -17,7 +18,237 @@ interface RGBA {
     alpha: number
 }
 
-class Plugin extends Phaser.Plugins.ScenePlugin {
+interface SelectPluginEvents {
+    'drag-start': (e: Phaser.Input.Pointer) => void
+    'drag': (e: Phaser.Input.Pointer) => void
+    'drag-end': (e: Phaser.Input.Pointer) => void
+    'unselect': (objects: Phaser.GameObjects.GameObject[]) => void
+    'select': (objects: Phaser.GameObjects.GameObject[]) => void
+}
+
+class SelectPlugin extends Phaser.Plugins.ScenePlugin {
+    readonly events: TypedEmitter<SelectPluginEvents> = new TypedEmitter
+    private activity: boolean = false
+    private rectangle: Phaser.GameObjects.Rectangle|null = null
+    private thickness: number = 0
+    private strokeColor: number = Phaser.Display.Color.GetColor(0, 255, 0)
+    private strokeAlpha: number = 1
+    private fillColor: number = Phaser.Display.Color.GetColor(0, 255, 0)
+    private fillAlpha: number = 0.05
+
+    private dragStartOffset: Point2 = { x: 0, y: 0 }
+    private dragEndOffset: Point2 = { x: 0, y: 0 }
+    private selects: Set<Phaser.GameObjects.GameObject> = new Set
+
+    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
+        super(scene, pluginManager)
+    }
+
+    boot(): void {
+        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
+        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
+
+        this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (e: Phaser.Input.Pointer): void => {
+            switch (e.button) {
+                case 0:
+                    this.onMouseLeftDown(e)
+                    break
+            }
+        })
+
+        this.scene.input.on(Phaser.Input.Events.POINTER_UP, (e: Phaser.Input.Pointer): void => {
+            switch (e.button) {
+                case 0:
+                    this.onMouseLeftUp(e)
+                    break
+            }
+        })
+
+        this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (e: Phaser.Input.Pointer): void => {
+            switch (e.buttons) {
+                case 1:
+                    this.onMouseLeftDrag(e)
+                    break
+            }
+        })
+    }
+
+    get isEnabled(): boolean {
+        return this.activity
+    }
+
+    enable(activity: boolean = true): this {
+        this.activity = activity
+        this.generateRectangle()
+        return this
+    }
+
+    private generateRectangle(): void {
+        this.rectangle?.destroy()
+
+        if (!this.activity) {
+            return
+        }
+
+        this.rectangle = this.scene.add.rectangle(0, 0, 0, 0, this.fillColor, this.fillAlpha)
+        this.rectangle.setStrokeStyle(this.thickness, this.strokeColor, this.strokeAlpha)
+        this.rectangle.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
+    }
+
+    private destroyObject(): void {
+        if (!this.rectangle) {
+            return
+        }
+        this.rectangle.destroy()
+        this.rectangle = null
+    }
+
+    private updateDragStartOffset(e: Phaser.Input.Pointer): void {
+        this.dragStartOffset = {
+            x: e.worldX,
+            y: e.worldY
+        }
+    }
+
+    private updateDragEndOffset(e: Phaser.Input.Pointer): void {
+        this.dragEndOffset = {
+            x: e.worldX,
+            y: e.worldY
+        }
+    }
+
+    private setRectanglePosition({ worldX, worldY }: Phaser.Input.Pointer): void {
+        if (!this.rectangle) {
+            return
+        }
+        this.rectangle.setPosition(worldX, worldY)
+    }
+
+    private updateRectangleSize(e: Phaser.Input.Pointer): void {
+        if (!this.rectangle) {
+            return
+        }
+
+        const distanceX: number = e.worldX - this.rectangle.x
+        const distanceY: number = e.worldY - this.rectangle.y
+        const width: number     = Math.abs(distanceX)
+        const height: number    = Math.abs(distanceY)
+
+        const originX: number = distanceX > 0 ? 0 : 1
+        const originY: number = distanceY > 0 ? 0 : 1
+
+        this.rectangle.setSize(width, height)
+        this.rectangle.setOrigin(originX, originY)
+    }
+
+    private activeRectangle(activity: boolean): void {
+        if (!this.rectangle) {
+            return
+        }
+        this.rectangle.setActive(activity)
+        this.rectangle.setVisible(activity)
+    }
+
+    private getObjectInRect(objects: Phaser.GameObjects.GameObject[]): Phaser.GameObjects.GameObject[] {
+        if (!this.rectangle) {
+            return []
+        }
+
+        const a: Phaser.Math.Vector2 = this.rectangle.getTopLeft()
+        const b: Phaser.Math.Vector2 = this.rectangle.getBottomRight()
+        
+        const list: Phaser.GameObjects.GameObject[] = []
+        for (const object of objects) {
+            if ( !('x' in object) ) continue
+            if ( !('y' in object) ) continue
+
+            const target = object as Phaser.GameObjects.GameObject&Phaser.GameObjects.Components.Transform
+            const { x, y } = target
+            if (
+                x > a.x && x < b.x &&
+                y > a.y && y < b.y
+            ) {
+                list.push(target)
+            }
+        }
+        return list
+    }
+
+    private unselect(): Phaser.GameObjects.GameObject[] {
+        const list: Phaser.GameObjects.GameObject[] = [ ...this.selects ]
+        this.events.emit('unselect', list)
+        this.selects.clear()
+        return list
+    }
+
+    private select(objects: Phaser.GameObjects.GameObject[] = this.scene.children.list): Phaser.GameObjects.GameObject[] {
+        let list: Phaser.GameObjects.GameObject[] = []
+        this.getObjectInRect(objects).forEach((object): void => {
+            this.selects.add(object)
+            list.push(object)
+        })
+        this.events.emit('select', [ ...this.selects ])
+        return list
+    }
+
+    private onMouseLeftDown(e: Phaser.Input.Pointer): void {
+        this.updateDragStartOffset(e)
+
+        if (!e.event.shiftKey) {
+            this.unselect()
+        }
+        this.setRectanglePosition(e)
+        this.updateRectangleSize(e)
+        this.activeRectangle(true)
+
+        this.events.emit('drag-start', e)
+    }
+
+    private onMouseLeftDrag(e: Phaser.Input.Pointer): void {
+        this.updateRectangleSize(e)
+        
+        this.events.emit('drag', e)
+    }
+
+    private onMouseLeftUp(e: Phaser.Input.Pointer): void {
+        this.updateDragEndOffset(e)
+        this.activeRectangle(false)
+
+        this.events.emit('drag-end', e)
+
+        this.select()
+    }
+
+    setStrokeThickness(thickness: number): this {
+        this.thickness = thickness
+        this.generateRectangle()
+        return this
+    }
+
+    setStrokeColor({ red, green, blue, alpha = 1 }: RGBA): this {
+        this.strokeColor = Phaser.Display.Color.GetColor(red, green, blue)
+        this.strokeAlpha = alpha
+        this.generateRectangle()
+        return this
+    }
+
+    setFillColor({ red, green, blue, alpha = 1 }: RGBA): this {
+        this.fillColor = Phaser.Display.Color.GetColor(red, green, blue)
+        this.fillAlpha = alpha
+        this.generateRectangle()
+        return this
+    }
+
+    update(time: number, delta: number): void {
+
+    }
+
+    destroy(): void {
+        this.destroyObject()
+    }
+}
+
+class PointerPlugin extends Phaser.Plugins.ScenePlugin {
     private polygon: Phaser.GameObjects.Polygon|null = null
     private text: Phaser.GameObjects.Text|null = null
     private side: number = 100
@@ -181,4 +412,4 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 }
 
-export { Plugin }
+export { PointerPlugin, SelectPlugin }

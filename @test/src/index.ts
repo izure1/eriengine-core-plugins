@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { Plugin as ActorPlugin, Actor } from '~/actor'
 import { Plugin as IsomScenePlugin } from '~/isometric-scene'
-import { Plugin as IsomCursorPlugin } from '~/isometric-cursor'
+import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } from '~/isometric-cursor'
 import { Plugin as DialoguePlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
@@ -148,6 +148,7 @@ class Test extends Phaser.Scene {
     private player: Player|null = null
     private map!: IsomScenePlugin
     private cursor!: IsomCursorPlugin
+    private select!: IsomSelectPlugin
     private dialogue!: DialoguePlugin
     private actor!: ActorPlugin
     private fow!: FowPlugin
@@ -185,6 +186,12 @@ class Test extends Phaser.Scene {
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)
+
+        this.select.enable(true)
+        this.select.setStrokeThickness(1)
+        this.select.events.on('select', (e): void => {
+            console.log(e)
+        })
 
         this.fow.setRevealer(this.player, 0x000000).setRadius(500)
         
@@ -228,7 +235,7 @@ class Test extends Phaser.Scene {
                 user.run.useMoveKey('wasd')
             }
             else if (this.shiftKey.isDown) {
-                this.map.setFloortile(x, y, 50, 'tile-basic-1')
+                this.map.setSensortile(x, y, 50)
             }
             else {
                 this.map.setWalltile(x, y, 50, 'logo')
@@ -277,6 +284,11 @@ const config: Phaser.Types.Core.GameConfig = {
                 key: 'isomCursorPlugin',
                 mapping: 'cursor',
                 plugin: IsomCursorPlugin
+            },
+            {
+                key: 'isomSelectPlugin',
+                mapping: 'select',
+                plugin: IsomSelectPlugin
             },
             {
                 key: 'fogOfWarPlugin',

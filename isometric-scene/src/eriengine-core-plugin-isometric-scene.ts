@@ -9,7 +9,8 @@ import {
     toIsometricCoord,
     GridObject,
     create2DArray,
-    fillItemInArray
+    fillItemInArray,
+    createIsometricDiamondPoints
 } from '@common/Math/MathUtil'
 import { WallObstacle } from './Tiles/WallObstacle'
 
@@ -21,6 +22,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private readonly gridScale: number = 30
     private readonly __tiles: Map<string, Phaser.GameObjects.Sprite> = new Map
     private readonly __walls: Map<string, WallObstacle> = new Map
+    private readonly __sensors: Map<string, MatterJS.BodyType> = new Map
     private side: number = 3000
     private bounds: MatterJS.BodyType|null = null
 
@@ -54,6 +56,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
     get tiles(): Phaser.GameObjects.Sprite[] {
         return [ ...this.__tiles.values() ]
+    }
+
+    get sensors(): MatterJS.BodyType[] {
+        return [ ...this.__sensors.values() ]
     }
 
     get obstacles(): IsometricObject[] {
@@ -215,6 +221,26 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return this
     }
 
+    setSensortile(x: number, y: number, side: number) {
+        const width: number = getIsometricWidth(side) * 2
+        const vertices: Point2[] = createIsometricDiamondPoints(width)
+        const sensor: MatterJS.BodyType = this.scene.matter.add.fromVertices(x, y, vertices, { isStatic: true, isSensor: true })
+
+        const key: string = this.getCoordKey(x, y)
+
+        if (this.__sensors.has(key)) {
+            const before = this.__sensors.get(key)!
+            this.scene.matter.world.remove(before)
+        }
+        this.__sensors.set(key, sensor)
+
+        this.scene.matter.world.on(Phaser.Physics.Matter.Events.AFTER_REMOVE, (): void => {
+            this.__sensors.delete(key)
+        })
+
+        return this
+    }
+
     removeWalltile(x: number, y: number): this {
         const key: string = this.getCoordKey(x, y)
         this.__walls.get(key)?.destroy()
@@ -224,6 +250,15 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     removeFloortile(x: number, y: number): this {
         const key: string = this.getCoordKey(x, y)
         this.__tiles.get(key)?.destroy()
+        return this
+    }
+
+    removeSensortile(x: number, y: number): this {
+        const key: string = this.getCoordKey(x, y)
+        if (this.__sensors.has(key)) {
+            const sensor = this.__sensors.get(key)!
+            this.scene.matter.world.remove(sensor)
+        }
         return this
     }
 

@@ -182,10 +182,14 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
 
         const key: string = this.getCoordKey(x, y)
-        if (this.__walls.has(key)) {
-            this.__walls.get(key)?.destroy()
-        }
+
+        this.__walls.get(key)?.destroy()
         this.__walls.set(key, wall)
+
+        wall.once(Phaser.GameObjects.Events.DESTROY, (): void => {
+            this.__walls.delete(key)
+        })
+
         return this
     }
 
@@ -200,10 +204,26 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
 
         const key: string = this.getCoordKey(x, y)
-        if (this.__tiles.has(key)) {
-            this.__tiles.get(key)?.destroy()
-        }
+
+        this.__tiles.get(key)?.destroy()
         this.__tiles.set(key, tile)
+
+        tile.once(Phaser.GameObjects.Events.DESTROY, (): void => {
+            this.__tiles.delete(key)
+        })
+
+        return this
+    }
+
+    removeWalltile(x: number, y: number): this {
+        const key: string = this.getCoordKey(x, y)
+        this.__walls.get(key)?.destroy()
+        return this
+    }
+
+    removeFloortile(x: number, y: number): this {
+        const key: string = this.getCoordKey(x, y)
+        this.__tiles.get(key)?.destroy()
         return this
     }
 

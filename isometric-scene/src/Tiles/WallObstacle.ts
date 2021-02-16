@@ -2,8 +2,6 @@ import Phaser from 'phaser'
 import { GridObject, getIsometricSide, createIsometricDiamondPoints } from '@common/Math/MathUtil'
 
 export class WallObstacle extends Phaser.Physics.Matter.Sprite implements GridObject {
-    name: string = 'eriengine-core-plugin-isometric-scene-walltile'
-
     constructor(world: Phaser.Physics.Matter.World, x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number, options?: Phaser.Types.Physics.Matter.MatterBodyConfig) {
         super(world, x, y, texture, frame, options)
         this.initVertices()

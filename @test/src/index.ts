@@ -175,10 +175,10 @@ class Test extends Phaser.Scene {
     }
     
     create(): void {
-        this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
+        this.player     = this.actor.addActor<Player>(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
-        
+
         this.input.mouse.disableContextMenu()
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
@@ -189,8 +189,8 @@ class Test extends Phaser.Scene {
 
         this.select.enable(true)
         this.select.setStrokeThickness(1)
-        this.select.events.on('select', (e): void => {
-            console.log(e)
+        this.select.events.on('drag-end', (e, selection): void => {
+            console.log(this.select.select(selection))
         })
 
         this.fow.setRevealer(this.player, 0x000000).setRadius(500)
@@ -238,7 +238,7 @@ class Test extends Phaser.Scene {
                 this.map.setSensortile(x, y, 50)
             }
             else {
-                this.map.setWalltile(x, y, 50, 'logo')
+                this.map.setWalltile(x, y, 'wall-basic-right')
             }
         }
     }

@@ -262,7 +262,7 @@ class ActorBubbleEmitter {
         return this
     }
 
-    private openEmotion(key: string|keyof typeof BubbleEmotion|Phaser.Textures.Texture, callback?: () => void): void {
+    private openEmotion(key: keyof typeof BubbleEmotion|Phaser.Textures.Texture, callback?: () => void): void {
         if (!this.scene) {
             return
         }
@@ -326,7 +326,7 @@ class ActorBubbleEmitter {
         }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, after)
     }
 
-    emotion(key: keyof typeof BubbleEmotion|string|Phaser.Textures.Texture, duration: number = 2500): this {
+    emotion(key: keyof typeof BubbleEmotion|Phaser.Textures.Texture, duration: number = 2500): this {
         if (!this.scene) {
             return this
         }
@@ -339,6 +339,26 @@ class ActorBubbleEmitter {
                 }
             })
         })
+        return this
+    }
+
+    clear(clearNotice: boolean = true): this {
+        if (!this.scene) {
+            return this
+        }
+
+        if (clearNotice) {
+            this.isNotice = false
+            this.noticeText = ''
+        }
+
+        this.clearText()
+        this.closeEmotion(0, (): void => {
+            if (this.isNotice) {
+                this.showText(this.noticeText)
+            }
+        })
+
         return this
     }
 

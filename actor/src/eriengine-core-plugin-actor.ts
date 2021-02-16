@@ -34,6 +34,8 @@ enum BubbleEmotion {
     'SLEEP'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
 }
 
+type ArgumentTypes<T> = T extends new (...a: infer A) => any? A : [] 
+
 class Plugin extends Phaser.Plugins.ScenePlugin {
     private actorset: Set<Actor> = new Set
 
@@ -78,8 +80,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
     }
 
-    addActor<Child extends Actor>(CustomActor: { new (...args: any): Child }, ...args: ConstructorParameters<typeof CustomActor>): Child {
-        const actor = new CustomActor(...Array.from(args))
+    addActor<T extends Actor, U extends { new (...args: any): T } = { new (...args: any): T }>(ActorClass: U, ...args: ConstructorParameters<U>): T {
+        const actor = new ActorClass(...Array.from(args))
+
+        ActorClass.constructor
 
         this.actorset.add(actor)
         this.scene.add.existing(actor)
@@ -87,7 +91,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         actor.__initPlugin(this)
         actor.start()
 
-        return actor
+        return actor as any
     }
 
     dropActor(actor: Actor): void {

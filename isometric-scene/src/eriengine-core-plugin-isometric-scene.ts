@@ -172,15 +172,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return `${x}:${y}`
     }
 
-    setWalltile(x: number, y: number, side: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): this {
+    setWalltile(x: number, y: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): WallObstacle {
         const wall: WallObstacle = new WallObstacle(this.scene.matter.world, x, y, texture, frame)
 
-        const ratio: number = wall.displayHeight / wall.displayWidth
-        const displayWidth: number = getIsometricWidth(side) * 2
         wall.addToScene()
         wall.setDepth(y)
         wall.setStatic(true)
-        wall.setDisplaySize(displayWidth, displayWidth * ratio)
         wall.initVertices()
 
         if (animation) {
@@ -196,14 +193,13 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             this.__walls.delete(key)
         })
 
-        return this
+        return wall
     }
 
-    setFloortile(x: number, y: number, side: number, texture: Phaser.Textures.Texture|string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): this {
+    setFloortile(x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): Phaser.GameObjects.Sprite {
         const tile: Phaser.GameObjects.Sprite = this.scene.add.sprite(x, y, texture, frame)
         
         tile.setDepth(Phaser.Math.MIN_SAFE_INTEGER)
-        tile.setDisplaySize(getIsometricWidth(side)*2, getIsometricHeight(side)*2)
 
         if (animation) {
             tile.play(animation, true)
@@ -218,10 +214,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             this.__tiles.delete(key)
         })
 
-        return this
+        return tile
     }
 
-    setSensortile(x: number, y: number, side: number) {
+    setSensortile(x: number, y: number, side: number): MatterJS.BodyType {
         const width: number = getIsometricWidth(side) * 2
         const vertices: Point2[] = createIsometricDiamondPoints(width)
         const sensor: MatterJS.BodyType = this.scene.matter.add.fromVertices(x, y, vertices, { isStatic: true, isSensor: true })
@@ -238,7 +234,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             this.__sensors.delete(key)
         })
 
-        return this
+        return sensor
     }
 
     removeWalltile(x: number, y: number): this {

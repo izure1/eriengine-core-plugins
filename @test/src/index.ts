@@ -81,7 +81,7 @@ class User extends Actor {
 class Player extends User {
     private spaceKey: Phaser.Input.Keyboard.Key = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     private initRun(): void {
-        this.run.useMoveKey('arrow')
+        this.run.useMovingKey('arrow')
     }
 
     start(): void {
@@ -232,7 +232,7 @@ class Test extends Phaser.Scene {
             if (!this.shiftKey.isDown && !this.ctrlKey.isDown) {
                 const user: User = this.actor.addActor(User, performance.now().toString(), this, 0, 0, 'sprite-hannah-stand')
                 user.setPosition(x, y)
-                user.run.useMoveKey('wasd')
+                user.run.useMovingKey('wasd')
             }
             else if (this.shiftKey.isDown) {
                 this.map.setSensortile(x, y, 50)

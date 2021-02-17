@@ -67,6 +67,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private update(time: number, delta: number): void {
     }
 
+
     boot(): void {
         Plugin.generateTexture(this.scene)
 
@@ -80,10 +81,13 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         }
     }
 
+    /**
+     * 씬에 액터를 추가합니다.
+     * @param ActorClass 추가할 액터 클래스입니다. Actor 추상클래스를 상속받은 클래스입니다.
+     * @param args `ActorClass`의 생성자 매개변수입니다.
+     */
     addActor<T extends Actor, U extends { new (...args: any): T } = { new (...args: any): T }>(ActorClass: U, ...args: ConstructorParameters<U>): T {
         const actor = new ActorClass(...Array.from(args))
-
-        ActorClass.constructor
 
         this.actorset.add(actor)
         this.scene.add.existing(actor)
@@ -94,6 +98,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         return actor as any
     }
 
+    /**
+     * 씬에 추가된 액터를 플러그인에서 제거합니다.  
+     * 액터는 플러그인에서 제거되며, 업데이트가 중단되지만 여전히 씬에는 존재합니다.
+     * 만약 씬에서도 완전히 제거하고 싶다면, dropActor 메서드를 사용하지말고, 액터 인스턴스를 직접 파괴하십시오. `actor.destroy()`
+     * @param actor 
+     */
     dropActor(actor: Actor): void {
         this.actorset.delete(actor)
     }

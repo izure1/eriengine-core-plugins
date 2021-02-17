@@ -32,6 +32,7 @@ class ActorBubbleEmitter {
         this.generateObjects()
     }
 
+    /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
     private get scene(): Phaser.Scene|null {
         if (!this.actor) {
             return null
@@ -39,10 +40,12 @@ class ActorBubbleEmitter {
         return this.actor.scene
     }
 
+    /** 현재 말풍선에 적용된 텍스트 스타일을 반환합니다. */
     private get currentStyle(): Phaser.Types.GameObjects.Text.TextStyle {
         return { ...this.baseStyle, ...this.appendStyle }
     }
 
+    /** 말풍선 기능에 필요한 게임 오브젝트를 생성합니다. 자동으로 호출되며, *절대 직접 호출하지 마십시오.* */
     private generateObjects(): void {
         if (!this.scene) {
             return
@@ -60,6 +63,7 @@ class ActorBubbleEmitter {
         this.image.setVisible(false)
     }
 
+    /** 말풍선 위치를 업데이트합니다. 자동으로 호출되며, *절대 직접 호출하지 마십시오.* */
     private updatePosition(): void {
         const x: number = this.actor!.x + this.offset.x
         const y: number = this.actor!.y + this.offset.y
@@ -67,6 +71,10 @@ class ActorBubbleEmitter {
         this.image?.setPosition(x, y)
     }
 
+    /**
+     * 말풍선의 가로 정렬 위치를 설정합니다.
+     * @param align 말풍선의 가로 정렬을 설정합니다. `left`는 좌측으로, `center`은 중심, `right`은 우측을 기준으로 정렬됩니다.
+     */
     setAlign(align: 'left'|'center'|'right'): this {
         if (!this.text || !this.image) {
             return this
@@ -88,6 +96,10 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선의 세로 정렬 위치를 설정합니다.
+     * @param vertical 말풍선의 세로 정렬을 설정합니다. `top`은 상단으로, `middle`은 중심, `bottom`은 하단을 기준으로 정렬됩니다.
+     */
     setVertical(vertical: 'top'|'middle'|'bottom'): this {
         if (!this.text || !this.image) {
             return this
@@ -109,18 +121,27 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선의 기본 텍스트 스타일을 설정합니다. 글꼴, 크기, 굵기, 기울기 등을 설정합니다.
+     * @param style 스타일 정보입니다.
+     */
     setBaseTextStyle(style: Phaser.Types.GameObjects.Text.TextStyle): this {
         this.baseStyle = style
         this.text?.setStyle(this.currentStyle)
         return this
     }
 
+    /** 기본 말풍선 텍스트 스타일을 초기화합니다. */
     clearBaseTextStyle(): this {
         this.baseStyle = {}
         this.text?.setStyle(this.currentStyle)
         return this
     }
 
+    /**
+     * 말풍선이 해당 액터를 기준으로 어느 위치에 표시될 것인지를 설정합니다. `x`, `y` 좌표로 직접 설정할 수도 있고, 주어진 값으로 간단히 설정할 수도 있습니다.
+     * @param offset 상대 좌표입니다. `x`, `y` 좌표로 설정하면, 해당 액터 인스턴스를 기준으로 상대 좌표를 상세히 설정할 수 있습니다.
+     */
     setOffset(offset: Point2|keyof typeof BubbleEmitterOffset): this {
         if (!this.actor) {
             return this
@@ -187,32 +208,46 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 기본 텍스트 스타일에 병합할 스타일을 설정합니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param style 스타일 정보입니다.
+     */
     private appendTextStyle(style: Phaser.Types.GameObjects.Text.TextStyle = {}): void {
         this.appendStyle = style
         this.text?.setStyle(this.currentStyle)
     }
 
+    /**
+     * 말풍선 텍스트를 보여줍니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param text 보여줄 텍스트입니다. 문자열 배열을 사용하면, 줄바꿈을 표현할 수 있습니다.
+     */
     private showText(text: string|string[] = ''): void {
         this.text?.setStyle(this.currentStyle)
         this.text?.setText(text)
         this.text?.setVisible(true)
     }
 
-    private clearText(dispatchCallback: boolean = false): void {
+    /**
+     * 말풍선 텍스트를 제거합니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param callback 말풍선이 제거된 후 호출될 함수입니다.
+     */
+    private clearText(callback: boolean = false): void {
         this.text?.setText('')
         this.text?.setVisible(false)
         
         if (this.textTimeEvent) {
-            this.textTimeEvent.remove(dispatchCallback)
+            this.textTimeEvent.remove(callback)
             this.textTimeEvent = null
         }
     }
 
+    /** 말풍선 텍스트 스타일을 초기화합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private clearTextStyle(): void {
         this.appendStyle = {}
         this.baseStyle = {}
     }
 
+    /** 말풍선 이미지 트윈을 제거합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private clearImageTween(): void {
         if (!this.imageTween) {
             return
@@ -221,16 +256,24 @@ class ActorBubbleEmitter {
         this.imageTween = null
     }
 
+    /** 말풍선 텍스트를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private destroyText(): void {
         this.text?.destroy()
         this.text = null
     }
 
+    /** 말풍선 이미지를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private destroyImage(): void {
         this.image?.destroy()
         this.image = null
     }
 
+    /**
+     * 말풍선에 텍스트를 출력합니다. 텍스트가 타이핑되듯이 한 글자씩 출력합니다. 출력이 끝난 뒤에는 일정 시간 뒤에 자동으로 사라집니다.
+     * @param text 보여줄 텍스트 문자열입니다.
+     * @param speed 한 글자가 타이핑되는데 걸리는 시간(ms)입니다. 기본값은 `35`입니다.
+     * @param style 이 텍스트에 추가로 적용될 텍스트 스타일입니다.
+     */
     say(text: string, speed: number = 35, style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.isNotice = false
         
@@ -250,6 +293,12 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선에 텍스트를 고정합니다. 
+     * `clear`, `say` 메서드를 사용하기 전까지 이 텍스트는 사라지지 않습니다. 일반적으로 액터의 이름같이 캐릭터 위에 고정되어있는 텍스트를 위해 사용합니다.
+     * @param text 보여줄 텍스트 문자열입니다.
+     * @param style 이 텍스트에 추가로 적용될 텍스트 스타일입니다.
+     */
     notice(text: string|string[], style: Phaser.Types.GameObjects.Text.TextStyle = {}): this {
         this.isNotice = true
         this.noticeText = text
@@ -262,6 +311,11 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선 이미지를 엽니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param key 말풍선 이미지로 사용할 텍스쳐 키입니다. 기본값도 지원합니다.
+     * @param callback 말풍선이 열린 뒤 호출될 함수입니다.
+     */
     private openEmotion(key: keyof typeof BubbleEmotion|Phaser.Textures.Texture, callback?: () => void): void {
         if (!this.scene) {
             return
@@ -296,6 +350,11 @@ class ActorBubbleEmitter {
         })
     }
 
+    /**
+     * 말풍선 이미지를 닫습니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param delay 닫히기까지 대기할 시간입니다.
+     * @param callback 닫힌 후 호출될 함수입니다.
+     */
     private closeEmotion(delay: number = 0, callback?: () => void): void {
         if (!this.scene) {
             return
@@ -326,6 +385,11 @@ class ActorBubbleEmitter {
         }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, after)
     }
 
+    /**
+     * 말풍선 이미지를 보여줍니다. 몇 가지 감정표현 이미지의 기본값이 있습니다. 만약 원하는 이미지를 띄우고 싶다면, 로드된 이미지를 텍스쳐를 이용하여 `scene.textures.get(key)`로 매개변수를 넘기십시오.
+     * @param key 보여줄 말풍선 키입니다.
+     * @param duration 말풍선을 보여줄 시간(ms)입니다. 기본값은 `2500`입니다.
+     */
     emotion(key: keyof typeof BubbleEmotion|Phaser.Textures.Texture, duration: number = 2500): this {
         if (!this.scene) {
             return this
@@ -342,6 +406,10 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선의 텍스트, 또는 이미지를 제거합니다.
+     * @param clearNotice `notice` 메서드로 보여주는 텍스트도 제거할지 여부를 결정합니다. 기본값은 `true`입니다.
+     */
     clear(clearNotice: boolean = true): this {
         if (!this.scene) {
             return this
@@ -362,10 +430,16 @@ class ActorBubbleEmitter {
         return this
     }
 
+    /**
+     * 말풍선을 업데이트하는 함수입니다. 씬이 매 프레임 업데이트 될 때 마다 자동으로 호출됩니다. *직접 호출하지 마십시오.*
+     * @param time 
+     * @param delta 
+     */
     update(time: number, delta: number): void {
         this.updatePosition()
     }
 
+    /** 말풍선 인스턴스를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     destroy(): void {
         this.clearText()
         this.clearTextStyle()
@@ -392,11 +466,20 @@ export class ActorBubble {
         this.actor = actor
     }
 
+    /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
     private get scene(): Phaser.Scene|null {
         if (!this.actor) return null
         return this.actor.world.scene
     }
 
+    /**
+     * 말풍선 인스턴스를 반환합니다. 말풍선이 없다면 만든 뒤 반환하고, 존재한다면 가져와서 반환합니다.
+     * 말풍선입니다.
+     * 액터의 주변에 떠다니는 텍스트, 또는 이미지를 표현할 수 있습니다.
+     * 액터가 대사를 말하거나, 이름, 레벨 등의 정보를 표기할 수 있습니다.
+     * `say` 메서드는 대사를, `notice`는 레벨을, `emotion`은 감정표현을 표현하기에 적합합니다.
+     * @param key 가져올 말풍선 키입니다.
+     */
     of(key: string): ActorBubbleEmitter {
         if (!this.emitters.has(key)) {
             this.emitters.set(key, new ActorBubbleEmitter(this.actor!))

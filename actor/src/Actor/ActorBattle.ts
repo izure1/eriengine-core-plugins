@@ -39,44 +39,57 @@ export class ActorBattle extends TypedEmitter<EventParameter> {
         this.actor = actor
     }
 
+    /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
     private get scene(): Phaser.Scene|null {
         if (!this.actor) return null
         return this.actor.world.scene
     }
 
+    /** 해당 액터 인스턴스가 속한 씬의 모든 액터를 반환합니다. */
     private get actors(): Actor[] {
         if (!this.actor) return []
         return this.actor?.plugin.actors
     }
 
+    /** 씬에 추가된 모든 액터를 반환합니다. */
     get all(): Actor[] {
         return this.actors
     }
 
+    /** 해당 인스턴스를 제외한 씬에 추가된 모든 액터를 반환합니다. */
     get except(): Actor[] {
         return this.all.filter((actor: Actor): boolean => actor.battle !== this.actor?.battle)
     }
 
+    /** 해당 인스턴스가 `setEnemy` 메서드로 적으로 설정한 모든 액터를 반환합니다. */
     get enemies(): Actor[] {
         return [ ...this.enemyset.values() ]
     }
 
+    /** 해당 인스턴스가 `setAlly` 메서드로 아군으로 설정한 모든 액터를 반환합니다. */
     get allies(): Actor[] {
         return [ ...this.allyset.values() ]
     }
 
+    /** 해당 인스턴스가 `setAlly`, `setEnemy` 메서드로 설정한 모든 아군, 또는 적 액터를 반환합니다. */
     get both(): Actor[] {
         return [ ...this.enemies, ...this.allies ]
     }
 
+    /** 해당 인스턴스가 `setAlly`, `setEnemy` 메서드로 설정하지 않은 씬에 추가된 모든 중립 액터를 반환합니다. */
     get neutral(): Actor[] {
         return this.all.filter((actor: Actor): boolean => !this.both.includes(actor))
     }
 
+    /** 해당 인스턴스에 추가된 모든 스킬 키 목록을 반환합니다. */
     get skills(): string[] {
         return [ ...this.skillmap.keys() ]
     }
 
+    /**
+     * 해당 액터 인스턴스가 속한 씬에 추가된 액터 중, 세력에 속한 액터 목록을 반환합니다.
+     * @param force 세력 정보입니다.
+     */
     private getAffiliatedActors(force: ActorForce): Actor[] {
         switch(force) {
             case 'all':             return this.all
@@ -89,22 +102,40 @@ export class ActorBattle extends TypedEmitter<EventParameter> {
         }
     }
 
+    /**
+     * 해당 좌표를 중심으로 반지름 내에 있는 모든 액터를 찾아 반환합니다.
+     * @param x 검색할 x좌표입니다.
+     * @param y 검색할 y좌표입니다.
+     * @param radius 검색할 반지름 반경입니다. 주어진 `x`, `y` 좌표로부터 이 수치만큼의 반지름을 가진 원 내부에 있는 액터를 찾습니다.
+     * @param actors 검색할 액터 목록입니다. 기본값은 해당 액터 인스턴스가 속한 씬의 모든 액터 목록입니다.
+     * @param sortByDistance 검색 결과를 주어진 `x`, `y` 좌표를 기준으로 가까운 순서로 정렬할지 여부를 결정합니다. 기본값은 `false`입니다.
+     */
     private getActorInArea(x: number, y: number, radius: number, actors?: Actor[], sortByDistance?: boolean): Actor[] {
         if (!this.actor) return []
         return this.actor.plugin.getActorsInArea(x, y, radius, actors, sortByDistance)
     }
 
+    /**
+     * 액터가 스킬에 적중했을 때 호출될 메서드입니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param from 스킬을 사용한 액터 인스턴스입니다.
+     * @param information 사용한 스킬의 정보입니다.
+     */
     private getHit(from: Actor, information: HitInformation): void {
         if (!this.actor) return
         this.attackerset.add(from)
         this.emit('get-hit', from, information)
     }
 
-    private hit(key: string, targets: Actor[]): void {
+    /**
+     * 액터가 스킬을 적중시켰을 때 호출될 메서드입니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     * @param skillKey 사용한 스킬 키입니다.
+     * @param targets 스킬에 적중한 액터 목록입니다.
+     */
+    private hit(skillKey: string, targets: Actor[]): void {
         if (!this.actor)                return
-        if (!this.skillmap.has(key))    return
+        if (!this.skillmap.has(skillKey))    return
 
-        const getInformation = this.skillmap.get(key)!
+        const getInformation = this.skillmap.get(skillKey)!
         for (const target of targets) {
             const information: HitInformation = getInformation(target, this.actor.dot)
             this.emit('hit', target, information)
@@ -112,6 +143,10 @@ export class ActorBattle extends TypedEmitter<EventParameter> {
         }
     }
 
+    /**
+     * 해당 액터 인스턴스를 아군, 또는 적으로 설정한 모든 액터들로부터 자신을 제거합니다.
+     * 교전 도중에 이 메서드를 호출하면 해당 액터 인스턴스와 교전 중이던 액터들은 공격자 목록에서 자신을 제거합니다.
+     */
     private forgetMe(): void {
         if (!this.actor) return
         for (const actor of this.actor.plugin.actors) {
@@ -123,37 +158,41 @@ export class ActorBattle extends TypedEmitter<EventParameter> {
 
     /**
      * 액터에 새로운 스킬을 지정합니다.
-     * @param key 
-     * @param callback 
+     * @param key 스킬 키입니다. 다른 스킬과 중복되어선 안됩니다.
+     * @param callback 스킬을 사용했을 때 호출될 함수입니다.
      */
     addSkill(key: string, callback: HitCallback): this {
         this.skillmap.set(key, callback)
         return this
     }
 
+    /**
+     * 액터에 추가된 스킬을 제거합니다.
+     * @param key 제거할 스킬 키입니다.
+     */
     deleteSkill(key: string): this {
         this.skillmap.delete(key)
         return this
     }
 
-    /** @alias useSkill for onlyAllies */
+    /** @alias useSkill for allies */
     useBuff(key: string, point: Vector2, radius: number = 1): this {
         this.useSkill(key, point, radius, 'allies')
         return this
     }
 
-    /** @alias useSkill for onlyEnemies */
+    /** @alias useSkill for enemies */
     useDebuff(key: string, point: Vector2, radius: number = 1): this {
         this.useSkill(key, point, radius, 'enemies')
         return this
     }
 
     /**
-     * 
-     * @param key 
-     * @param point 
-     * @param radius 
-     * @param force 
+     * 해당 위치에 스킬을 사용합니다.
+     * @param key 사용할 스킬 키입니다.
+     * @param point 스킬을 사용할 좌표입니다.
+     * @param radius 스킬의 효과를 받을 반경 반지름입니다. `point` 좌표를 기준으로 이 반경 내에 있는 모든 액터는 스킬의 효과를 받습니다. 기본값은 `1`입니다.
+     * @param force 이 스킬이 적중할 대상 세력입니다. 만약 스킬이 적 액터에게만 적중하게 하고 싶다면, `enemies`로 설정하십시오. 기본값은 `all`입니다. 
      */
     useSkill(key: string, point: Vector2, radius: number = 1, force: ActorForce = 'all'): this {
         if (!this.actor) {

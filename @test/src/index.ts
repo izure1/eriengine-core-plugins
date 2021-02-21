@@ -183,6 +183,8 @@ class Test extends Phaser.Scene {
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
         // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
+        this.dialogue.setUsingScene('coordinate').addDialogue('main', 'monologue')
+        this.dialogue.get('main')?.say('내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)
@@ -248,7 +250,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     type: Phaser.WEBGL,
-    scene: [ Test ],
+    scene: [ Test, CoordinateSystem ],
     scale: {
         parent: '#game',
         fullscreenTarget: '#game',
@@ -261,39 +263,36 @@ const config: Phaser.Types.Core.GameConfig = {
         createContainer: true
     },
     plugins: {
-        global: [
-            // {
-            //     key: 'dialoguePlugin',
-            //     mapping: 'dialogue',
-            //     plugin: DialoguePlugin
-            // }
-        ],
         scene: [
             {
-                key: 'actorPlugin',
+                key: 'ActorPlugin',
                 mapping: 'actor',
                 plugin: ActorPlugin
             },
             {
-                key: 'isomScenePlugin',
+                key: 'IsomScenePlugin',
                 mapping: 'map',
-                plugin: IsomScenePlugin,
-                start: false
+                plugin: IsomScenePlugin
             },
             {
-                key: 'isomCursorPlugin',
+                key: 'IsomCursorPlugin',
                 mapping: 'cursor',
                 plugin: IsomCursorPlugin
             },
             {
-                key: 'isomSelectPlugin',
+                key: 'IsomSelectPlugin',
                 mapping: 'select',
                 plugin: IsomSelectPlugin
             },
             {
-                key: 'fogOfWarPlugin',
+                key: 'FowPlugin',
                 mapping: 'fow',
                 plugin: FowPlugin
+            },
+            {
+                key: 'dialoguePlugin',
+                mapping: 'dialogue',
+                plugin: DialoguePlugin
             }
         ]
     },

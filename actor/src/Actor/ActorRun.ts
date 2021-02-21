@@ -1,7 +1,15 @@
+import { TypedEmitter } from 'tiny-typed-emitter'
 import { Vector2, Point2, isApproximated, getSmaller } from '@common/Math/MathUtil'
 import { Actor } from './Actor'
 
-export class ActorRun {
+interface ActorRunEvent {
+    'route-start':  (routes: Point2[]) => void
+    'route-turn':   (route: Point2) => void
+    'route-end':    () => void
+    'route-stop':   () => void
+}
+
+export class ActorRun extends TypedEmitter<ActorRunEvent> {
     private upKey:    Phaser.Input.Keyboard.Key|null = null
     private downKey:  Phaser.Input.Keyboard.Key|null = null
     private leftKey:  Phaser.Input.Keyboard.Key|null = null
@@ -21,6 +29,7 @@ export class ActorRun {
     }
 
     constructor(actor: Actor) {
+        super()
         this.actor = actor
     }
 
@@ -131,13 +140,18 @@ export class ActorRun {
         this.routes = routes
         this.checkKeepGoing = checkKeepGoing
         this.routingAutomatic()
+
+        this.emit('route-start', routes)
         return this
     }
 
     /** 액터가 `left`, `right`, `up`, `down`, `to` 메서드로 움직이는 움직임을 멈춥니다. */
     stop(): this {
         this.actor?.setVelocity(0, 0)
-        this.routes.length = 0
+        if (this.routes.length) {
+            this.routes.length = 0
+            this.emit('route-stop')
+        } 
         return this
     }
 
@@ -148,6 +162,7 @@ export class ActorRun {
         }
         const { x, y } = this.routes.shift()!
         this.actor?.setPosition(x, y)
+        this.emit('route-turn', { x, y })
     }
 
     /** 액터가 `to` 메서드로 움직이는 도중, 매 프레임마다 호출될 메서드입니다. 자동으로 호출되며 *직접 호출하지 마십시오.* */
@@ -180,6 +195,7 @@ export class ActorRun {
             this.arriveCurrentSign()
             if (!this.isRouting) {
                 this.actor.setVelocity(0, 0)
+                this.emit('route-end')
             }
         }
     }

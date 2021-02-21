@@ -1,3 +1,4 @@
+import { TypedEmitter } from 'tiny-typed-emitter'
 import { Actor } from './Actor'
 
 type UpdateCallback = (time: number, delta: number) => void
@@ -8,7 +9,14 @@ interface DotJob {
     doneCallback?: UpdateCallback
 }
 
-export class ActorDot {
+interface ActorDotEvent {
+    'start': (key: string) => void
+    'update': (key: string, passedTime: number, delta: number) => void
+    'stop': (key: string) => void
+    'end': (key: string) => void
+}
+
+export class ActorDot extends TypedEmitter<ActorDotEvent> {
     private jobmap: Map<string, DotJob> = new Map
     private actor: Actor|null = null
 
@@ -21,6 +29,7 @@ export class ActorDot {
     }
 
     constructor(actor: Actor) {
+        super()
         this.actor = actor
     }
 
@@ -45,6 +54,7 @@ export class ActorDot {
     start(key: string, duration: number, tickCallback?: UpdateCallback, doneCallback?: UpdateCallback): this {
         const start: number = this.now
         this.jobmap.set(key, { start, duration, tickCallback, doneCallback })
+        this.emit('start', key)
         return this
     }
 
@@ -63,6 +73,8 @@ export class ActorDot {
      */
     stop(key: string): this {
         this.jobmap.delete(key)
+        this.emit('stop', key)
+        this.emit('end', key)
         return this
     }
 
@@ -73,15 +85,18 @@ export class ActorDot {
      */
     private update(time: number, delta: number): void {
         for (const [ key, { start, duration, tickCallback, doneCallback } ] of this.jobmap) {
-            if (start + duration < time) {
+            const passedTime: number = time - start
+            if (passedTime > duration) {
                 if (doneCallback) {
                     doneCallback(time, delta)
                 }
                 this.jobmap.delete(key)
+                this.emit('end', key)
                 continue
             }
             if (tickCallback) {
                 tickCallback(time, delta)
+                this.emit('update', key, passedTime, delta)
             }
         }
     }

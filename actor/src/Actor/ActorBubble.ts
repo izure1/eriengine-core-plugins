@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { TypedEmitter } from 'tiny-typed-emitter'
 import { Actor } from './Actor'
 import { BubbleEmotion } from '../eriengine-core-plugin-actor'
 import { Point2, getIsometricWidth, getIsometricHeight } from '@common/Math/MathUtil'
@@ -15,7 +16,18 @@ enum BubbleEmitterOffset {
     'bottom-right',
 }
 
-class ActorBubbleEmitter {
+interface ActorBubbleEmitterEvent {
+    'show-text':        (text: Phaser.GameObjects.Text|null) => void
+    'clear-text':       (text: Phaser.GameObjects.Text|null) => void
+    'show-emotion':     (image: Phaser.GameObjects.Image|null) => void
+    'clear-emotion':    (image: Phaser.GameObjects.Image|null) => void
+    'say-typing-start': (text: Phaser.GameObjects.Text|null) => void
+    'say-typing':       (text: Phaser.GameObjects.Text|null) => void
+    'say-typing-done':  (text: Phaser.GameObjects.Text|null) => void
+    'say-finish':       (text: Phaser.GameObjects.Text|null) => void   
+}
+
+class ActorBubbleEmitter extends TypedEmitter<ActorBubbleEmitterEvent> {
     private actor: Actor|null = null
     private offset: Point2 = { x: 0, y: 0 }
     private baseStyle: Phaser.Types.GameObjects.Text.TextStyle = { fontSize: '15px', color: 'white', strokeThickness: 3, stroke: 'black' }
@@ -28,6 +40,7 @@ class ActorBubbleEmitter {
     private noticeText: string|string[] = ''
 
     constructor(actor: Actor) {
+        super()
         this.actor = actor
         this.generateObjects()
     }
@@ -225,6 +238,8 @@ class ActorBubbleEmitter {
         this.text?.setStyle(this.currentStyle)
         this.text?.setText(text)
         this.text?.setVisible(true)
+
+        this.emit('show-text', this.text)
     }
 
     /**
@@ -234,6 +249,7 @@ class ActorBubbleEmitter {
     private clearText(callback: boolean = false): void {
         this.text?.setText('')
         this.text?.setVisible(false)
+        this.emit('clear-text', this.text)
         
         if (this.textTimeEvent) {
             this.textTimeEvent.remove(callback)
@@ -281,11 +297,20 @@ class ActorBubbleEmitter {
         this.closeEmotion(0, (): void => {
             this.appendTextStyle(style)
             this.showText()
-            this.text?.startTyping(text, speed).on('done', (): void => {
+            this.emit('say-typing-start', this.text)
+
+            this.text?.startTyping(text, speed)
+            .on('step', (): void => {
+                this.emit('say-typing', this.text)
+            })
+            .on('done', (): void => {
+                this.emit('say-typing-done', this.text)
+
                 if (!this.scene) {
                     return
                 }
                 this.textTimeEvent = this.scene?.time.delayedCall(2500, (): void => {
+                    this.emit('say-finish', this.text)
                     this.clearText()
                 })
             })
@@ -344,6 +369,7 @@ class ActorBubbleEmitter {
             duration: 300,
             ease: Phaser.Math.Easing.Back.Out
         }).on(Phaser.Tweens.Events.TWEEN_COMPLETE, (): void => {
+            this.emit('show-emotion', this.image)
             if (callback) {
                 callback()
             }
@@ -365,6 +391,7 @@ class ActorBubbleEmitter {
         const after = (): void => {
             this.image?.setVisible(false)
             this.clearImageTween()
+            this.emit('clear-emotion', this.image)
 
             if (callback) {
                 callback()

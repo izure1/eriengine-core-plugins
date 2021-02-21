@@ -16,14 +16,14 @@ export interface HitInformation {
 }
 export type HitCallback = (targets: Actor, dot: ActorDot) => HitInformation
 
-export interface EventParameter {
+interface ActorBattleEvent {
     'hit':      (target: Actor, information: HitInformation) => void
     'get-hit':  (from: Actor, information: HitInformation) => void
     'win':      (from: Actor) => void
     'defeat':   (froms: Actor[]) => void
 }
 
-export class ActorBattle extends TypedEmitter<EventParameter> {
+export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
     private actor: Actor|null
     private readonly skillmap: Map<string, HitCallback> = new Map       // 자신이 가지고 있는 스킬 목록입니다.
     private readonly enemyset: Set<Actor> = new Set                     // 자신이 교전을 할 적 액터 목록입니다.

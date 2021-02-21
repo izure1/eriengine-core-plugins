@@ -99,42 +99,45 @@ class Dialogue extends Phaser.GameObjects.Text {
      * @param speed 한 글자가 타이핑될 때 걸리는 시간(ms)입니다. 기본값은 `15`입니다. 이 값을 음수로 설정할 경우, 타이핑 효과 없이 텍스트가 즉시 출력됩니다.
      * @param autoClean 텍스트가 모두 출력된 후, 자동으로 사라지는데까지 대기하는 시간(ms)입니다. 기본값은 `2500`입니다. 이 값을 음수로 설정할 경우, 텍스트가 자동으로 사라지지 않습니다.
      */
-    say(text: string, speed: number = 15, autoClean: number = 2500): this {
-        this.setText('')
-        this.show(undefined, (): void => {
-            const onDone = (): void => {
-                const wrapped: string = this.advancedWordWrap(text, this.context, this.textWrapWidth)
-                this.destroyStepper()
-                this.setText(wrapped)
+    say(text: string, speed: number = 15, autoClean: number = 2500): Promise<string> {
+        return new Promise((resolve): void => {
+            this.setText('')
+            this.show(undefined, (): void => {
+                const onDone = (): void => {
+                    const wrapped: string = this.advancedWordWrap(text, this.context, this.textWrapWidth)
+                    this.destroyStepper()
+                    this.setText(wrapped)
 
-                if (autoClean < 0) {
+                    resolve(text)
+
+                    if (autoClean < 0) {
+                        return
+                    }
+                    this.generateStepper()
+                    this.stepper?.on('done', (): void => {
+                        this.destroyStepper()
+                        this.hide()
+                    })
+                    this.stepper?.start(autoClean, 1)
+                }
+
+                // 출력 속도가 0보다 작을 경우, 즉시 모든 텍스트 출력
+                if (speed < 0) {
+                    onDone()
                     return
                 }
+
+                // 그렇지 않다면 타이핑 효과 사용
                 this.generateStepper()
-                this.stepper?.on('done', (): void => {
-                    this.destroyStepper()
-                    this.hide()
+                this.stepper
+                ?.on('step', (currentStep: number): void => {
+                    const wrapped: string = this.advancedWordWrap(text.substr(0, currentStep), this.context, this.textWrapWidth)
+                    this.setText(wrapped)
                 })
-                this.stepper?.start(autoClean, 1)
-            }
-
-            // 출력 속도가 0보다 작을 경우, 즉시 모든 텍스트 출력
-            if (speed < 0) {
-                onDone()
-                return
-            }
-
-            // 그렇지 않다면 타이핑 효과 사용
-            this.generateStepper()
-            this.stepper
-            ?.on('step', (currentStep: number): void => {
-                const wrapped: string = this.advancedWordWrap(text.substr(0, currentStep), this.context, this.textWrapWidth)
-                this.setText(wrapped)
+                ?.on('done', onDone)
+                this.stepper?.start(speed, text.length)
             })
-            ?.on('done', onDone)
-            this.stepper?.start(speed, text.length)
         })
-        return this
     }
 
     private generateFadeTween(option: object|Phaser.Types.Tweens.TweenBuilderConfig): void {

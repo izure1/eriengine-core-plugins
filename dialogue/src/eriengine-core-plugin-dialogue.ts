@@ -141,8 +141,9 @@ class Dialogue extends Phaser.GameObjects.Text {
      * @param text 출력될 텍스트입니다.
      * @param speed 한 글자가 타이핑될 때 걸리는 시간(ms)입니다. 기본값은 `15`입니다. 이 값을 음수로 설정할 경우, 타이핑 효과 없이 텍스트가 즉시 출력됩니다.
      * @param autoClean 텍스트가 모두 출력된 후, 자동으로 사라지는데까지 대기하는 시간(ms)입니다. 기본값은 `2500`입니다. 이 값을 음수로 설정할 경우, 텍스트가 자동으로 사라지지 않습니다.
+     * @param customStyle 추가로 적용될 텍스트 스타일입니다. 이 스타일은 1회용으로만 적용됩니다. 기본값은 `{}`입니다.
      */
-    say(text: string, speed: number = 15, autoClean: number = 2500): Promise<string> {
+    say(text: string, speed: number = 15, autoClean: number = 2500, customStyle: DialogueTextStyle = {}): Promise<string> {
         return new Promise((resolve): void => {
             this.destroyStepper('say-autoclean')
             this.generateStepper('say-typing')
@@ -158,7 +159,10 @@ class Dialogue extends Phaser.GameObjects.Text {
                     maxiumStep = text.length
                 }
 
-                // 그렇지 않다면 타이핑 효과 사용
+                // 스타일 적용
+                this.applyDialogueStyle(this.createMergedDialogueStyle(customStyle))
+
+                // 타이핑 시작
                 this.getStepper('say-typing')
                 ?.on('step', (currentStep: number): void => {
                     this.setWrappedText(text.substr(0, currentStep))
@@ -223,6 +227,7 @@ class Dialogue extends Phaser.GameObjects.Text {
      * @param texts 출력될 대사 모음입니다.
      * @param speed 한 글자가 타이핑될 때 걸리는 시간(ms)입니다. 기본값은 `15`입니다. 이 값을 음수로 설정할 경우, 타이핑 효과 없이 텍스트가 즉시 출력됩니다.
      * @param autoClean 텍스트가 모두 출력된 후, 자동으로 사라지는데까지 대기하는 시간(ms)입니다. 기본값은 `2500`입니다. 이 값을 음수로 설정할 경우, 텍스트가 자동으로 사라지지 않습니다.
+     * @param customStyle 추가로 적용될 텍스트 스타일입니다. 이 스타일은 1회용으로만 적용됩니다. 기본값은 `{}`입니다.
      * @param rule 대사의 출력을 제어하는 방법을 설정합니다. 기본값은 마우스 좌클릭 시, 타이핑 도중이라면 스킵하고, 대기 모드라면 다음 대사로 넘어가는 함수입니다.  
      * 이 함수는 대사가 타이핑될 때 마다 호출됩니다.
      * 함수의 매개변수로는 `next` 함수와, `text` 문자열, `usingScene` 씬 인스턴스를 받습니다.
@@ -240,6 +245,7 @@ class Dialogue extends Phaser.GameObjects.Text {
         texts: string[],
         speed: number = 15,
         autoClean: number = 2500,
+        customStyle: DialogueTextStyle = {},
         rule: ((next: () => void, text: string, usingScene: Phaser.Scene) => void) = (next, text, usingScene) => {
             usingScene.input.off(Phaser.Input.Events.POINTER_DOWN, this.beforeDefaultRule)
 
@@ -259,13 +265,15 @@ class Dialogue extends Phaser.GameObjects.Text {
             // 모든 텍스트를 순회하면서 대사를 출력합니다.
             for (const text of texts) {
                 await new Promise((resolve: (value?: unknown) => void): void => {
-                    this.say(text, speed, -1)
+                    this.say(text, speed, -1, customStyle)
                     this.getStepper('say-typing')
                     ?.on('step', (): void => rule(resolve, text, this.scene))
                     ?.on('done', (): void => rule(resolve, text, this.scene))
                 })
             }
 
+            resolve()
+            
             const lastText: string = texts[texts.length-1]
             this.sleep(lastText, autoClean)
         })

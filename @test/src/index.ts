@@ -189,7 +189,7 @@ class Test extends Phaser.Scene {
             '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야.',
             '내 곁에서 상당히 많은 자매들이 전투를 치렀지.',
             '어떤 임무라도 누나한테 맡겨주렴. 우후후……'
-        ], 100, 1000)
+        ])
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)

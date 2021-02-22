@@ -11,13 +11,14 @@ interface DialogueTextStyle extends Phaser.Types.GameObjects.Text.TextStyle {
 class Dialogue extends Phaser.GameObjects.Text {
     private steppers: Map<string, IntervalManager> = new Map
     private fadeTween: Phaser.Tweens.Tween|null = null
-    private disposableTextStyle: DialogueTextStyle|null = null
+    private basicTextStyle: DialogueTextStyle
     private beforeDefaultRule: ((e: Phaser.Input.Pointer) => void) = (): void => {}
 
     constructor(scene: Phaser.Scene, x: number, y: number, text: string, style: DialogueTextStyle) {
         super(scene, x, y, text, style)
 
-        this.applyDialogueStyle(this.createMergedDialogueStyle(style))
+        this.basicTextStyle = style
+        this.applyDialogueStyle(style)
         
         this.once(Phaser.GameObjects.Events.DESTROY, this.onDestroy.bind(this))
         this.hide(0)
@@ -66,7 +67,7 @@ class Dialogue extends Phaser.GameObjects.Text {
     }
 
     private createMergedDialogueStyle(...mergedStyles: DialogueTextStyle[]): DialogueTextStyle {
-        let merged: DialogueTextStyle = this.defaultDialogueStyle
+        let merged: DialogueTextStyle = {}
         for (const style of mergedStyles)  {
             merged = {
                 ...merged,
@@ -77,10 +78,7 @@ class Dialogue extends Phaser.GameObjects.Text {
     }
 
     private applyDialogueStyle(style: DialogueTextStyle): void {
-        const merged: DialogueTextStyle = {
-            ...this.defaultDialogueStyle,
-            ...style
-        }
+        const merged: DialogueTextStyle = this.createMergedDialogueStyle(this.defaultDialogueStyle, this.basicTextStyle, style)
         const fontSize: number = parseFloat(merged.fontSize!)
         const lineHeight: number = merged.lineHeight || 1
 
@@ -160,7 +158,7 @@ class Dialogue extends Phaser.GameObjects.Text {
                 }
 
                 // 스타일 적용
-                this.applyDialogueStyle(this.createMergedDialogueStyle(customStyle))
+                this.applyDialogueStyle(customStyle)
 
                 // 타이핑 시작
                 this.getStepper('say-typing')

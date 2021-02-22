@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { nanoid } from 'nanoid'
 import { Point2 } from '@common/Math/MathUtil'
 import { IntervalManager } from '@common/Phaser/IntervalManager'
 
@@ -8,9 +9,10 @@ interface DialogueTextStyle extends Phaser.Types.GameObjects.Text.TextStyle {
 }
 
 class Dialogue extends Phaser.GameObjects.Text {
-    private stepper: IntervalManager|null = null
+    private steppers: Map<string, IntervalManager> = new Map
     private fadeTween: Phaser.Tweens.Tween|null = null
     private disposableTextStyle: DialogueTextStyle|null = null
+    private beforeDefaultRule: ((e: Phaser.Input.Pointer) => void) = (): void => {}
 
     constructor(scene: Phaser.Scene, x: number, y: number, text: string, style: DialogueTextStyle) {
         super(scene, x, y, text, style)
@@ -45,6 +47,24 @@ class Dialogue extends Phaser.GameObjects.Text {
         }
     }
 
+    private get randomId(): string {
+        return nanoid()
+    }
+
+    /**
+     * 대사가 타이핑 도중인지 여부를 반환합니다.
+     */
+    get isTyping(): boolean {
+        return this.steppers.has('say-typing')
+    }
+
+    /**
+     * 대사창이 대기 모드인지 여부를 반환합니다.
+     */
+    get isSleeping(): boolean {
+        return !this.isTyping
+    }
+
     private createMergedDialogueStyle(...mergedStyles: DialogueTextStyle[]): DialogueTextStyle {
         let merged: DialogueTextStyle = this.defaultDialogueStyle
         for (const style of mergedStyles)  {
@@ -69,17 +89,39 @@ class Dialogue extends Phaser.GameObjects.Text {
         this.updateText()
     }
 
-    private generateStepper(): void {
-        this.destroyStepper()
-        this.stepper = new IntervalManager(this.scene)
-    }
-    
-    private destroyStepper(): void {
-        this.stepper?.destroy()
-        this.stepper = null
+    private generateStepper(id: string): IntervalManager {
+        this.destroyStepper(id)
+        const stepper: IntervalManager = new IntervalManager(this.scene)
+        this.steppers.set(id, stepper)
+        return stepper
     }
 
-    onDestroy(): void {
+    private getStepper(id: string): IntervalManager|null {
+        if (!this.steppers.has(id)) {
+            return null
+        }
+        return this.steppers.get(id)!
+    }
+    
+    private destroyStepper(id?: string): void {
+        const steppers: Map<string, IntervalManager> = new Map
+        if (id === undefined) {
+            for (const [ id, stepper ] of this.steppers) {
+                steppers.set(id, stepper)
+            }
+        }
+        else {
+            if (this.steppers.has(id)) {
+                steppers.set(id, this.steppers.get(id)!)
+            }
+        }
+        for (const [ id, stepper ] of steppers) {
+            stepper.destroy()
+            this.steppers.delete(id)
+        }
+    }
+
+    private onDestroy(): void {
         this.destroyStepper()
     }
 
@@ -93,7 +135,8 @@ class Dialogue extends Phaser.GameObjects.Text {
      * 줄바꿈을 위해선 `setFixedSize` 메서드를 이용하여 가로 크기를 지정하십시오.  
      * 텍스트는 기본적으로 타이핑 효과로 출력되며, 원할 경우 즉시 출력할 수 있도록 설정할 수 있습니다.
      * 타이핑 효과를 그만두고 즉시 모든 텍스트를 출력하게 하고 싶다면, `skip` 메서드를 이용하십시오.  
-     * 출력이 끝나면, 기본적으로 자동으로 페이드아웃되어 사라지지만, 원할 경우 사라지지 않게 설정할 수 있습니다.
+     * 출력이 끝나면, 대기 모드로 전환됩니다.  
+     * `autoClean` 매개변수를 이용하면 대기 모드로 전환 후, 자동으로 페이드아웃되어 사라지게 할 수 있습니다.
      * 이 경우 텍스트를 수동으로 사라지게 하기 위해서는 `hide` 메서드를 이용하십시오.
      * @param text 출력될 텍스트입니다.
      * @param speed 한 글자가 타이핑될 때 걸리는 시간(ms)입니다. 기본값은 `15`입니다. 이 값을 음수로 설정할 경우, 타이핑 효과 없이 텍스트가 즉시 출력됩니다.
@@ -101,42 +144,130 @@ class Dialogue extends Phaser.GameObjects.Text {
      */
     say(text: string, speed: number = 15, autoClean: number = 2500): Promise<string> {
         return new Promise((resolve): void => {
+            this.destroyStepper('say-autoclean')
+            this.generateStepper('say-typing')
+
             this.setText('')
             this.show(undefined, (): void => {
-                const onDone = (): void => {
-                    const wrapped: string = this.advancedWordWrap(text, this.context, this.textWrapWidth)
-                    this.destroyStepper()
-                    this.setText(wrapped)
-
-                    resolve(text)
-
-                    if (autoClean < 0) {
-                        return
-                    }
-                    this.generateStepper()
-                    this.stepper?.on('done', (): void => {
-                        this.destroyStepper()
-                        this.hide()
-                    })
-                    this.stepper?.start(autoClean, 1)
-                }
-
+                let maxiumStep: number
                 // 출력 속도가 0보다 작을 경우, 즉시 모든 텍스트 출력
                 if (speed < 0) {
-                    onDone()
-                    return
+                    maxiumStep = 0
+                }
+                else {
+                    maxiumStep = text.length
                 }
 
                 // 그렇지 않다면 타이핑 효과 사용
-                this.generateStepper()
-                this.stepper
+                this.getStepper('say-typing')
                 ?.on('step', (currentStep: number): void => {
-                    const wrapped: string = this.advancedWordWrap(text.substr(0, currentStep), this.context, this.textWrapWidth)
-                    this.setText(wrapped)
+                    this.setWrappedText(text.substr(0, currentStep))
                 })
-                ?.on('done', onDone)
-                this.stepper?.start(speed, text.length)
+                .on('done', (): void => {
+                    resolve(text)
+                    this.sleep(text, autoClean)
+                })
+                .start(speed, maxiumStep)
             })
+        })
+    }
+
+    /**
+     * 대사를 출력하고, 대기 모드로 전환됩니다. 대기 모드로 전환되었을 때, 
+     * 만약 대사가 타이핑 도중이었다면, 즉시 타이핑을 종료합니다.
+     * @param text 출력할 텍스트입니다.
+     * @param autoClean 텍스트가 자동으로 사라지는데까지 대기하는 시간(ms)입니다. 이 값을 음수로 설정할 경우, 텍스트가 자동으로 사라지지 않습니다.
+     */
+    sleep(text: string, autoClean: number): void {
+        this.destroyStepper('say-typing')
+        this.setWrappedText(text)
+
+        if (autoClean < 0) {
+            return
+        }
+        this.generateStepper('say-autoclean')
+        .on('done', (): void => {
+            this.destroyStepper('say-autoclean')
+            this.hide()
+        })
+        .start(autoClean, 1)
+    }
+
+    /**
+     * 대사창의 크기에 맞는, 줄바꿈이 적용된 대사를 출력합니다.
+     * 이는 `padding`, `fixedWidth` 속성의 영향을 받습니다.
+     * @param text 출력할 텍스트입니다.
+     */
+    setWrappedText(text: string): this {
+        const wrapped: string = this.advancedWordWrap(text, this.context, this.textWrapWidth)
+        this.setText(wrapped)
+        return this
+    }
+
+    /**
+     * 일정 시간 대기합니다. 이는 비동기 처리를 위해 사용합니다.
+     * `setUsingScene` 메서드로 설정한 씬이 비활성화상태거나, 업데이트가 중지되었다면 그 시간동안 대기합니다.
+     * @param delay 대기할 시간입니다.
+     */
+    wait(delay: number): Promise<void> {
+        return new Promise((resolve): void => {
+            this.generateStepper(this.randomId)
+            .on('done', () => resolve())
+            .start(delay, 1)
+        })
+    }
+
+    /**
+     * 연속된 대사를 출력합니다. 이는 몇 개의 `say` 메서드를 연달아서 호출하는 것보다 권장됩니다.
+     * `skipRule` 메서드를 이용하여 출력된 대사를 넘기는 방법을 지정할 수 있습니다.
+     * @param texts 출력될 대사 모음입니다.
+     * @param speed 한 글자가 타이핑될 때 걸리는 시간(ms)입니다. 기본값은 `15`입니다. 이 값을 음수로 설정할 경우, 타이핑 효과 없이 텍스트가 즉시 출력됩니다.
+     * @param autoClean 텍스트가 모두 출력된 후, 자동으로 사라지는데까지 대기하는 시간(ms)입니다. 기본값은 `2500`입니다. 이 값을 음수로 설정할 경우, 텍스트가 자동으로 사라지지 않습니다.
+     * @param rule 대사의 출력을 제어하는 방법을 설정합니다. 기본값은 마우스 좌클릭 시, 타이핑 도중이라면 스킵하고, 대기 모드라면 다음 대사로 넘어가는 함수입니다.  
+     * 이 함수는 대사가 타이핑될 때 마다 호출됩니다.
+     * 함수의 매개변수로는 `next` 함수와, `text` 문자열, `usingScene` 씬 인스턴스를 받습니다.
+     * `next` 함수를 호출하면 현재 출력 중인 대사를 즉시 종료하고, 다음 대사로 넘어갑니다.
+     * ```
+     * dialoguePlugin.speech([ 'hello', 'world' ], 15, (next, text): void => {
+     *      // 3초후 자동으로 대사를 넘깁니다.
+     *      setTimeout(next, 3000)
+     * })
+     * ```
+     * `text` 매개변수는 지금 출력 중인 대사의 전문입니다.  
+     * `usingScene` 매개변수는 현재 플러그인이 `setUsingScene`으로 지정한 씬 인스턴스를 의미합니다.
+     */
+    speech(
+        texts: string[],
+        speed: number = 15,
+        autoClean: number = 2500,
+        rule: ((next: () => void, text: string, usingScene: Phaser.Scene) => void) = (next, text, usingScene) => {
+            usingScene.input.off(Phaser.Input.Events.POINTER_DOWN, this.beforeDefaultRule)
+
+            this.beforeDefaultRule = (e: Phaser.Input.Pointer): void => {
+                // 좌클릭 했을 경우 타이핑 중이라면 스킵을, 대기 모드라면 다음으로 넘어갑니다.
+                if (this.isTyping) {
+                    this.skip()
+                }
+                else if (this.isSleeping) {
+                    next()
+                }
+            }
+            usingScene.input.once(Phaser.Input.Events.POINTER_DOWN, this.beforeDefaultRule)
+        }
+    ): Promise<void> {
+        return new Promise(async (resolve): Promise<void> => {
+            // 모든 텍스트를 순회하면서 대사를 출력합니다.
+            for (const text of texts) {
+                await new Promise((resolve: (value?: unknown) => void): void => {
+                    this.say(text, speed, -1)
+                    this.getStepper('say-typing')
+                    ?.on('step', (): void => rule(resolve, text, this.scene))
+                    ?.on('done', (): void => rule(resolve, text, this.scene))
+                })
+            }
+
+            const lastText: string = texts[texts.length-1]
+            this.sleep(lastText, autoClean)
         })
     }
 
@@ -181,16 +312,13 @@ class Dialogue extends Phaser.GameObjects.Text {
      * `say` 메서드로 출력 중인 텍스트의 타이핑 효과를 즉시 종료합니다.
      */
     skip(): this {
-        if (!this.stepper) {
-            return this
-        }
-        this.stepper.finish()
+        this.getStepper('say-typing')?.finish()
         return this
     }
 }
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
-    private static Scene: Phaser.Scene|null = null
+    static Scene: Phaser.Scene|null = null
     private static Dialogues: Map<string, Dialogue> = new Map
 
     private static ENOSCENEEXISTS: string = 'You must first initialize using the setUsingScene method.'

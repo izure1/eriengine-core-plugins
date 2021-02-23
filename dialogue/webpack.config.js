@@ -68,7 +68,7 @@ module.exports = {
                 ]
             },
             {
-                test: /\.scss$/,
+                test: /\.s(c|a)ss$/,
                 exclude: path.resolve(__dirname, 'node_modules'),
                 use: [
                     {
@@ -97,7 +97,7 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: ['.ts', '.js', '.vue', '.json', '.jpg', '.jpeg', '.png', '.gif', '.svg'],
+        extensions: ['.ts', '.js', '.json'],
         alias: {
             '@common': path.resolve(__dirname, '../@common'),
             '@assets': path.resolve(__dirname, 'src', 'Components', 'Assets')

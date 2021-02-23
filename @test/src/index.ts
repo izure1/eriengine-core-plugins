@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { Plugin as ActorPlugin, Actor } from '~/actor'
 import { Plugin as IsomScenePlugin } from '~/isometric-scene'
 import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } from '~/isometric-cursor'
-import { Plugin as DialoguePlugin } from '~/dialogue'
+import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
@@ -150,6 +150,7 @@ class Test extends Phaser.Scene {
     private cursor!: IsomCursorPlugin
     private select!: IsomSelectPlugin
     private dialogue!: DialoguePlugin
+    private modal!: ModalPlugin
     private actor!: ActorPlugin
     private fow!: FowPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
@@ -195,6 +196,43 @@ class Test extends Phaser.Scene {
                 'test2'
             ])
         })
+
+       this.modal.addModal('test', {
+            title: '네이밍',
+            subtitle: '캐릭터의 이름을 정해주세요',
+            inputs: [
+                {
+                    key: 'id',
+                    description: '아이디 입력',
+                    type: 'text'
+                },
+                {
+                    key: 'password',
+                    description: '비밀번호 입력',
+                    type: 'password'
+                },
+                {
+                    key: 'age',
+                    description: '나이 입력',
+                    type: 'number'
+                },
+                {
+                    key: 'isMan',
+                    description: '남자인가요?',
+                    type: 'boolean'
+                },
+            ],
+            buttons: [
+                {
+                    text: '확인',
+                    click: (answer) => {
+                        console.log(answer)
+                    }
+                }
+            ]
+        })
+
+        this.modal.get('test')?.open()
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)
@@ -262,8 +300,8 @@ const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     scene: [ Test, CoordinateSystem ],
     scale: {
-        parent: '#game',
-        fullscreenTarget: '#game',
+        parent: 'game',
+        fullscreenTarget: 'game',
         zoom: 1
     },
     render: {
@@ -303,6 +341,11 @@ const config: Phaser.Types.Core.GameConfig = {
                 key: 'dialoguePlugin',
                 mapping: 'dialogue',
                 plugin: DialoguePlugin
+            },
+            {
+                key: 'modalPlugin',
+                mapping: 'modal',
+                plugin: ModalPlugin
             }
         ]
     },

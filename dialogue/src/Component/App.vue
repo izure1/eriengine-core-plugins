@@ -49,10 +49,10 @@ export default class AppComponent extends Vue {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import 'vuetify/dist/vuetify.min.css';
 
-.v-application--wrap {
+.v-application >>> .v-application--wrap {
     max-width: initial !important;
     min-height: initial !important;
 }

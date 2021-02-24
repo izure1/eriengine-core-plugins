@@ -222,7 +222,9 @@ class ModalPlugin extends Phaser.Plugins.ScenePlugin {
     }
 
     private destroyApp(): void {
-        this.parent.removeChild(ModalPlugin.AppWrapper!)
+        if (ModalPlugin.AppWrapper) {
+            this.parent.removeChild(ModalPlugin.AppWrapper!)
+        }
         ModalPlugin.App?.$destroy()
         ModalPlugin.App = null
     }

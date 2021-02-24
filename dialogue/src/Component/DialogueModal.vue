@@ -34,7 +34,7 @@
                     />
                 </div>
             </v-card-text>
-            <v-divider />
+            <v-divider v-if="modal.buttons.length" />
             <v-card-actions>
                 <v-spacer />
                 <v-btn

@@ -31,9 +31,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     }
 
     boot(): void {
-        this.scene.events.once(Phaser.Scenes.Events.CREATE, (): void => {
-            this.setWorldSize(this.side)
-        })
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
     }
@@ -55,6 +52,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         this.destroyFloors()
         this.destroyWalls()
         this.destroySensors()
+        this.destroyBounds()
         this.easystarset.clear()
     }
 
@@ -185,9 +183,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         const p11 = p6
 
         // isometric shape wall
-        if (this.bounds) {
-            this.scene.matter.world.remove(this.bounds)
-        }
+        this.destroyBounds()
+
         this.bounds = this.scene.matter.add.fromVertices(this.center.x, this.center.y, [
             p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11
         ], { isStatic: true })
@@ -198,6 +195,14 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
             this.center.y - (y / 2),
             x, y
         )
+    }
+
+    /** 씬에 아이소메트릭 월드 경계를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
+    private destroyBounds(): void {
+        if (this.bounds) {
+            this.scene.matter.world.remove(this.bounds)
+            this.scene.cameras.main.removeBounds()
+        }
     }
 
     /**

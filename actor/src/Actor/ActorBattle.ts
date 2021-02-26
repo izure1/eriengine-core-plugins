@@ -3,7 +3,7 @@ import { Actor } from './Actor'
 import { ActorDot } from './ActorDot'
 import { Vector2 } from '@common/Math/MathUtil'
 
-export type ActorForce = 'all'|'all-except-me'|'allies'|'enemies'|'both'|'neutral'
+export type ActorForce = 'all'|'me'|'all-except-me'|'allies'|'enemies'|'both'|'neutral'
 export interface HitInformation {
     name?: string
     isMiss?: boolean
@@ -56,6 +56,10 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
         return this.actors
     }
 
+    get me(): Actor[] {
+        return [ this.actor! ]
+    }
+
     /** 해당 인스턴스를 제외한 씬에 추가된 모든 액터를 반환합니다. */
     get except(): Actor[] {
         return this.all.filter((actor: Actor): boolean => actor.battle !== this.actor?.battle)
@@ -93,6 +97,7 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
     private getAffiliatedActors(force: ActorForce): Actor[] {
         switch(force) {
             case 'all':             return this.all
+            case 'me':              return this.me
             case 'all-except-me':   return this.except
             case 'allies':          return this.allies
             case 'enemies':         return this.enemies
@@ -172,6 +177,12 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
      */
     deleteSkill(key: string): this {
         this.skillmap.delete(key)
+        return this
+    }
+
+    /** @alias useSkill for me */
+    useBuffForMe(key: string, point: Vector2, radius: number = 1): this {
+        this.useSkill(key, point, radius, 'me')
         return this
     }
 

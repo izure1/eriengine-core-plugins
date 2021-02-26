@@ -181,6 +181,7 @@ class Test extends Phaser.Scene {
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
 
         this.input.mouse.disableContextMenu()
+        this.map.setWorldSize(3000)
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
         // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')

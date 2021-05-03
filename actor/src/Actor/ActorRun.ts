@@ -271,7 +271,7 @@ export class ActorRun extends TypedEmitter<ActorRunEvent> {
      * @param time 씬이 시작한 후 흐른 시간(ms)입니다.
      * @param delta 이전 프레임과 현재 프레임 사이에 흐른 시간(ms)입니다. 게임은 일반적으로 60프레임이므로, 1/60초인 0.016초입니다.
      */
-    private update(time: number, delta: number): void {
+    private update(_time: number, _delta: number): void {
         this.routingAutomatic()
         this.moveAutomatic()
     }

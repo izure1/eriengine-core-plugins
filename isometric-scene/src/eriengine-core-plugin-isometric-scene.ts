@@ -26,10 +26,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     private side: number = 3000
     private bounds: MatterJS.BodyType|null = null
 
-    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
-        super(scene, pluginManager)
-    }
-
     boot(): void {
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))

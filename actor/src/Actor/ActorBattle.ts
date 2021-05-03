@@ -40,10 +40,10 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
     }
 
     /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
-    private get scene(): Phaser.Scene|null {
-        if (!this.actor) return null
-        return this.actor.world.scene
-    }
+    // private get scene(): Phaser.Scene|null {
+    //     if (!this.actor) return null
+    //     return this.actor.world.scene
+    // }
 
     /** 해당 액터 인스턴스가 속한 씬의 모든 액터를 반환합니다. */
     private get actors(): Actor[] {

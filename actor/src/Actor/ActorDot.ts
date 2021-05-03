@@ -34,10 +34,10 @@ export class ActorDot extends TypedEmitter<ActorDotEvent> {
     }
 
     /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
-    private get scene(): Phaser.Scene|null {
-        if (!this.actor) return null
-        return this.actor.world.scene
-    }
+    // private get scene(): Phaser.Scene|null {
+    //     if (!this.actor) return null
+    //     return this.actor.world.scene
+    // }
 
     /** 해당 액터 인스턴스가 속한 씬이 생성된 후 지난 시간(ms)입니다. *직접 호출하지 마십시오.* */
     private get now(): number {

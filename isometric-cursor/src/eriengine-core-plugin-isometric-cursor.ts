@@ -41,10 +41,6 @@ class SelectPlugin extends Phaser.Plugins.ScenePlugin {
 
     private __selects: Set<Phaser.GameObjects.GameObject> = new Set
 
-    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
-        super(scene, pluginManager)
-    }
-
     boot(): void {
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
         this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
@@ -351,10 +347,6 @@ class PointerPlugin extends Phaser.Plugins.ScenePlugin {
     private activity: boolean = true
     private thickness: number = 2
     private strokeColor: number = Phaser.Display.Color.GetColor(0, 255, 0)
-
-    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
-        super(scene, pluginManager)
-    }
 
     boot(): void {
         this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))

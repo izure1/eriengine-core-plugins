@@ -4,6 +4,7 @@ import { Plugin as IsomScenePlugin } from '~/isometric-scene'
 import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } from '~/isometric-cursor'
 import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
+// import { Plugin as DaylightPlugin } from '~/daylight'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
@@ -347,7 +348,12 @@ const config: Phaser.Types.Core.GameConfig = {
                 key: 'modalPlugin',
                 mapping: 'modal',
                 plugin: ModalPlugin
-            }
+            },
+            // {
+            //   key: 'daylightPlugin',
+            //   mapping: 'daylight',
+            //   plugin: DaylightPlugin
+            // }
         ]
     },
     physics: {

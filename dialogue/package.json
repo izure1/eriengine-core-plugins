@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-dialogue",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Dialogue plugin for Phaser 3",
   "main": "dist/dialogue/src/eriengine-core-plugin-dialogue.js",
   "scripts": {
@@ -17,30 +17,30 @@
     "vuetify": "^2.4.4"
   },
   "devDependencies": {
-    "ts-loader": "^8.0.7",
-    "typescript": "^4.0.5",
-    "webpack": "^5.8.0",
-    "webpack-cli": "^4.2.0",
-    "phaser": "^3.50.0",
-    "vue-template-compiler": "2.6.12",
-    "vue-loader": "15.9.5",
-    "css-loader": "4.3.0",
-    "style-loader": "2.0.0",
-    "vue-style-loader": "4.1.2",
-    "node-sass": "4.14.1",
-    "sass-loader": "10.1.0",
-    "url-loader": "4.1.1",
-    "@zerollup/ts-transform-paths": "1.7.18",
     "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-typescript": "^7.12.7",
-    "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
     "@mdi/font": "^5.8.55",
-    "babel-loader": "^8.2.2"
+    "@zerollup/ts-transform-paths": "1.7.18",
+    "babel-loader": "^8.2.2",
+    "css-loader": "4.3.0",
+    "node-sass": "5.0.0",
+    "phaser": "^3.54.0",
+    "sass-loader": "11.0.1",
+    "style-loader": "2.0.0",
+    "ts-loader": "^8.0.7",
+    "typescript": "^4.0.5",
+    "url-loader": "4.1.1",
+    "vue-loader": "15.9.5",
+    "vue-style-loader": "4.1.3",
+    "vue-template-compiler": "2.6.12",
+    "webpack": "^5.8.0",
+    "webpack-cli": "^4.2.0"
   },
   "peerDependencies": {
-    "phaser": "^3.50.0"
+    "phaser": "^3.54.0"
   }
 }

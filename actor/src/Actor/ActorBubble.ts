@@ -462,7 +462,7 @@ class ActorBubbleEmitter extends TypedEmitter<ActorBubbleEmitterEvent> {
      * @param time 
      * @param delta 
      */
-    update(time: number, delta: number): void {
+    update(_time: number, _delta: number): void {
         this.updatePosition()
     }
 
@@ -494,10 +494,10 @@ export class ActorBubble {
     }
 
     /** 해당 액터 인스턴스가 속한 씬을 반환합니다. 씬에 추가되어있지 않다면 `null`을 반환합니다. */
-    private get scene(): Phaser.Scene|null {
-        if (!this.actor) return null
-        return this.actor.world.scene
-    }
+    // private get scene(): Phaser.Scene|null {
+    //     if (!this.actor) return null
+    //     return this.actor.world.scene
+    // }
 
     /**
      * 말풍선 인스턴스를 반환합니다. 말풍선이 없다면 만든 뒤 반환하고, 존재한다면 가져와서 반환합니다.

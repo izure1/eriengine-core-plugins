@@ -34,7 +34,7 @@ enum BubbleEmotion {
     'SLEEP'         = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_SLEEP__',
 }
 
-type ArgumentTypes<T> = T extends new (...a: infer A) => any? A : [] 
+// type ArgumentTypes<T> = T extends new (...a: infer A) => any? A : [] 
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
     private actorset: Set<Actor> = new Set
@@ -56,15 +56,11 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         base64Load(scene, BubbleEmotion['SLEEP'], bubbleSleep)
     }
 
-    constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
-        super(scene, pluginManager)
-    }
-
     get actors(): Actor[] {
         return [ ...this.actorset ]
     }
 
-    private update(time: number, delta: number): void {
+    private update(_time: number, _delta: number): void {
     }
 
 

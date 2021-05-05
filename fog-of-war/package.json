@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-fog-of-war",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Fog of war plugin for Phaser 3",
   "main": "dist/fog-of-war/src/eriengine-core-plugin-fog-of-war.js",
   "scripts": {

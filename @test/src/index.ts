@@ -234,7 +234,7 @@ class Test extends Phaser.Scene {
             ]
         })
 
-        this.modal.get('test')?.open()
+        this.modal.get('test')?.open().close()
 
         this.cursor.enable(true)
         this.cursor.setGridSide(50)
@@ -245,7 +245,8 @@ class Test extends Phaser.Scene {
             console.log(this.select.select(selection))
         })
 
-        this.fow.setRevealer(this.player, 0x000000).setRadius(500)
+        this.fow.setRevealer(this.player).setRadius(500)
+        this.fow.changeDaylight('daytime', 10000, true)
         
         this.anims.create({
             key: 'hannah-stand',

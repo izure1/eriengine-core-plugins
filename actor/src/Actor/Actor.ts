@@ -53,7 +53,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
     }
 
     /** 씬의 메인카메라가 현재 액터를 따라다니는지 여부를 반환합니다. */
-    private get isCameraFollowing(): boolean {
+    get isCameraFollowing(): boolean {
         if (
             !this.scene ||
             !this.scene.cameras ||

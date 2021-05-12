@@ -17,6 +17,8 @@ import bubbleQuestion from '@assets/bubble-question.png'
 import bubbleShame from '@assets/bubble-shame.png'
 import bubbleSleep from '@assets/bubble-sleep.png'
 
+type Constructor<T> = { new (...args: any): T }
+
 enum BubbleEmotion {
     '?'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_QUESTION__',
     '!'             = '__ERIENGINE_CORE_PLUGIN_ACTOR_BUBBLE_EMOTION_KEY_EXCLAMATION__',
@@ -82,7 +84,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
      * @param ActorClass 추가할 액터 클래스입니다. Actor 추상클래스를 상속받은 클래스입니다.
      * @param args `ActorClass`의 생성자 매개변수입니다.
      */
-    addActor<T extends Actor, U extends { new (...args: any): T } = { new (...args: any): T }>(ActorClass: U, ...args: ConstructorParameters<U>) {
+    addActor<T extends Actor, U extends Constructor<T>>(ActorClass: U, ...args: ConstructorParameters<typeof ActorClass>): InstanceType<typeof ActorClass> {
         const actor = new ActorClass(...Array.from(args))
 
         this.actorset.add(actor)
@@ -91,7 +93,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
         actor.__initPlugin(this)
         actor.start()
 
-        return actor
+        return actor as any
     }
 
     /**

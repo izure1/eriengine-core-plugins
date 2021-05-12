@@ -177,7 +177,7 @@ class Test extends Phaser.Scene {
     }
     
     create(): void {
-        this.player     = this.actor.addActor<Player>(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
+        this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand') as Player
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
 

@@ -5,6 +5,7 @@ type Target = Phaser.GameObjects.Sprite&Phaser.GameObjects.Image
 type Revealer = Target&Phaser.GameObjects.Components.Transform
 
 class Plugin extends Phaser.Plugins.ScenePlugin {
+  private enabled: boolean = false
   private revealer: Revealer|null = null
   private light: Phaser.GameObjects.Light|null = null
   private daylight: number = 0
@@ -28,16 +29,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   /** `setRevealer` 메서드로 지정한 필터의 영향을 받는 씬 게임 오브젝트 목록을 반환합니다. */
   get targets(): Phaser.GameObjects.GameObject[] {
     return this.supportedTargets.filter(this.filter)
-  }
-
-  /**
-   * `setRevealer` 메서드로 지정한 필터를 통과한 게임 오브젝트를 lights pipeline을 활성화합니다.
-   * @param object 게임 오브젝트입니다.
-   */
-  private onAdded(object: Phaser.GameObjects.GameObject): void {
-    if (this.filter(object)) {
-      this.setActive(object)
-    }
   }
 
   /** lights pipeline 영향을 받을 게임 오브젝트 필터를 설정합니다. */
@@ -231,6 +222,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
    * @param nextDay 이 값을 `true`로 지정하면 현재 시각과 `time`이 같아도, 무조건 한 번 순회합니다. 가령 현재 시간이 `night`인데, `time`을 `night`로 지정하면 어떤 작동도 하지 않지만, 이 값을 `true`로 지정하면 하루를 순회합니다.
    */
   async changeDaylight(time: 'daytime'|'twilight'|'night', duration: number = 0, nextDay: boolean = false): Promise<void> {
+    if (!this.enabled) {
+      throw 'The \'enable\' method must be called first.'
+    }
+
     this.destroyDaylightTween()
 
     const daytime = [Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(255, 255, 255)]
@@ -308,6 +303,10 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
    * 기본값은 `() => true` 입니다. 이는 씬에 있는 모든 게임 오브젝트를 대상으로 전장의 안개를 활성화하겠다는 의미입니다.
    */
   setRevealer(target: Revealer, color: number = this.color, ambientColor: number = this.ambientColor, filter = this.filter): this {
+    if (!this.enabled) {
+      throw 'The \'enable\' method must be called first.'
+    }
+
     this.revealer = target
     this.color = color
     this.ambientColor = ambientColor
@@ -317,24 +316,41 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     this.destroyLight()
     this.generateLight(x, y)
     
-    this.scene.lights.enable()
-    this.scene.lights.setAmbientColor(this.ambientColor)
     return this
   }
 
-  /** 씬이 생성되었을 때 호출될 함수입니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
-  private onCreated(): void {
+  /**
+   * 해당 씬에 빛 효과 플러그인을 활성화합니다.
+   * `setRevealer`, `changeDaylight` 메서드를 사용하기 전에 해당 메서드를 먼저 호출해야 정상적으로 작동합니다.
+   * 이 작업은 돌이킬 수 없습니다. 빛 효과는 씬을 구별하지 않으므로 주의하십시오. 가령 gui씬에서 이 메서드로 플러그인을 활성화한다면 다른 씬의 빛의 영향을 받게 됩니다.
+   */
+  enable(): this {
+    if (this.enabled) {
+      return this
+    }
+
     this.setInactive(...this.scene.children.list)
     this.setActive(...this.targets)
 
     this.scene.lights.enable()
     this.scene.lights.setAmbientColor(this.ambientColor)
+    this.enabled = true
+    return this
+  }
+
+  /**
+   * `setRevealer` 메서드로 지정한 필터를 통과한 게임 오브젝트를 lights pipeline을 활성화합니다.
+   * @param object 게임 오브젝트입니다.
+   */
+  private onAdded(object: Phaser.GameObjects.GameObject): void {
+    if (this.enabled && this.filter(object)) {
+      this.setActive(object)
+    }
   }
 
   boot(): void {
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
     this.scene.events.on(Phaser.Scenes.Events.ADDED_TO_SCENE, this.onAdded.bind(this))
-    this.scene.events.on(Phaser.Scenes.Events.CREATE, this.onCreated.bind(this))
   }
 
   /**

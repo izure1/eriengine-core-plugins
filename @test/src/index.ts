@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import * as Key from 'keycode-js'
 import { Plugin as ActorPlugin, Actor } from '~/actor'
 import { Plugin as IsomScenePlugin } from '~/isometric-scene'
 import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } from '~/isometric-cursor'
@@ -177,7 +178,6 @@ class Test extends Phaser.Scene {
     }
     
     create(): void {
-      var a = this.actor.addActor(Player, 'izure', this, 100, 100, 'asdf')
         this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
@@ -246,8 +246,8 @@ class Test extends Phaser.Scene {
             console.log(this.select.select(selection))
         })
 
-        this.fow.setRevealer(this.player).setRadius(500)
-        this.fow.changeDaylight('daytime', 10000, true)
+        //this.fow.setRevealer(this.player).setRadius(500)
+        // this.fow.enable().setRevealer(this.player).changeDaylight('daytime', 10000, true)
         
         this.anims.create({
             key: 'hannah-stand',
@@ -265,11 +265,11 @@ class Test extends Phaser.Scene {
 
 
         this.input.on(Phaser.Input.Events.POINTER_DOWN, async (e: Phaser.Input.Pointer): Promise<void> => {
-            if (e.button === 2) {
-                if (this.player && this.player.active) {
-                    this.player.run.to(await this.map.getRoutes(this.player, this.cursor.pointer))
-                }
+          if (e.button === 2) {
+            if (this.player && this.player.active) {
+              this.player.run.to(await this.map.getRoutes(this.player, this.cursor.pointer))
             }
+          }
         })
 
         console.log(this.player, this)

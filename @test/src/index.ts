@@ -5,6 +5,7 @@ import { Plugin as IsomScenePlugin } from '~/isometric-scene'
 import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } from '~/isometric-cursor'
 import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
+import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
 // import { Plugin as DaylightPlugin } from '~/daylight'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
@@ -155,9 +156,11 @@ class Test extends Phaser.Scene {
     private modal!: ModalPlugin
     private actor!: ActorPlugin
     private fow!: FowPlugin
+    private spatial!: SpatialAudioPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
     private side: number = 3000
+    private bgm!: SpatialAudio
 
     constructor() {
         super({ key: 'test', active: true })
@@ -175,15 +178,22 @@ class Test extends Phaser.Scene {
         this.load.image('character-sample', '/assets/img/character-sample.png')
         this.load.image('tile-stone', '/assets/img/stones.png')
         this.load.image('logo', '/assets/img/logo.png')
+
+        this.load.audio('bgm', '/assets/audio/bgm.mp3')
     }
     
     create(): void {
-        this.player     = this.actor.addActor(Player, 'izure', this, 100, 100, 'sprite-hannah-stand')
+        this.player     = this.actor.addActor(Player, 'izure', this, 0, 0, 'sprite-hannah-stand')
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
 
         this.input.mouse.disableContextMenu()
         this.map.setWorldSize(3000)
+
+        this.sound.pauseOnBlur = false
+        this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
+        this.bgm.setLoop(true).setThresholdRadius(1000).setVolume(1).play()
+        console.log(this.bgm)
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
         // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
@@ -295,6 +305,22 @@ class Test extends Phaser.Scene {
                 this.map.setWalltile(x, y, 'wall-basic-right')
             }
         }
+
+        if (this.player) {
+          // this.bgm.setPosition(this.player)
+          // const distanceThreshold = 1000; //This is the max distance from the object. Any farther and no sound is played.
+          // const distanceToObject = Phaser.Math.Distance.BetweenPoints(this.player, { x: 0, y: 0 })
+          // let normalizedSound = 1 - (distanceToObject / distanceThreshold)
+          // // let normalizedVolume = Phaser.Math.
+
+          // // if (normalizedSound < 0) {
+          // //   normalizedSound = 0
+          // // }
+
+          // // this.bgm.setPan(distanceToObject / distanceThreshold)
+          // // console.log(normalizedSound, distanceToObject / distanceThreshold)
+          // this.bgm.volume = Phaser.Math.Easing.Sine.In(normalizedSound)
+        }
     }
 }
 
@@ -351,6 +377,11 @@ const config: Phaser.Types.Core.GameConfig = {
                 mapping: 'modal',
                 plugin: ModalPlugin
             },
+            {
+              key: 'spatialAudioPlugin',
+              mapping: 'spatial',
+              plugin: SpatialAudioPlugin
+            }
             // {
             //   key: 'daylightPlugin',
             //   mapping: 'daylight',

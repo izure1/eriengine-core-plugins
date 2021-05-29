@@ -203,8 +203,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     /** 씬에 아이소메트릭 월드 경계를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private destroyBounds(): void {
         if (this.bounds) {
-            this.scene.matter.world.remove(this.bounds)
-            this.scene.cameras.main.removeBounds()
+            this.scene.matter?.world?.remove(this.bounds)
+            this.scene.cameras?.main?.removeBounds()
         }
     }
 

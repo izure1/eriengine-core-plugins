@@ -194,7 +194,7 @@ class Test extends Phaser.Scene {
         this.sound.pauseOnBlur = false
         this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
         this.bgm.setLoop(true).setThresholdRadius(1000).setVolume(1).play()
-        this.sound.add('effect-chicken', { loop: true }).play({ delay: 3 })
+        // this.sound.add('effect-chicken', { loop: true }).play({ delay: 3 })
         console.log(this.bgm)
 
         // this.dialogue.addCharacter('character-sample', -150, 50)

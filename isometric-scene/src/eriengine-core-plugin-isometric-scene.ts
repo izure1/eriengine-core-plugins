@@ -73,12 +73,19 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
      * 게임 오브젝트가 활성화(`active`)되어 있지 않다면 포함되지 않습니다.
      */
     get obstacles(): IsometricObject[] {
-        return this.scene.children.list.filter((children: Phaser.GameObjects.GameObject): boolean => {
+        return this.scene.children.list.filter((children) => {
             if (!children.active) {
                 return false
             }
             if (!children.body) {
                 return false
+            }
+            if (
+              (children as any).isSensor &&
+              (children as any).isSensor.call &&
+              (children as any).isSensor()
+            ) {
+              return false
             }
             if ( !('side' in children) ) {
                 return false

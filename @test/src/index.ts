@@ -180,6 +180,7 @@ class Test extends Phaser.Scene {
         this.load.image('logo', '/assets/img/logo.png')
 
         this.load.audio('bgm', '/assets/audio/bgm.mp3')
+        this.load.audio('effect-chicken', '/assets/audio/effect-chicken.mp3')
     }
     
     create(): void {
@@ -193,6 +194,7 @@ class Test extends Phaser.Scene {
         this.sound.pauseOnBlur = false
         this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
         this.bgm.setLoop(true).setThresholdRadius(1000).setVolume(1).play()
+        this.sound.add('effect-chicken', { loop: true }).play({ delay: 3 })
         console.log(this.bgm)
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
@@ -287,23 +289,23 @@ class Test extends Phaser.Scene {
 
     update(): void {
         if (this.player && this.player.active) {
-            x = ~~this.player.x
-            y = ~~this.player.y
+          x = ~~this.player.x
+          y = ~~this.player.y
         }
 
         if (this.input.mousePointer.leftButtonDown()) {
-            const { x, y } = this.cursor.pointer
-            if (!this.shiftKey.isDown && !this.ctrlKey.isDown) {
-                const user: User = this.actor.addActor(User, performance.now().toString(), this, 0, 0, 'sprite-hannah-stand')
-                user.setPosition(x, y)
-                user.run.useMovingKey('wasd')
-            }
-            else if (this.shiftKey.isDown) {
-                this.map.setSensortile(x, y, 50)
-            }
-            else {
-                this.map.setWalltile(x, y, 'wall-basic-right')
-            }
+          const { x, y } = this.cursor.pointer
+          if (!this.shiftKey.isDown && !this.ctrlKey.isDown) {
+              const user: User = this.actor.addActor(User, performance.now().toString(), this, 0, 0, 'sprite-hannah-stand')
+              user.setPosition(x, y)
+              user.run.useMovingKey('wasd')
+          }
+          else if (this.shiftKey.isDown) {
+              this.map.setWalltile(x, y, 'wall-basic-right').setSensor(true)
+          }
+          else {
+              this.map.setWalltile(x, y, 'wall-basic-right')
+          }
         }
 
         if (this.player) {

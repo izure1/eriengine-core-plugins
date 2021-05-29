@@ -177,6 +177,7 @@ export class SpatialAudio extends Phaser.Sound.WebAudioSound {
    * *절대 직접 호출하지 마십시오.*
    */
   update(): void {
+    super.update()
     this.updateSpatial()
   }
 }

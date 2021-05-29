@@ -194,8 +194,12 @@ class Test extends Phaser.Scene {
         this.sound.pauseOnBlur = false
         this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
         this.bgm.setLoop(true).setThresholdRadius(1000).setVolume(1).play()
-        // this.sound.add('effect-chicken', { loop: true }).play({ delay: 3 })
         console.log(this.bgm)
+
+        const chicken = this.sound.add('effect-chicken')
+        chicken.on(Phaser.Sound.Events.COMPLETE, () => {
+          chicken.play({ delay: 3 })
+        }).play()
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
         // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
@@ -259,7 +263,7 @@ class Test extends Phaser.Scene {
         })
 
         //this.fow.setRevealer(this.player).setRadius(500)
-        // this.fow.enable().setRevealer(this.player).changeDaylight('daytime', 10000, true)
+        this.fow.enable().setRevealer(this.player).changeDaylight('daytime', 10000, true)
         
         this.anims.create({
             key: 'hannah-stand',

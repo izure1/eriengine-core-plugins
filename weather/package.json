@@ -1,8 +1,8 @@
 {
-  "name": "@eriengine/plugin-fog-of-war",
-  "version": "1.3.0",
-  "description": "Fog of war plugin for Phaser 3",
-  "main": "dist/fog-of-war/src/eriengine-core-plugin-fog-of-war.js",
+  "name": "@eriengine/plugin-weather",
+  "version": "1.0.0",
+  "description": "Weather effect plugin for Phaser 3",
+  "main": "dist/weather/src/eriengine-core-plugin-weather.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"

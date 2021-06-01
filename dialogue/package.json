@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-dialogue",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": "Dialogue plugin for Phaser 3",
   "main": "dist/dialogue/src/eriengine-core-plugin-dialogue.js",
   "scripts": {

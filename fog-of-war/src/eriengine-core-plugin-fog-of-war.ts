@@ -55,7 +55,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
       if ( !('setPipeline' in target) ) {
         continue
       }
-      const object: Target = target
+      const object: Target = target as Target
       object.setPipeline(Phaser.Renderer.WebGL.Pipelines.LIGHT_PIPELINE)
     }
     if (this.revealer) {
@@ -75,7 +75,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
       if ( !('setPipeline' in target) ) {
         continue
       }
-      const object: Target = target
+      const object: Target = target as Target
       object.resetPipeline()
     }
   }

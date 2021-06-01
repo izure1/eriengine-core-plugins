@@ -6,7 +6,7 @@ import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } f
 import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
 import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
-// import { Plugin as DaylightPlugin } from '~/daylight'
+import { Plugin as WeatherPlugin } from '~/weather'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
@@ -157,6 +157,7 @@ class Test extends Phaser.Scene {
     private actor!: ActorPlugin
     private fow!: FowPlugin
     private spatial!: SpatialAudioPlugin
+    private weather!: WeatherPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
     private side: number = 3000
@@ -196,14 +197,14 @@ class Test extends Phaser.Scene {
         this.bgm.setLoop(true).setThresholdRadius(1000).setVolume(1).play()
         console.log(this.bgm)
 
-        const chicken = this.sound.add('effect-chicken')
-        chicken.on(Phaser.Sound.Events.COMPLETE, () => {
-          chicken.play({ delay: 3 })
-        }).play()
+        // const chicken = this.sound.add('effect-chicken')
+        // chicken.on(Phaser.Sound.Events.COMPLETE, () => {
+        //   chicken.play({ delay: 3 })
+        // }).play()
 
         // this.dialogue.addCharacter('character-sample', -150, 50)
         // this.dialogue.say('character-sample', '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
-        this.dialogue.setUsingScene('coordinate').addDialogue('main', 'bottom-fullwidth')
+        this.dialogue.setUsingScene('coordinate').addDialogue('main', 'monologue')
         //this.dialogue.get('main')?.say('내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야. 내 곁에서 상당히 많은 자매들이 전투를 치렀지. 어떤 임무라도 누나한테 맡겨주렴. 우후후……')
         this.dialogue.get('main')?.speech([
             '내가 바로 타카오급 중순양함 2번함, 제2함대 기함——아타고야.',
@@ -263,7 +264,9 @@ class Test extends Phaser.Scene {
         })
 
         //this.fow.setRevealer(this.player).setRadius(500)
-        this.fow.enable().setRevealer(this.player).changeDaylight('daytime', 10000, true)
+        this.fow.enable().setRevealer(this.player).changeDaylight('twilight', 10000, true)
+        //this.cameras.main.setPostPipeline(GloomyPostFX)//.setPostPipeline(GloomyPostFX)
+        this.weather.changeWeather('rainy')
         
         this.anims.create({
             key: 'hannah-stand',
@@ -336,12 +339,18 @@ const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.WEBGL,
     scene: [ Test, CoordinateSystem ],
     scale: {
-        parent: 'game',
-        fullscreenTarget: 'game',
-        zoom: 1
+      mode: Phaser.Scale.ScaleModes.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
+      parent: 'game',
+      fullscreenTarget: 'game',
+      zoom: 1
     },
     render: {
-        maxLights: 10
+        maxLights: 10,
+        // pipeline: {
+        //   GloomyPostFX,
+        //   DreamPostFX
+        // } as any,
     },
     dom: {
         createContainer: true
@@ -387,6 +396,11 @@ const config: Phaser.Types.Core.GameConfig = {
               key: 'spatialAudioPlugin',
               mapping: 'spatial',
               plugin: SpatialAudioPlugin
+            },
+            {
+              key: 'weatherPlugin',
+              mapping: 'weather',
+              plugin: WeatherPlugin
             }
             // {
             //   key: 'daylightPlugin',

@@ -8,9 +8,9 @@ export class SpatialAudio extends Phaser.Sound.WebAudioSound {
    */
   isListenerOnCamera: boolean = true
   /** 사운드가 발생하는 씬의 x좌표입니다. 청취자의 위치와 `this.thresholdRadius` 값을 계산하여 사운드의 크기가 조정됩니다. */
-  x!: number
+  declare x: number
   /** 사운드가 발생하는 씬의 y좌표입니다. 청취자의 위치와 `this.thresholdRadius` 값을 계산하여 사운드의 크기가 조정됩니다. */
-  y!: number
+  declare y: number
   private readonly scene!: Phaser.Scene
   private readonly spatialPannerNode!: PannerNode
   private readonly spatialListener!: AudioListener

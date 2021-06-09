@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-spatial-audio",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Spatial audio plugin for Phaser 3",
   "main": "dist/spatial-audio/src/eriengine-core-plugin-spatial-audio.js",
   "scripts": {

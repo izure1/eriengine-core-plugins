@@ -1,8 +1,8 @@
 {
-  "name": "@eriengine/plugin-weather",
+  "name": "@eriengine/plugin-environment",
   "version": "1.0.0",
-  "description": "Weather effect plugin for Phaser 3",
-  "main": "dist/weather/src/eriengine-core-plugin-weather.js",
+  "description": "environment effect plugin for Phaser 3",
+  "main": "dist/environment/src/eriengine-core-plugin-environment.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"

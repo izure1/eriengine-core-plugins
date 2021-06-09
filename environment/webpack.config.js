@@ -5,15 +5,15 @@ const mode = process.env.NODE_ENV ? process.env.NODE_ENV.trim() : 'production'
 module.exports = {
     mode,
     entry: {
-        'eriengine-core-plugin-weather': [
+        'eriengine-core-plugin-environment': [
             '@babel/polyfill',
-            path.resolve(__dirname, 'src', 'eriengine-core-plugin-weather.ts')
+            path.resolve(__dirname, 'src', 'eriengine-core-plugin-environment.ts')
         ]
     },
     output: {
-        path: path.resolve(__dirname, 'dist', 'weather', 'src'),
+        path: path.resolve(__dirname, 'dist', 'environment', 'src'),
         filename: '[name].js',
-        library: 'eriengine-core-plugin-weather',
+        library: 'eriengine-core-plugin-environment',
         libraryTarget: 'umd'
     },
     externals: [

@@ -68,8 +68,9 @@ export class DreamPostFX extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline 
     } as WebGLPipelineConfig)
   }
 
-  onPreRender() {
+  onPreRender(): void {
     const r = Math.abs(2 * Math.sin(this.game.loop.time * 10))
+    
     this.set1f('uResolution', this.renderer.width)
     this.set1f('radius', r)
     this.set2f('dir', 1.0, 1.0)

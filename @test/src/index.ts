@@ -7,6 +7,7 @@ import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
 import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
 import { Plugin as EnvironmentPlugin } from '~/environment'
+import { Plugin as FeelingPlugin } from '~/feeling'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
@@ -30,35 +31,35 @@ class User extends Actor {
     }
 
     private initParticle(): void {
-        this.particle
-            .add('effect', 'particle-red', false, { speed: 1500 })
-            .add('explode', 'particle-flash')
-            .add('dead', 'sprite-hannah-stand', true, { speed: 500, lifespan: 100 })
-            .pause('explode').pause('dead').pause('effect')
+      this.particle
+        .add('effect', 'particle-red', false, { speed: 1500 })
+        .add('explode', 'particle-flash')
+        .add('dead', 'sprite-hannah-stand', true, { speed: 500, lifespan: 100 })
+        .pause('explode').pause('dead').pause('effect')
     }
 
     private initBattle(): void {
-        this.battle.on('get-hit', (from, { key, damage }): void => {
-            this.bubble.of('message').say(`윽! ${from.name}로부터 ${damage}만큼의 딜을 받았다!`)
-            if (damage) {
-                const min: number = Phaser.Math.MinSub(this.hp, damage, 0)
-                this.hp = min
-            }
-            if (this.hp <= 0) {
-                this.battle.defeat()
-                this.destroy()
-            }
-        })
-        this.battle.on('win', (from): void => {
-            this.bubble.of('message').say(`와! ${from.name}로부터 승리했다!`)
-        })
+      this.battle.on('get-hit', (from, { key, damage }): void => {
+        this.bubble.of('message').say(`윽! ${from.name}로부터 ${damage}만큼의 딜을 받았다!`)
+        if (damage) {
+          const min: number = Phaser.Math.MinSub(this.hp, damage, 0)
+          this.hp = min
+        }
+        if (this.hp <= 0) {
+          this.battle.defeat()
+          this.destroy()
+        }
+      })
+      this.battle.on('win', (from): void => {
+        this.bubble.of('message').say(`와! ${from.name}로부터 승리했다!`)
+      })
     }
 
     start(): void {
-        this.initBubble()
-        this.initParticle()
-        this.initBattle()
-        this.play('hannah-stand', true)
+      this.initBubble()
+      this.initParticle()
+      this.initBattle()
+      this.play('hannah-stand', true)
     }
 
     update(): void {
@@ -107,13 +108,37 @@ class Player extends User {
                 })
                 return { damage: 1 }
             })
+            .addSkill('missile', (target, dot) => {
+              const actors = this.getAroundActors(1000, undefined, true)
+              
+              if (actors.length <= 0) {
+                return {}
+              }
+              
+              const rocket = this.bullet.addMissile(this, 'rocket', undefined, (_e, pair) => {
+                if (pair instanceof Player) {
+                  return
+                }
+                if (pair instanceof User) {
+                  pair.destroy()
+                }
+                rocket.destroy()
+              }, () => {
+                rocket.particle.explode('flame', 30)
+              })
+              rocket.fireMissile(rocket.getAngleBetween(actors[0]), 0.1, 0.01, actors[0])
+              rocket.particle.add('flame', 'particle-flash', false)
+
+              return {}
+            })
     }
 
     update(): void {
         super.update()
         if (this.spaceKey.isDown) {
-            this.particle.explode('effect', 20)
-            this.battle.useSkill('confuse', this, 250, 'all-except-me')
+            // this.particle.explode('effect', 20)
+            // this.battle.useSkill('confuse', this, 250, 'all-except-me')
+            this.battle.useSkill('missile', this, 1, 'me')
         }
     }
 }
@@ -157,9 +182,10 @@ class Test extends Phaser.Scene {
     private fow!: FowPlugin
     private spatial!: SpatialAudioPlugin
     private environment!: EnvironmentPlugin
+    private feeling!: FeelingPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
-    private side: number = 3000
+    private side: number = 5000
     private bgm!: SpatialAudio
 
     constructor() {
@@ -178,6 +204,7 @@ class Test extends Phaser.Scene {
         this.load.image('character-sample', '/assets/img/character-sample.png')
         this.load.image('tile-stone', '/assets/img/stones.png')
         this.load.image('logo', '/assets/img/logo.png')
+        this.load.image('rocket', '/assets/img/rocket.png')
 
         this.load.audio('bgm', '/assets/audio/bgm.mp3')
         this.load.audio('effect-chicken', '/assets/audio/effect-chicken.mp3')
@@ -199,13 +226,15 @@ class Test extends Phaser.Scene {
           .setVolume(0.3)
           .play()
 
-        this.fow
-          .enable()
-          .setRevealer(this.player)
-          .changeDaylight('night', 0, true)
+        // this.fow
+        //   .enable()
+        //   .setRevealer(this.player)
+        //   .changeDaylight('night', 0, true)
 
-        this.environment
-          .addEnvironment('frozen')
+        // this.environment
+        //   .addEnvironment('frozen')
+
+        // this.feeling.hit({ r: 0, g: 0, b: 0 }, 1, 0.15)
 
         // const chicken = this.sound.add('effect-chicken')
         // chicken.on(Phaser.Sound.Events.COMPLETE, () => {
@@ -403,6 +432,11 @@ const config: Phaser.Types.Core.GameConfig = {
               key: 'EnvironmentPlugin',
               mapping: 'environment',
               plugin: EnvironmentPlugin
+            },
+            {
+              key: 'FeelingPlugin',
+              mapping: 'feeling',
+              plugin: FeelingPlugin
             }
             // {
             //   key: 'daylightPlugin',
@@ -414,7 +448,7 @@ const config: Phaser.Types.Core.GameConfig = {
     physics: {
         default: 'matter',
         matter: {
-            debug: true,
+            // debug: true,
             gravity: {
                 x: 0,
                 y: 0

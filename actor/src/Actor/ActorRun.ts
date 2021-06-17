@@ -227,7 +227,7 @@ export class ActorRun extends TypedEmitter<ActorRunEvent> {
         let down:   Phaser.Input.Keyboard.Key|null
         let left:   Phaser.Input.Keyboard.Key|null
         let right:  Phaser.Input.Keyboard.Key|null
-        switch(method) {
+        switch (method) {
             case 'arrow':
                 up      = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP)
                 down    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
@@ -263,6 +263,7 @@ export class ActorRun extends TypedEmitter<ActorRunEvent> {
         this.downKey    = null
         this.leftKey    = null
         this.rightKey   = null
+        this.isStopWhenDepress = true
         return this
     }
 

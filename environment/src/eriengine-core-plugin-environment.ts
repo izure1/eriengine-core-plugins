@@ -1,5 +1,5 @@
 import { getSmaller } from '@common/Math/MathUtil'
-import Phaser, { Cameras } from 'phaser'
+import Phaser from 'phaser'
 
 import { BurningPostFX } from './Pipelines/BurningPostFX'
 export { BurningPostFX } from './Pipelines/BurningPostFX'
@@ -60,7 +60,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     return this.scene.cameras.main
   }
 
-  private get postPipelineClasses(): Map<string, Constructor<Phaser.Renderer.WebGL.Pipelines.PostFXPipeline>> {
+  private get postPipelineClasses(): Map<keyof typeof PostPipeline, Constructor<Phaser.Renderer.WebGL.Pipelines.PostFXPipeline>> {
     return (this.systems.renderer as any).pipelines.postPipelineClasses
   }
 

@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-environment",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "environment effect plugin for Phaser 3",
   "main": "dist/environment/src/eriengine-core-plugin-environment.js",
   "scripts": {

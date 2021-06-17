@@ -1,0 +1,1 @@
+export type WebGLPipelineConfig = Phaser.Types.Renderer.WebGL.WebGLPipelineConfig & { uniforms: string[] }

@@ -42,34 +42,42 @@ class SelectPlugin extends Phaser.Plugins.ScenePlugin {
     private __selects: Set<Phaser.GameObjects.GameObject> = new Set
 
     boot(): void {
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
-        this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
+      this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
+      this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
 
-        this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (e: Phaser.Input.Pointer): void => {
-            switch (e.button) {
-                case 0:
-                    this.onMouseLeftDown(e)
-                    break
-            }
-        })
+      this.scene.input.on(Phaser.Input.Events.POINTER_DOWN, (e: Phaser.Input.Pointer): void => {
+        switch (e.button) {
+          case 0:
+            this.onMouseLeftDown(e)
+            break
+        }
+      })
 
-        this.scene.input.on(Phaser.Input.Events.POINTER_UP, (e: Phaser.Input.Pointer): void => {
-            switch (e.button) {
-                case 0:
-                    this.onMouseLeftUp(e)
-                    break
-            }
-        })
+      this.scene.input.on(Phaser.Input.Events.POINTER_UP, (e: Phaser.Input.Pointer): void => {
+        switch (e.button) {
+          case 0:
+            this.onMouseLeftUp(e)
+            break
+        }
+      })
+      
+      this.scene.input.on(Phaser.Input.Events.POINTER_UP_OUTSIDE, (e: Phaser.Input.Pointer): void => {
+        switch (e.button) {
+          case 0:
+            this.onMouseLeftUp(e)
+            break
+        }
+      })
+      
+      this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (e: Phaser.Input.Pointer): void => {
+        switch (e.buttons) {
+          case 1:
+            this.onMouseLeftDrag(e)
+            break
+        }
+      })
 
-        this.scene.input.on(Phaser.Input.Events.POINTER_MOVE, (e: Phaser.Input.Pointer): void => {
-            switch (e.buttons) {
-                case 1:
-                    this.onMouseLeftDrag(e)
-                    break
-            }
-        })
-
-        this.generateRectangle()
+      this.generateRectangle()
     }
 
     /** `enable` 메서드를 이용해 해당 기능이 활성화 되어 있는지 여부를 반환합니다. */
@@ -411,22 +419,26 @@ class PointerPlugin extends Phaser.Plugins.ScenePlugin {
      * 커서 포인터의 좌표는 실제 마우스 포인터의 위치와 동일하지 않습니다. 커서 포인터 크기에 따라 달라지기 때문입니다.
      * 이 메서드는 커서 포인터 크기를 이용하여 특정 씬의 좌표 위치를 커서 포인터의 위치로 변환할 수 있습니다.
      * @param point 씬의 좌표입니다.
+     * @param side 아이소메트릭 커서의 한 변의 길이입니다. 기본값은 `this.side` 입니다.
+     * @param isoOrigin 아이소메트릭 xy좌표 `0,0`가 데카르트 좌표로 어느 위치인지 기준점을 지정합니다. 기본값은 `0,0` 입니다.
      */
-    calcCursorOffset(point: Point2): Point2 {
-        const isoOffset: Point2 = toIsometricCoord({
-            x: point.x,
-            y: point.y,
-        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
+    calcCursorOffset(point: Point2, side: number = this.side, isoOrigin: Point2 = this.isoOrigin): Point2 {
+      const isoW = getIsometricWidth(side)
+      const isoH = getIsometricHeight(side)
+      const isoOffset: Point2 = toIsometricCoord({
+        x: point.x,
+        y: point.y,
+      }, isoOrigin.x, isoOrigin.y, isoW, isoH)
 
-        const sceneOffset: Point2 = toCartesianCoord({
-            x: Math.round(isoOffset.x),
-            y: Math.round(isoOffset.y),
-        }, this.isoOrigin.x, this.isoOrigin.y, this.isoW, this.isoH)
+      const sceneOffset: Point2 = toCartesianCoord({
+        x: Math.round(isoOffset.x),
+        y: Math.round(isoOffset.y),
+      }, isoOrigin.x, isoOrigin.y, isoW, isoH)
 
-        const x: number = sceneOffset.x
-        const y: number = sceneOffset.y
+      const x: number = sceneOffset.x
+      const y: number = sceneOffset.y
 
-        return { x, y }
+      return { x, y }
     }
 
     /**

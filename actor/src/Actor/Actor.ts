@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { createIsometricDiamondPoints, getIsometricSide, GridObject } from '@common/Math/MathUtil'
+import { createIsometricDiamondPoints, getIsometricSide, GridObject, Point2, getAngleBetweenPoints } from '@common/Math/MathUtil'
 import { Plugin as ActorPlugin } from '../eriengine-core-plugin-actor'
 import { ActorBattle } from './ActorBattle'
 import { ActorRun } from './ActorRun'
@@ -79,7 +79,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
 
   /** 액터가 가지는 충돌체의 한 변의 길이입니다. */
   get side(): number {
-    const xHalf: number = this.displayWidth / 2
+    const xHalf = this.displayWidth / 2
 
     return getIsometricSide(xHalf)
   }
@@ -158,10 +158,18 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
    * @param sortByDistance 검색된 리스트를 액터의 좌표로부터 가까운 순서대로 정렬해서 반환할 것인지 여부를 지정합니다.
    */
   getAroundActors(radius: number, actors: Actor[] = this.plugin.actors, sortByDistance: boolean = false): Actor[] {
-    const { x, y } = this
-    const list: Actor[] = this.plugin.getActorsInArea(x, y, radius, actors, sortByDistance)
-    list.splice(list.indexOf(this), 1)
-    return list
+    const aroundActors = this.plugin.getActorsInArea(this.x, this.y, radius, actors, sortByDistance)
+    aroundActors.splice(aroundActors.indexOf(this), 1)
+    return aroundActors
+  }
+
+  /**
+   * 대상과의 각도를 구합니다.
+   * @param to 대상의 위치입니다.
+   * @returns 액터를 기준으로 대상을 향하는 각도를 반환합니다.
+   */
+  getAngleBetween(to: Point2): number {
+    return getAngleBetweenPoints(this, to)
   }
 
   /**

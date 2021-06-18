@@ -101,6 +101,16 @@ export function getSmaller(a: number, b: number): number {
 }
 
 /**
+ * 두 점 사이의 각도를 구합니다.
+ * @param from 기준점의 위치입니다.
+ * @param to 대상의 위치입니다.
+ * @returns 기준점을 기준으로 대상을 향하는 각도를 반환합니다.
+ */
+export function getAngleBetweenPoints(from: Point2, to: Point2): number {
+  return radToAngle(Math.atan2(to.y - from.y, to.x - from.x))
+}
+
+/**
  * 특정 좌표를 기준으로 수색 반지름 내에 포인트가 존재하는지 여부를 반환합니다.
  * @param co 범위 내 포인트를 찾아내고자 하는 중심좌표입니다
  * @param po 포인트의 좌표입니다

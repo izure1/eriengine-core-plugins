@@ -1,6 +1,6 @@
 import Phaser from 'phaser'
 import { Actor } from '../Actor'
-import { Point2 } from '@common/Math/MathUtil'
+import { Point2, getAngleBetweenPoints } from '@common/Math/MathUtil'
 import { ActorParticle } from '@common/Phaser/ActorParticle'
 import { CollideHandler, CollideObject, BeforeDestroyHandler } from './types'
 
@@ -47,7 +47,7 @@ export class Bullet extends Phaser.Physics.Matter.Sprite {
    * @returns 대상을 향하는 각도를 반환합니다.
    */
   getAngleBetween(target: Point2): number {
-    return this.actor.bullet.getAngleBetweenPoints(this, target)
+    return getAngleBetweenPoints(this, target)
   }
 
   /**

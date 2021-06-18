@@ -149,14 +149,4 @@ export class ActorBullet {
 
     return bullet
   }
-
-  /**
-   * 두 점 사이의 각도를 구합니다.
-   * @param from 기준점의 위치입니다.
-   * @param to 대상의 위치입니다.
-   * @returns 기준점을 기준으로 대상을 향하는 각도를 반환합니다.
-   */
-  getAngleBetweenPoints(from: Point2, to: Point2): number {
-    return Phaser.Math.RadToDeg(Math.atan2(to.y - from.y, to.x - from.x))
-  }
 }

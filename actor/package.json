@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-actor",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Actor plugin for Phaser 3",
   "main": "dist/actor/src/eriengine-core-plugin-actor.js",
   "scripts": {

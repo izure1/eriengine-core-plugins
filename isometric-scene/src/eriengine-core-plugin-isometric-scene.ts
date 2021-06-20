@@ -232,24 +232,24 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
    * @param animation 충돌체가 가질 애니메이션 설정입니다.
    */
   setWalltile(x: number, y: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): IsometricWall {
-      const wall = new IsometricWall(this.scene.matter.world, x, y, texture, frame)
+    const wall = new IsometricWall(this.scene.matter.world, x, y, texture, frame)
 
-      this.scene.add.existing(wall)
+    this.scene.add.existing(wall)
 
-      if (animation) {
-        wall.play(animation)
-      }
+    if (animation) {
+      wall.play(animation)
+    }
 
-      const key = this.getCoordKey(x, y)
+    const key = this.getCoordKey(x, y)
 
-      this.__walls.get(key)?.destroy()
-      this.__walls.set(key, wall)
+    this.__walls.get(key)?.destroy()
+    this.__walls.set(key, wall)
 
-      wall.once(Phaser.GameObjects.Events.DESTROY, () => {
-        this.__walls.delete(key)
-      })
+    wall.once(Phaser.GameObjects.Events.DESTROY, () => {
+      this.__walls.delete(key)
+    })
 
-      return wall
+    return wall
   }
 
   /**

@@ -15,6 +15,6 @@ export class IsometricFloor extends Phaser.GameObjects.Sprite implements GridObj
 
   init(): void {
     this.setOrigin(0.5, (this.displayHeight - this.displayWidth / 4) / this.displayHeight)
-    this.setDepth(Phaser.Math.MIN_SAFE_INTEGER)
+    this.setDepth(Phaser.Math.MIN_SAFE_INTEGER + this.y)
   }
 }

@@ -119,7 +119,9 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
    * @param information 사용한 스킬의 정보입니다.
    */
   private getHit(from: Actor, information: HitInformation): void {
-    this.attackerset.add(from)
+    if (this.actor !== from) {
+      this.attackerset.add(from)
+    }
 
     this.emit('get-hit', from, information)
   }
@@ -142,6 +144,15 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
 
       target.battle.getHit(this.actor, information)
     }
+  }
+
+  /**
+   * 해당 액터 인스턴스가 아군, 또는 적으로 설정한 모든 액터를 제거합니다.
+   */
+  private forgetAll(): void {
+    this.attackerset.clear()
+    this.enemyset.clear()
+    this.allyset.clear()
   }
 
   /**
@@ -316,6 +327,7 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
   /**
    * 전투의 패배를 선언합니다. 자신을 공격하고 있던 액터들은 승리하게 될 것입니다.
    * 자신을 공격하던 액터의 적 목록에서 자신이 제거됩니다.
+   * 그러나 `setEnemy` 메서드로 자신을 적으로 등록한 모든 상대 액터가 승리하는 것은 아니며, `useSkill` 메서드로 공격한 액터만이 승리합니다.
    */
   defeat(): this {
     for (const attacker of this.attackerset) {
@@ -331,6 +343,7 @@ export class ActorBattle extends TypedEmitter<ActorBattleEvent> {
   }
 
   private destroy(): void {
+    this.forgetAll()
     this.forgetMe()
   }
 }

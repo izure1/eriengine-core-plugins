@@ -10,6 +10,11 @@ import { ActorBullet } from './ActorBullet'
 
 export abstract class Actor extends Phaser.Physics.Matter.Sprite implements GridObject {
   /**
+   * 자신의 정보를 담고있는 프록시 정보입니다.
+   */
+  private readonly __proxy: Actor
+
+  /**
    * 액터의 플러그인 설정입니다. *건드리지 마십시오.*
    */
   plugin!: ActorPlugin
@@ -20,43 +25,52 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
    * 스킬을 사용할 때, 지정한 특정 세력에게만 작용하도록 할 수 있습니다.
    * 가령 아군에게 버프를 주고 싶다면, 아군 액터를 `setAlly` 메서드를 이용하여 등록한 뒤, `useSkill` 메서드에 아군 세력만을 효과 범위로 지정해 호출하십시오.
    */
-  readonly battle: ActorBattle        = new ActorBattle(this)
+  readonly battle: ActorBattle
 
   /**
    * 액터의 말풍선 목록이 담겨져 있습니다.
    * `of` 메서드를 이용하여 새로운 말풍선을 만들거나 가져오십시오.
    */
-  readonly bubble: ActorBubble        = new ActorBubble(this)
+  readonly bubble: ActorBubble
 
   /**
    * 액터 주변으로 파티클 효과를 줍니다. 이는 액터가 스킬을 사용하거나, 파괴될 때 주변에 폭발효과를 주는 등에 사용하기에 좋습니다.
    */
-  readonly particle: ActorParticle    = new ActorParticle(this)
+  readonly particle: ActorParticle
 
   /**
    * 액터의 움직임을 담당합니다. 액터 인스턴스에 물리적인 힘을 가하여 상하좌우로 움직이게 만듭니다.
    * 특정 지역까지 이동하는 좌표 목록을 주어, 액터가 길을 찾아 움직일 수 있도록 할 수도 있습니다.
    */
-  readonly run: ActorRun              = new ActorRun(this)
+  readonly run: ActorRun
 
   /**
    * 액터의 탄막 시스템을 구현합니다. 투사체를 발사하거나, 맞았을 때 구현하기에 좋습니다.
    */
-  readonly bullet: ActorBullet        = new ActorBullet(this)
+  readonly bullet: ActorBullet
 
   /**
    * 액터에게 꾸준한 효과를 주기 위해 사용됩니다. 가령 독 데미지같이 몇 초에 걸쳐 꾸준한 효과를 주어야할 때 사용합니다.
    */
-  readonly dot: ActorDot              = new ActorDot(this)
+  readonly dot: ActorDot
 
   constructor(scene: Phaser.Scene, x: number, y: number, texture: string|Phaser.Textures.Texture, frame?: string|number, option?: Phaser.Types.Physics.Matter.MatterBodyConfig) {
     super(scene.matter.world, x, y, texture, frame, option)
 
     this.initVertices()
 
-    return new Proxy(this, {
+    this.__proxy = new Proxy(this, {
       set: this.PROXY_SETTER.bind(this)
     })
+
+    this.battle = new ActorBattle(this.__proxy)
+    this.bubble = new ActorBubble(this.__proxy)
+    this.particle = new ActorParticle(this.__proxy)
+    this.run = new ActorRun(this.__proxy)
+    this.bullet = new ActorBullet(this.__proxy)
+    this.dot = new ActorDot(this.__proxy)
+
+    return this.__proxy
   }
 
   /** 씬의 메인카메라가 현재 액터를 따라다니는지 여부를 반환합니다. */
@@ -87,7 +101,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
   protected PROXY_SETTER(target: Actor, prop: keyof Actor, value: any): true {
     (target as any)[prop] = value
 
-    switch(prop) {
+    switch (prop) {
       case 'scale':
       case 'scaleX':
       case 'scaleY':
@@ -159,7 +173,11 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
    */
   getAroundActors(radius: number, actors: Actor[] = this.plugin.actors, sortByDistance: boolean = false): Actor[] {
     const aroundActors = this.plugin.getActorsInArea(this.x, this.y, radius, actors, sortByDistance)
-    aroundActors.splice(aroundActors.indexOf(this), 1)
+
+    const i = aroundActors.indexOf(this)
+    if (i !== -1) {
+      aroundActors.splice(i, 1)
+    }
     return aroundActors
   }
 
@@ -170,6 +188,23 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
    */
   getAngleBetween(to: Point2): number {
     return getAngleBetweenPoints(this, to)
+  }
+
+  /**
+   * 현재 액터를 기준으로 특정 각도와 거리를 주어 해당 지역의 좌표를 얻어옵니다.
+   * @param angle 액터를 기준으로 가르킬 방향입니다.
+   * @param radius 액터를 기준으로 `angle` 매개변수로 나아갈 거리입니다.
+   * @returns 주어진 `angle`, `radius` 매개변수를 종합하여, 해당 각도로 나아간 거리에 있는 좌표를 반환합니다.
+   */
+  getPointFromAngle(angle: number, radius: number): Point2 {
+    const rad = Phaser.Math.DegToRad(angle)
+    const x = Math.cos(rad) * radius
+    const y = Math.sin(rad) * radius
+
+    return {
+      x: x + this.x,
+      y: y + this.y
+    }
   }
 
   /**

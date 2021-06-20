@@ -119,7 +119,7 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     const list: Actor[] = []
 
     for (const actor of actors) {
-      const searched = isInsideFromCircle({ x, y }, { x: actor.x, y: actor.y }, radius)
+      const searched = isInsideFromCircle({ x, y }, actor, radius)
 
       if (searched) {
         list.push(actor)

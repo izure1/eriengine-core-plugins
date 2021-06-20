@@ -108,28 +108,35 @@ class Player extends User {
                 })
                 return { damage: 1 }
             })
-            .addSkill('missile', (target, dot) => {
-              const actors = this.getAroundActors(1000, undefined, true)
+            .addSkill('use-missile', (target, dot) => {
+              const actors = this.getAroundActors(1000, this.battle.enemies, true)
               
               if (actors.length <= 0) {
                 return {}
               }
-              
-              const rocket = this.bullet.addMissile(this, 'rocket', undefined, (_e, pair) => {
+
+              const betweenAngle = this.getAngleBetween(actors[0])
+              const missilePosition = this.getPointFromAngle(betweenAngle, 150)
+
+              const rocket = this.bullet.addMissile(missilePosition, 'rocket', undefined, (_e, pair) => {
                 if (pair instanceof Player) {
                   return
                 }
                 if (pair instanceof User) {
-                  pair.destroy()
+                  this.battle.useSkill('hit-missile', pair, 1, 'enemies')
                 }
                 rocket.destroy()
               }, () => {
                 rocket.particle.explode('flame', 30)
               })
-              rocket.fireMissile(rocket.getAngleBetween(actors[0]), 0.1, 0.01, actors[0])
+
+              rocket.fireMissile(betweenAngle, 0.1, 0.01, actors[0])
               rocket.particle.add('flame', 'particle-flash', false)
 
               return {}
+            })
+            .addSkill('hit-missile', (target, dot) => {
+              return { damage: 45 }
             })
     }
 
@@ -138,7 +145,7 @@ class Player extends User {
         if (this.spaceKey.isDown) {
             // this.particle.explode('effect', 20)
             // this.battle.useSkill('confuse', this, 250, 'all-except-me')
-            this.battle.useSkill('missile', this, 1, 'me')
+            this.battle.useSkill('use-missile', this, 1, 'me')
         }
     }
 }
@@ -337,6 +344,8 @@ class Test extends Phaser.Scene {
               const user: User = this.actor.addActor(User, performance.now().toString(), this, 0, 0, 'sprite-hannah-stand')
               user.setPosition(x, y)
               user.run.useMovingKey('wasd')
+
+              this.player?.battle.addEnemy(user)
           }
           else if (this.shiftKey.isDown) {
               this.map.setWalltile(x, y, 'wall-basic-right').setSensor(true)

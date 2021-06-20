@@ -1,4 +1,6 @@
 import Phaser from 'phaser'
+import { v4 as uuid } from 'uuid'
+
 import { createIsometricDiamondPoints, getIsometricSide, GridObject, Point2, getAngleBetweenPoints } from '@common/Math/MathUtil'
 import { Plugin as ActorPlugin } from '../eriengine-core-plugin-actor'
 import { ActorBattle } from './ActorBattle'
@@ -13,6 +15,9 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
    * 자신의 정보를 담고있는 프록시 정보입니다.
    */
   private readonly __proxy: Actor
+
+  /** 액터의 고유값입니다. 액터를 비교하기 위해서, 해당 값을 사용할 수 있습니다. 이 값은 읽기 전용입니다. */
+  readonly id: string = uuid()
 
   /**
    * 액터의 플러그인 설정입니다. *건드리지 마십시오.*

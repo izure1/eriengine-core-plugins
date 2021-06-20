@@ -215,34 +215,37 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   /**
    * `setColor`, `setAmbientColor` 메서드를 이용해 낮/노을/밤 효과를 만듭니다.
    * `duration` 매개변수를 지정하면 부드럽게 시간이 변하는 효과를 줄 수 있습니다. 
-   * 시간의 순서는 `daytime` → `twilight` → `night` 입니다. 마지막으로 지정한 값이 `daytime`이고, `night`로 변경한다면, 중간인 `twilight`을 거쳐서 시간대가 변화됩니다.
-   * `twilight`에서 `daytime`으로 변화할 경우, `twilight` → `night` → `daytime` 순서로 변경됩니다. 이는 현실적인 시간 변화 효과를 줄 수 있습니다.
-   * @param time 시간대를 설정합니다. `daytime`, `twilight`, `night` 중 선택할 수 있습니다.
+   * 시간의 순서는 `daytime` → `twilight` → `night` → `dawn` 입니다. 마지막으로 지정한 값이 `daytime`이고, `night`로 변경한다면, 중간인 `twilight`을 거쳐서 시간대가 변화됩니다.
+   * `twilight`에서 `daytime`으로 변화할 경우, `twilight` → `night` → `dawn` → `daytime` 순서로 변경됩니다. 이는 현실적인 시간 변화 효과를 줄 수 있습니다.
+   * @param time 시간대를 설정합니다. `daytime`, `twilight`, `night`, `dawn` 중 선택할 수 있습니다.
    * @param duration 이 값을 지정하면 부드럽게 변화하는 효과를 줄 수 있습니다. 기본값은 `0`입니다.
    * @param nextDay 이 값을 `true`로 지정하면 현재 시각과 `time`이 같아도, 무조건 한 번 순회합니다. 가령 현재 시간이 `night`인데, `time`을 `night`로 지정하면 어떤 작동도 하지 않지만, 이 값을 `true`로 지정하면 하루를 순회합니다.
    */
-  async changeDaylight(time: 'daytime'|'twilight'|'night', duration: number = 0, nextDay: boolean = false): Promise<void> {
+  async changeDaylight(time: 'daytime'|'twilight'|'night'|'dawn', duration: number = 0, nextDay: boolean = false): Promise<void> {
     if (!this.enabled) {
       throw 'The \'enable\' method must be called first.'
     }
 
     this.destroyDaylightTween()
-
+    
+    // structure => [ lightColor, ambientColor ]
     const daytime = [Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(255, 255, 255)]
     const twilight = [Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(255, 100, 50)]
     const night = [Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(0, 0, 0)]
+    const dawn = [Phaser.Display.Color.GetColor(255, 255, 255), Phaser.Display.Color.GetColor(65, 122, 164)]
 
     const times = new Map([
       ['daytime', 0],
       ['twilight', 1],
-      ['night', 2]
+      ['night', 2],
+      ['dawn', 3]
     ])
 
     const timelines: number[] = []
     let i = this.daylight
     const stop = times.get(time)!
     while (++i) {
-      const current = i % 3
+      const current = i % times.size
       if (timelines.includes(current)) {
         break
       }
@@ -257,11 +260,11 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     if (!this.daylightDone) {
       nextDay = true
     }
-    if (!nextDay && timelines.length === 3) {
+    if (!nextDay && timelines.length === times.size) {
       timelines.length = 0
     }
 
-    const daylights = [daytime, twilight, night]
+    const daylights = [daytime, twilight, night, dawn]
     const interval = duration / timelines.length
 
     let beforeColor: number = this.color

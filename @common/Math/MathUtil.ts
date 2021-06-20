@@ -12,7 +12,7 @@ export const ISOMETRIC_ANGLE: number = 26.57
  * @param angle 각도입니다.
  */
 export function angleToRad(angle: number): number {
-    return Math.PI / 180 * angle
+    return (Math.PI / 180) * angle
 }
 
 /**
@@ -20,7 +20,7 @@ export function angleToRad(angle: number): number {
  * @param rad 라디안입니다.
  */
 export function radToAngle(rad: number): number {
-    return Math.PI * 180 / rad
+    return (180 / Math.PI) * rad
 }
 
 export function getIsometricHeight(side: number): number {

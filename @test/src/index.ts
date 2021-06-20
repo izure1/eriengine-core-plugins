@@ -226,10 +226,10 @@ class Test extends Phaser.Scene {
           .setVolume(0.3)
           .play()
 
-        // this.fow
-        //   .enable()
-        //   .setRevealer(this.player)
-        //   .changeDaylight('night', 0, true)
+        this.fow
+          .enable()
+          .setRevealer(this.player)
+          .changeDaylight('dawn', 0, true)
 
         // this.environment
         //   .addEnvironment('frozen')

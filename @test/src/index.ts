@@ -143,8 +143,6 @@ class Player extends User {
     update(): void {
         super.update()
         if (this.spaceKey.isDown) {
-            // this.particle.explode('effect', 20)
-            // this.battle.useSkill('confuse', this, 250, 'all-except-me')
             this.battle.useSkill('use-missile', this, 1, 'me')
         }
     }
@@ -204,6 +202,7 @@ class Test extends Phaser.Scene {
         this.load.image('wall-basic-right', '/assets/img/wall-basic-right.png')
         this.load.image('tile-basic-1', '/assets/img/tile-basic-1.png')
         this.load.image('tile', '/assets/img/tile.png')
+        this.load.image('dirt', '/assets/img/dirt_E.png')
         this.load.spritesheet('sprite-hannah-run', '/assets/img/sprite-hannah-run.webp', { frameWidth: 170, frameHeight: 210,  })
         this.load.spritesheet('sprite-hannah-stand', '/assets/img/sprite-hannah-stand.webp', { frameWidth: 170, frameHeight: 210 })
         this.load.image('particle-flash', '/assets/img/particle-flash.png')
@@ -348,7 +347,7 @@ class Test extends Phaser.Scene {
               this.player?.battle.addEnemy(user)
           }
           else if (this.shiftKey.isDown) {
-              this.map.setWalltile(x, y, 'wall-basic-right').setSensor(true)
+              this.map.setFloortile(x, y, 'dirt')
           }
           else {
               this.map.setWalltile(x, y, 'wall-basic-right')

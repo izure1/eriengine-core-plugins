@@ -1,8 +1,8 @@
 {
-  "name": "@eriengine/plugin-actor",
-  "version": "1.5.1",
-  "description": "Actor plugin for Phaser 3",
-  "main": "dist/actor/src/eriengine-core-plugin-actor.js",
+  "name": "@eriengine/plugin-particle",
+  "version": "1.0.0",
+  "description": "Particle plugin for Phaser 3",
+  "main": "dist/particle/src/eriengine-core-plugin-particle.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack"
@@ -28,8 +28,7 @@
   },
   "dependencies": {
     "eventemitter3": "^4.0.7",
-    "tiny-typed-emitter": "^2.0.3",
-    "uuid": "^8.3.2"
+    "tiny-typed-emitter": "^2.0.3"
   },
   "peerDependencies": {
     "phaser": "^3.54.0"

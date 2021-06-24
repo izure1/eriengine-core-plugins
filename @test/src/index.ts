@@ -8,6 +8,7 @@ import { Plugin as FowPlugin } from '~/fog-of-war'
 import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
 import { Plugin as EnvironmentPlugin } from '~/environment'
 import { Plugin as FeelingPlugin } from '~/feeling'
+import { Plugin as ParticlePlugin } from '~/particle'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
@@ -131,7 +132,7 @@ class Player extends User {
               })
 
               rocket.fireMissile(betweenAngle, 0.1, 0.01, actors[0])
-              rocket.particle.add('flame', 'particle-flash', false)
+              rocket.particle.addPrebuilt('flame', 'particle-flash', 'jet', 0, false)
 
               return {}
             })
@@ -188,6 +189,7 @@ class Test extends Phaser.Scene {
     private spatial!: SpatialAudioPlugin
     private environment!: EnvironmentPlugin
     private feeling!: FeelingPlugin
+    private particle!: ParticlePlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
     private side: number = 5000
@@ -232,10 +234,22 @@ class Test extends Phaser.Scene {
           .setVolume(0.3)
           .play()
 
-        this.fow
-          .enable()
-          .setRevealer(this.player)
-          .changeDaylight('dawn', 0, true)
+        // this.fow
+        //   .enable()
+        //   .setRevealer(this.player)
+        //   .changeDaylight('dawn', 0, true)
+
+        const particle = this.particle.addFirefly(-100, -100)
+
+        // this.particle.addGlitter(200, 200)
+        // this.particle.addSmoke(200, 200)
+        // this.particle.addExplode(-200, -200)
+        // this.particle.addBurn(-500, -500)
+
+        // this.particle.addSnow(300, 300, 1000)
+        this.particle.addRain(300, 300, 1000)
+
+        this.player.particle.addPrebuilt('sp', 'particle-flash', 'burn', 0, false)
 
         // this.environment
         //   .addEnvironment('frozen')
@@ -328,7 +342,7 @@ class Test extends Phaser.Scene {
           }
         })
 
-        console.log(this.player, this)
+        console.log(this.player, this, particle)
     }
 
     update(): void {
@@ -445,6 +459,11 @@ const config: Phaser.Types.Core.GameConfig = {
               key: 'FeelingPlugin',
               mapping: 'feeling',
               plugin: FeelingPlugin
+            },
+            {
+              key: 'ParticlePlugin',
+              mapping: 'particle',
+              plugin: ParticlePlugin
             }
             // {
             //   key: 'daylightPlugin',

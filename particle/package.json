@@ -26,10 +26,7 @@
     "webpack": "^5.17.0",
     "webpack-cli": "^4.4.0"
   },
-  "dependencies": {
-    "eventemitter3": "^4.0.7",
-    "tiny-typed-emitter": "^2.0.3"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "phaser": "^3.54.0"
   }

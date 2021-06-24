@@ -1,13 +1,4 @@
 import Phaser from 'phaser'
-import { ExplodeParticle } from './Particle/ExplodeParticle'
-import { FireflyParticle } from './Particle/FireflyParticle'
-import { GlitterParticle } from './Particle/GlitterParticle'
-import { JetParticle } from './Particle/JetParticle'
-import { SmokeParticle } from './Particle/SmokeParticle'
-import { SparkParticle } from './Particle/SparkParticle'
-import { BurnParticle } from './Particle/BurnParticle'
-import { SnowParticle } from './Particle/SnowParticle'
-import { RainParticle } from './Particle/RainParticle'
 
 type ParticleEmitterConfig = Phaser.Types.GameObjects.Particles.ParticleEmitterConfig
 type Actor = Phaser.GameObjects.GameObject&Phaser.GameObjects.Components.Transform
@@ -86,70 +77,21 @@ export class ActorParticle {
   }
 
   /**
-   * 사전에 만들어진 파티클 효과를 추가합니다.
-   * 이는 간단하게 원하는 파티클 종류를 구현하고 싶을 때 사용할 수 있습니다.
+   * 이미 생성된 파티클 게임 오브젝트 인스턴스를 등록합니다.
+   * 이렇게 등록된 객체는 액터를 따라다니며, 액터가 파괴되었을 때 함께 파괴됩니다.
    * @param key 파티클 키입니다.
-   * @param type 구현하고 싶은 파티클의 종류입니다.
-   * @param texture 파티클에서 사용할 텍스쳐 키입니다.
-   * @param emitRadius 파티클이 생성되는 영역의 범위입니다. 파티클은 이 범위 내에서 랜덤하게 생성될 것입니다.
-   * @param isTop 파티클이 액터 위에 그려질 것인지 여부를 설정합니다. 기본값은 `false`입니다.
-   * @param config 파티클 설정입니다. `speed`, `lifespan`, `blendMode`, `scale` 등이 있습니다. 자세한 내용은 아래 링크를 참고하십시오.
-   * https://photonstorm.github.io/phaser3-docs/Phaser.Types.GameObjects.Particles.html#.ParticleEmitterConfig
+   * @param particle 존재하는 파티클 게임 오브젝트 인스턴스입니다.
+   * @@param isTop 파티클이 액터 위에 그려질 것인지 여부를 설정합니다. 기본값은 `false`입니다.
    */
-  addPrebuilt(key: string, texture: string, type: 'explode'|'firefly'|'glitter'|'jet'|'smoke'|'spark'|'burn'|'snow'|'rain', emitRadius: number|undefined, isTop: boolean = false, config: ParticleEmitterConfig = {}): this {
-    const { x, y } = this.actor
+  addExists(key: string, particle: Phaser.GameObjects.Particles.ParticleEmitterManager, isTop: boolean = false): this {
+    const emitter = particle.emitters.first
+    emitter.startFollow(this.actor)
+    
+    const option = ActorParticle.createEmitterOption(emitter, isTop)
 
     this.remove(key)
-    
-    let particle
 
-    switch (type) {
-      case 'explode': {
-        particle = new ExplodeParticle(this.scene, x, y, emitRadius, texture, config)
-        break
-      }
-      case 'firefly': {
-        particle = new FireflyParticle(this.scene, x, y, emitRadius, texture, config)
-        break
-      }
-      case 'glitter': {
-        particle = new GlitterParticle(this.scene, x ,y, emitRadius, texture, config)
-        break
-      }
-      case 'jet': {
-        particle = new JetParticle(this.scene, x ,y, emitRadius, texture, config)
-        break
-      }
-      case 'smoke': {
-        particle = new SmokeParticle(this.scene, x ,y, emitRadius, texture, config)
-        break
-      }
-      case 'spark': {
-        particle = new SparkParticle(this.scene, x ,y, emitRadius, texture, config)
-        break
-      }
-      case 'burn': {
-        particle = new BurnParticle(this.scene, x, y, emitRadius, texture, config)
-        break
-      }
-      case 'snow': {
-        particle = new SnowParticle(this.scene, x, y, emitRadius, texture, config)
-        break
-      }
-      case 'rain': {
-        particle = new RainParticle(this.scene, x, y, emitRadius, texture, config)
-        break
-      }
-    }
-
-    if (particle) {
-      const emitter = particle.emitters.first
-      const option = ActorParticle.createEmitterOption(emitter, isTop)
-
-      this.emittermap.set(key, option)
-
-      emitter.startFollow(this.actor)
-    }
+    this.emittermap.set(key, option)
 
     return this
   }

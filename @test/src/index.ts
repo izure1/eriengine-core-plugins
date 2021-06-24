@@ -13,6 +13,7 @@ import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
     private hp: number = 100
+    declare scene: Test
 
     constructor(name: string, scene: Phaser.Scene, x: number, y: number, texture: string) {
         super(scene, x, y, texture)
@@ -132,7 +133,7 @@ class Player extends User {
               })
 
               rocket.fireMissile(betweenAngle, 0.1, 0.01, actors[0])
-              rocket.particle.addPrebuilt('flame', 'particle-flash', 'jet', 0, false)
+              rocket.particle.addExists('flame', this.scene.particle.addJet(0, 0))
 
               return {}
             })
@@ -178,18 +179,18 @@ fps: ${this.game.loop.actualFps}
 }
 
 class Test extends Phaser.Scene {
-    private player: Player|null = null
-    private map!: IsomScenePlugin
-    private cursor!: IsomCursorPlugin
-    private select!: IsomSelectPlugin
-    private dialogue!: DialoguePlugin
-    private modal!: ModalPlugin
-    private actor!: ActorPlugin
-    private fow!: FowPlugin
-    private spatial!: SpatialAudioPlugin
-    private environment!: EnvironmentPlugin
-    private feeling!: FeelingPlugin
-    private particle!: ParticlePlugin
+    player: Player|null = null
+    map!: IsomScenePlugin
+    cursor!: IsomCursorPlugin
+    select!: IsomSelectPlugin
+    dialogue!: DialoguePlugin
+    modal!: ModalPlugin
+    actor!: ActorPlugin
+    fow!: FowPlugin
+    spatial!: SpatialAudioPlugin
+    environment!: EnvironmentPlugin
+    feeling!: FeelingPlugin
+    particle!: ParticlePlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
     private side: number = 5000
@@ -239,17 +240,10 @@ class Test extends Phaser.Scene {
         //   .setRevealer(this.player)
         //   .changeDaylight('dawn', 0, true)
 
-        const particle = this.particle.addFirefly(-100, -100)
+        const particle = this.particle.addFirefly(0, 0)
 
-        // this.particle.addGlitter(200, 200)
-        // this.particle.addSmoke(200, 200)
-        // this.particle.addExplode(-200, -200)
-        // this.particle.addBurn(-500, -500)
-
-        // this.particle.addSnow(300, 300, 1000)
-        this.particle.addRain(300, 300, 1000)
-
-        this.player.particle.addPrebuilt('sp', 'particle-flash', 'burn', 0, false)
+        // this.player.particle.addExists('smoke', this.particle.addSmoke(0, 0), true)
+        // this.player.particle.addExists('explode', this.particle.addExplode(0, 0, 100), true)
 
         // this.environment
         //   .addEnvironment('frozen')

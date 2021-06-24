@@ -67,9 +67,9 @@ export abstract class DefaultParticle extends Phaser.GameObjects.Particles.Parti
         ...useDefaultEmitterConfig(),
         ...config
       })
-      emitter.setPosition(x, y).start()
+      emitter.start()
     }
-      
+    
     this.scene.add.existing(this)
   }
 }

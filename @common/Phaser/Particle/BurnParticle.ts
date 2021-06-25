@@ -11,6 +11,7 @@ export class BurnParticle extends DefaultParticle {
       texture,
       [
         {
+          blendMode: Phaser.BlendModes.ADD,
           speed: 0,
           lifespan: 2000,
           frequency: 30,

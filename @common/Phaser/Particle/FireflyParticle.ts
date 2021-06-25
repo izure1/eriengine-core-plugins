@@ -10,6 +10,7 @@ export class FireflyParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.ADD,
         lifespan: 5000,
         frequency: 300,
         speed: { min: 0, max: 50 },

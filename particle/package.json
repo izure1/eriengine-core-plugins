@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-particle",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Particle plugin for Phaser 3",
   "main": "dist/particle/src/eriengine-core-plugin-particle.js",
   "scripts": {

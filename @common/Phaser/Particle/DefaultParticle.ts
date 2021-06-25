@@ -63,10 +63,7 @@ export abstract class DefaultParticle extends Phaser.GameObjects.Particles.Parti
       emitterConfig = [emitterConfig]
     }
     for (const config of emitterConfig) {
-      const emitter = this.createEmitter({
-        ...useDefaultEmitterConfig(),
-        ...config
-      })
+      const emitter = this.createEmitter(config)
       emitter.start()
     }
     

@@ -10,6 +10,7 @@ export class ExplodeParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.ADD,
         speed: 0,
         lifespan: 400,
         frequency: 50,

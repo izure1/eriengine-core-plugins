@@ -10,12 +10,13 @@ export class RainParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.SCREEN,
         lifespan: 1000,
         gravityY: 3000,
         gravityX: 100,
         quantity: 3,
         alpha: { start: 0, end: 1 },
-        scale: { start: 0.1, end: 0 },
+        scale: { start: 0.3, end: 0 },
         ...useRandomPositionEmitterConfig(emitRadius),
         ...config
       }

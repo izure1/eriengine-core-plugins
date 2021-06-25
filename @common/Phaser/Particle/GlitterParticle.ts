@@ -10,6 +10,7 @@ export class GlitterParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.ADD,
         speed: 0,
         lifespan: 1500,
         frequency: 500,

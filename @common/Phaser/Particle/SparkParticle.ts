@@ -10,6 +10,7 @@ export class SparkParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.ADD,
         speed: 200,
         lifespan: 400,
         quantity: 2,

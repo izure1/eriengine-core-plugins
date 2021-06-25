@@ -11,6 +11,7 @@ export class JetParticle extends DefaultParticle {
       texture,
       [
         {
+          blendMode: Phaser.BlendModes.ADD,
           speed: 200,
           lifespan: 400,
           alpha: { start: 1, end: 0 },

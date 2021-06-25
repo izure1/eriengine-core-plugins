@@ -10,6 +10,7 @@ export class SmokeParticle extends DefaultParticle {
       y,
       texture,
       {
+        blendMode: Phaser.BlendModes.MULTIPLY,
         gravityY: -100,
         gravityX: 10,
         lifespan: 3000,

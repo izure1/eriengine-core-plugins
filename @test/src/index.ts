@@ -6,7 +6,6 @@ import { PointerPlugin as IsomCursorPlugin, SelectPlugin as IsomSelectPlugin } f
 import { DialoguePlugin, ModalPlugin } from '~/dialogue'
 import { Plugin as FowPlugin } from '~/fog-of-war'
 import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
-import { Plugin as EnvironmentPlugin } from '~/environment'
 import { Plugin as FeelingPlugin } from '~/feeling'
 import { Plugin as ParticlePlugin } from '~/particle'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
@@ -35,9 +34,9 @@ class User extends Actor {
     private initParticle(): void {
       this.particle
         .add('effect', 'particle-red', false, { speed: 1500 })
-        .add('explode', 'particle-flash')
         .add('dead', 'sprite-hannah-stand', true, { speed: 500, lifespan: 100 })
-        .pause('explode').pause('dead').pause('effect')
+        .pause('dead')
+        .pause('effect')
     }
 
     private initBattle(): void {
@@ -47,6 +46,19 @@ class User extends Actor {
           const min: number = Phaser.Math.MinSub(this.hp, damage, 0)
           this.hp = min
         }
+
+        if (this.hp < 75) {
+          if (!this.particle.has('smoke')) {
+            this.particle.addExists('smoke', this.scene.particle.addSmoke(0, 0), true)
+          }
+        }
+        
+        if (this.hp < 30) {
+          if (!this.particle.has('explode')) {
+            this.particle.addExists('explode', this.scene.particle.addExplode(0, 0), true)
+          }
+        }
+
         if (this.hp <= 0) {
           this.battle.defeat()
           this.destroy()
@@ -122,6 +134,8 @@ class Player extends User {
 
               const rocket = this.bullet.addMissile(missilePosition, 'rocket', undefined, (_e, pair) => {
                 if (pair instanceof Player) {
+                  rocket.destroy()
+                  this.scene.feeling.wound()
                   return
                 }
                 if (pair instanceof User) {
@@ -138,7 +152,12 @@ class Player extends User {
               return {}
             })
             .addSkill('hit-missile', (target, dot) => {
-              return { damage: 45 }
+              let damage = 45
+              if (Math.random() > 0.75) {
+                this.scene.feeling.critical()
+                damage *= 2
+              }
+              return { damage }
             })
     }
 
@@ -188,7 +207,6 @@ class Test extends Phaser.Scene {
     actor!: ActorPlugin
     fow!: FowPlugin
     spatial!: SpatialAudioPlugin
-    environment!: EnvironmentPlugin
     feeling!: FeelingPlugin
     particle!: ParticlePlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
@@ -228,12 +246,12 @@ class Test extends Phaser.Scene {
         this.map.setWorldSize(3000)
 
         this.sound.pauseOnBlur = false
-        this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
-        this.bgm
-          .setLoop(true)
-          .setThresholdRadius(1000)
-          .setVolume(0.3)
-          .play()
+        // this.bgm = this.spatial.addSpatialAudio('bgm', { x: 0, y: 0 })
+        // this.bgm
+        //   .setLoop(true)
+        //   .setThresholdRadius(1000)
+        //   .setVolume(0.3)
+        //   .play()
 
         // this.fow
         //   .enable()
@@ -244,9 +262,6 @@ class Test extends Phaser.Scene {
 
         // this.player.particle.addExists('smoke', this.particle.addSmoke(0, 0), true)
         // this.player.particle.addExists('explode', this.particle.addExplode(0, 0, 100), true)
-
-        // this.environment
-        //   .addEnvironment('frozen')
 
         // this.feeling.hit({ r: 0, g: 0, b: 0 }, 1, 0.15)
 
@@ -443,11 +458,6 @@ const config: Phaser.Types.Core.GameConfig = {
               key: 'spatialAudioPlugin',
               mapping: 'spatial',
               plugin: SpatialAudioPlugin
-            },
-            {
-              key: 'EnvironmentPlugin',
-              mapping: 'environment',
-              plugin: EnvironmentPlugin
             },
             {
               key: 'FeelingPlugin',

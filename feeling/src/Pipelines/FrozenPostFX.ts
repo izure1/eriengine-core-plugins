@@ -2,7 +2,7 @@ import Phaser from 'phaser'
 import { WebGLPipelineConfig } from './Types'
 
 const fragShader = `
-#define SHADER_NAME FEELING_HIT_FS
+#define SHADER_NAME FROZEN_FS
 
 precision mediump float;
 
@@ -13,7 +13,6 @@ const vec3 CIRCLE_COLOR = vec3(0.6, 0.8, 0.9);
 
 uniform sampler2D uMainSampler;
 uniform float uTime;
-uniform float uIntensity;
 varying vec2 outTexCoord;
 
 vec4 vignette(vec4 color) {
@@ -32,11 +31,8 @@ void main( void )
 }
 `;
 
-export class HitPostFX extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
-  protected time: number = 0
-  protected color: number[] = [0, 0, 0, 0]
-  protected intensity: number = 1
-  protected duration: number = 0
+export class FrozenPostFX extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
+  private time: number = 0
 
   constructor(game: Phaser.Game) {
     super({
@@ -46,21 +42,9 @@ export class HitPostFX extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
       uniforms: [
         'uProjectionMatrix',
         'uMainSampler',
-        'uTime',
-        'uIntensity'
+        'uTime'
       ]
     } as WebGLPipelineConfig)
-  }
-
-  start(color: Phaser.Types.Display.ColorObject, intensity: number, duration: number): this {
-    const { r, g, b, a } = color
-
-    this.color = new Phaser.Display.Color(r, g, b, a).gl
-    this.intensity = intensity
-    this.duration = duration
-    this.time = 0
-    
-    return this
   }
 
   onPreRender(): void {

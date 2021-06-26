@@ -116,6 +116,11 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
       case 'displayHeight':
         this.initVertices()
         break
+        
+      case 'x':
+      case 'y':
+        this.sortDepth()
+        break
     }
 
     return true
@@ -152,7 +157,6 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
       if (this.active) {
         this.update(time, delta)
         this.updateDefaultPlugins(time, delta)
-        this.sortDepth()
       }
     }
     

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import * as EasyStar from 'easystarjs'
+
 import {
     Point2,
     getIsometricWidth,
@@ -12,6 +13,8 @@ import {
     fillItemInArray,
     createIsometricDiamondPoints
 } from '@common/Math/MathUtil'
+import { isDisplayingOnCamera } from '@common/Phaser/GameObjectUtil'
+
 import { IsometricWall } from './Tiles/Wall'
 import { IsometricFloor } from './Tiles/Floor'
 
@@ -40,9 +43,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
    * @param delta 이전 프레임과 현재 프레임 사이에 흐른 시간(ms)입니다. 게임은 일반적으로 60프레임이므로, 1/60초인 0.016초입니다.
    */
   update(time: number, delta: number): void {
-    for (const easystar of this.easystarset.values()) {
-      easystar.calculate()
-    }
+    this.updateCalcRoutes()
+    this.updateDisplayFloor()
   }
 
   destroy(): void {
@@ -196,6 +198,68 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     this.generateBounds()
 
     return this
+  }
+
+  private updateCalcRoutes(): void {
+    for (const easystar of this.easystarset.values()) {
+      easystar.calculate()
+    }
+  }
+
+  private updateDisplayFloor(): void {
+    let isNeedUpdate = false
+
+    // https://github.com/photonstorm/phaser/issues/5756 문제점 대응
+    // 수정된다면 cacheCameraPosition 메서드와 함께 제거해야 함.
+    interface CustomCamera extends Phaser.Cameras.Scene2D.Camera {
+      __beforeScrollX: number
+      __beforeScrollY: number
+    }
+
+    const cacheCameraPosition = (camera: CustomCamera) => {
+      camera.__beforeScrollX = camera.scrollX
+      camera.__beforeScrollY = camera.scrollY
+    }
+
+    // 업데이트된 카메라 목록이 있는지 여부를 확인합니다.
+    for (const c of this.scene.cameras.cameras) {
+      const camera = c as CustomCamera
+      if (
+        camera.dirty ||
+        camera.__beforeScrollX !== camera.scrollX ||
+        camera.__beforeScrollY !== camera.scrollY
+      ) {
+        isNeedUpdate = true
+        cacheCameraPosition(camera)
+        break
+      }
+
+      cacheCameraPosition(camera)
+    }
+
+    // 이전 업데이트에서 업데이트 된 내용이 없다면 중지합니다.
+    if (!isNeedUpdate) {
+      return
+    }
+
+    for (const floor of this.__floors.values()) {
+      let isDisplaying = false
+      for (const camera of this.scene.cameras.cameras) {
+        if (!isDisplayingOnCamera(camera, floor)) {
+          continue
+        }
+        isDisplaying = true
+        break
+      }
+
+      // 해당 타일을 비추고 있는 카메라가 있다면 디스플레이 리스트에 추가하고, 아니면 성능을 위해 제거합니다.
+      if (isDisplaying) {
+        floor.addToDisplayList()
+      }
+      else {
+        floor.removeFromDisplayList()
+      }
+    }
   }
 
   /**

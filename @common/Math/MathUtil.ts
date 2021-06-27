@@ -121,6 +121,23 @@ export function isInsideFromCircle(co: Point2, po: Point2, radius: number): bool
 }
 
 /**
+ * 좌측 상단을 좌표를 기준으로 주어진 크기의 사각형을 만들어 각 정점의 좌표를 반환합니다.
+ * @param x 사각형의 좌측 상단의 x좌표입니다.
+ * @param y 사각형의 좌측 상단의 y좌표입니다.
+ * @param width 사각형의 가로 크기입니다.
+ * @param height 사각형의 세로 크기입니다.
+ * @returns 사각형의 각 정점의 좌표입니다.
+ */
+export function createRectVertices(x: number, y: number, width: number, height: number): [number, number][] {
+  return [
+    [x, y],
+    [x + width, y],
+    [x + width, y + height],
+    [x, y + height]
+  ]
+}
+
+/**
  * 특정 좌표가 폴리곤내에 존재하는지 여부를 반환합니다.
  * @param point 포인트의 좌표입니다.
  * @param vertices 폴리곤의 정보입니다. 폴리곤의 각 정점 좌표 [x, y]의 형태로 가지고 있는 2차원 배열입니다.

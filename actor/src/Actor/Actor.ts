@@ -116,11 +116,6 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
       case 'displayHeight':
         this.initVertices()
         break
-        
-      case 'x':
-      case 'y':
-        this.sortDepth()
-        break
     }
 
     return true
@@ -157,6 +152,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
       if (this.active) {
         this.update(time, delta)
         this.updateDefaultPlugins(time, delta)
+        this.sortDepth()
       }
     }
     
@@ -239,7 +235,7 @@ export abstract class Actor extends Phaser.Physics.Matter.Sprite implements Grid
 
   /** 액터의 `y` 좌표를 이용하여 `depth` 값을 설정합니다. 일반적으로 자동으로 호출되며, *절대 직접 호출하지 마십시오.* */
   private sortDepth(): void {
-    this.setDepth(this.y)
+    this.setDepth(~~this.y)
   }
 
   /** 액터에서 사용하는 기본 플러그인을 업데이트합니다. 일반적으로 자동으로 호출되며, *절대 직접 호출하지 마십시오.* */

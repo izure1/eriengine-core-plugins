@@ -31,18 +31,8 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   private bounds: MatterJS.BodyType|null = null
 
   boot(): void {
-    this.scene.renderer.on(Phaser.Scenes.Events.RENDER, this.render.bind(this))
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
     this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
-  }
-
-  /**
-   * 씬이 매 프레임 렌더링 될 때 마다 호출될 메서드입니다.
-   * 씬이 일시중지되었거나, 파괴되었다면 더 이상 호출되지 않습니다.  
-   * *절대 직접 호출하지 마십시오.*
-   */
-  render(): void {
-    this.updateDisplayFloor()
   }
 
   /**
@@ -212,42 +202,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   private updateCalcRoutes(): void {
     for (const easystar of this.easystarset.values()) {
       easystar.calculate()
-    }
-  }
-
-  private updateDisplayFloor(): void {
-    let isNeedUpdate = false
-
-    // 업데이트된 카메라 목록이 있는지 여부를 확인합니다.
-    for (const camera of this.scene.cameras.cameras) {
-      if (camera.dirty) {
-        isNeedUpdate = true
-        break
-      }
-    }
-
-    // 이전 업데이트에서 업데이트 된 내용이 없다면 중지합니다.
-    if (!isNeedUpdate) {
-      return
-    }
-
-    for (const floor of this.__floors.values()) {
-      let isDisplaying = false
-      for (const camera of this.scene.cameras.cameras) {
-        if (!isDisplayingOnCamera(camera, floor)) {
-          continue
-        }
-        isDisplaying = true
-        break
-      }
-
-      // 해당 타일을 비추고 있는 카메라가 있다면 디스플레이 리스트에 추가하고, 아니면 성능을 위해 제거합니다.
-      if (isDisplaying) {
-        floor.addToDisplayList()
-      }
-      else {
-        floor.removeFromDisplayList()
-      }
     }
   }
 

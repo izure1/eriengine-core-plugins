@@ -13,7 +13,6 @@ import {
     fillItemInArray,
     createIsometricDiamondPoints
 } from '@common/Math/MathUtil'
-import { isDisplayingOnCamera } from '@common/Phaser/GameObjectUtil'
 
 import { IsometricWall } from './Tiles/Wall'
 import { IsometricFloor } from './Tiles/Floor'

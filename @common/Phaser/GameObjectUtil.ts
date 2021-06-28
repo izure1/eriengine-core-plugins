@@ -17,13 +17,13 @@ export function isDisplayingOnCamera(
   const viewport = createRectVertices(worldView.x, worldView.y, worldView.width, worldView.height)
 
   const { x, y, displayWidth, displayHeight, displayOriginX, displayOriginY } = gameObject
-  const startX = x - (displayWidth - displayOriginX)
-  const startY = y - (displayHeight - displayOriginY)
+  const startX = x - displayOriginX
+  const startY = y - displayOriginY
   const endX = x + (displayWidth - displayOriginX)
   const endY = y + (displayHeight - displayOriginY)
 
   return isInsideFromPolygon({ x: startX, y: startY }, viewport) ||
+    isInsideFromPolygon({ x: startX, y: endY }, viewport) ||
     isInsideFromPolygon({ x: endX, y: startY }, viewport) ||
-    isInsideFromPolygon({ x: endX, y: endY }, viewport) ||
-    isInsideFromPolygon({ x: startX, y: endY }, viewport)
+    isInsideFromPolygon({ x: endX, y: endY }, viewport)
 }

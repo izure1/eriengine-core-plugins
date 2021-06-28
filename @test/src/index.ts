@@ -211,7 +211,7 @@ class Test extends Phaser.Scene {
     particle!: ParticlePlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
-    private side: number = 5000
+    private side: number = 10000
     private bgm!: SpatialAudio
 
     constructor() {

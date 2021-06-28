@@ -31,20 +31,29 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   private bounds: MatterJS.BodyType|null = null
 
   boot(): void {
+    this.scene.renderer.on(Phaser.Scenes.Events.RENDER, this.render.bind(this))
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, this.update.bind(this))
     this.scene.events.on(Phaser.Scenes.Events.DESTROY, this.destroy.bind(this))
   }
 
   /**
+   * 씬이 매 프레임 렌더링 될 때 마다 호출될 메서드입니다.
+   * 씬이 일시중지되었거나, 파괴되었다면 더 이상 호출되지 않습니다.  
+   * *절대 직접 호출하지 마십시오.*
+   */
+  render(): void {
+    this.updateDisplayFloor()
+  }
+
+  /**
    * 씬이 매 프레임 업데이트 될 때 마다 호출될 메서드입니다.
-   * 씬이 일시중지되었거나,파괴되었다면 더 이상 호출되지 않습니다.  
+   * 씬이 일시중지되었거나, 파괴되었다면 더 이상 호출되지 않습니다.  
    * *절대 직접 호출하지 마십시오.*
    * @param time 씬이 시작한 후 흐른 시간(ms)입니다.
    * @param delta 이전 프레임과 현재 프레임 사이에 흐른 시간(ms)입니다. 게임은 일반적으로 60프레임이므로, 1/60초인 0.016초입니다.
    */
   update(time: number, delta: number): void {
     this.updateCalcRoutes()
-    this.updateDisplayFloor()
   }
 
   destroy(): void {
@@ -209,32 +218,12 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   private updateDisplayFloor(): void {
     let isNeedUpdate = false
 
-    // https://github.com/photonstorm/phaser/issues/5756 문제점 대응
-    // 수정된다면 cacheCameraPosition 메서드와 함께 제거해야 함.
-    interface CustomCamera extends Phaser.Cameras.Scene2D.Camera {
-      __beforeScrollX: number
-      __beforeScrollY: number
-    }
-
-    const cacheCameraPosition = (camera: CustomCamera) => {
-      camera.__beforeScrollX = camera.scrollX
-      camera.__beforeScrollY = camera.scrollY
-    }
-
     // 업데이트된 카메라 목록이 있는지 여부를 확인합니다.
-    for (const c of this.scene.cameras.cameras) {
-      const camera = c as CustomCamera
-      if (
-        camera.dirty ||
-        camera.__beforeScrollX !== camera.scrollX ||
-        camera.__beforeScrollY !== camera.scrollY
-      ) {
+    for (const camera of this.scene.cameras.cameras) {
+      if (camera.dirty) {
         isNeedUpdate = true
-        cacheCameraPosition(camera)
         break
       }
-
-      cacheCameraPosition(camera)
     }
 
     // 이전 업데이트에서 업데이트 된 내용이 없다면 중지합니다.

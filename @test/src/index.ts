@@ -9,6 +9,7 @@ import { Plugin as SpatialAudioPlugin, SpatialAudio } from '~/spatial-audio'
 import { Plugin as FeelingPlugin } from '~/feeling'
 import { Plugin as ParticlePlugin } from '~/particle'
 import { Plugin as OptimizationPlugin } from '~/optimization'
+import { Plugin as InventoryPlugin } from '~/inventory'
 import { getIsometricSide } from '~/@common/Math/MathUtil'
 
 class User extends Actor {
@@ -211,6 +212,7 @@ class Test extends Phaser.Scene {
     feeling!: FeelingPlugin
     particle!: ParticlePlugin
     optimization!: OptimizationPlugin
+    inventory!: InventoryPlugin
     private shiftKey!: Phaser.Input.Keyboard.Key
     private ctrlKey!: Phaser.Input.Keyboard.Key
     private side: number = 10000
@@ -477,6 +479,11 @@ const config: Phaser.Types.Core.GameConfig = {
               key: 'OptimizationPlugin',
               mapping: 'optimization',
               plugin: OptimizationPlugin
+            },
+            {
+              key: 'InventoryPlugin',
+              mapping: 'inventory',
+              plugin: InventoryPlugin
             }
             // {
             //   key: 'daylightPlugin',

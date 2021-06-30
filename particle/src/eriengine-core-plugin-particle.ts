@@ -10,6 +10,7 @@ import { SparkParticle } from '@common/Phaser/Particle/SparkParticle'
 import { BurnParticle } from '@common/Phaser/Particle/BurnParticle'
 import { SnowParticle } from '@common/Phaser/Particle/SnowParticle'
 import { RainParticle } from '@common/Phaser/Particle/RainParticle'
+import { JetSmokeParticle } from '@common/Phaser/Particle/JetSmoke'
 
 import particleGreen from '@assets/particle-green.png'
 import particleWhite from '@assets/particle-white.png'
@@ -127,6 +128,20 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
    */
   addJet(x: number, y: number, emitRadius?: number): JetParticle {
     const particle = new JetParticle(this.scene, x, y, emitRadius, ParticleAsset['particle-flash'])
+    this.particleset.add(particle)
+  
+    return particle
+  }
+
+  /**
+   * 로켓과 같은 추진체에서 나오는 연기 파티클 지역을 생성합니다.
+   * `emitRadius` 매개변수를 이용하여 파티클이 생성되는 지역의 범위를 설정할 수 있습니다.
+   * @param x 파티클이 생성될 x좌표입니다.
+   * @param y 파티클이 생성될 y좌표입니다.
+   * @param emitRadius 파티클이 생성되는 영역의 범위입니다. 파티클은 이 범위 내에서 랜덤하게 생성될 것입니다.
+   */
+  addJetSmoke(x: number, y: number, emitRadius?: number): JetParticle {
+    const particle = new JetSmokeParticle(this.scene, x, y, emitRadius, ParticleAsset['particle-smoke'])
     this.particleset.add(particle)
   
     return particle

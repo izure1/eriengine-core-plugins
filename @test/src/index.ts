@@ -150,6 +150,7 @@ class Player extends User {
 
               rocket.fireMissile(betweenAngle, 0.1, 0.01, actors[0])
               rocket.particle.addExists('flame', this.scene.particle.addJet(0, 0))
+              rocket.particle.addExists('smoke', this.scene.particle.addJetSmoke(0, 0))
 
               return {}
             })

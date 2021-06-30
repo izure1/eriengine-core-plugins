@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-inventory",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Inventory system plugin for Phaser 3",
   "main": "dist/inventory/src/eriengine-core-plugin-inventory.js",
   "scripts": {

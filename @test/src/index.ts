@@ -265,6 +265,8 @@ class Test extends Phaser.Scene {
 
         const particle = this.particle.addFirefly(0, 0)
 
+        this.player.particle.addExists('t', particle).pause('t')
+
         // this.player.particle.addExists('smoke', this.particle.addSmoke(0, 0), true)
         // this.player.particle.addExists('explode', this.particle.addExplode(0, 0, 100), true)
 

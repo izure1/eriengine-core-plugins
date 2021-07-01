@@ -77,7 +77,7 @@ export class ActorParticle {
       .createEmitter(configAppended)
       .startFollow(this.actor)
 
-    const option = ActorParticle.createEmitterOption(emitter, isTop, configAppended.frequency!)
+    const option = ActorParticle.createEmitterOption(emitter, isTop, emitter.frequency!)
 
     this.remove(key)
 
@@ -163,10 +163,9 @@ export class ActorParticle {
   /**
    * 등록된 파티클 효과를 출력합니다.
    * @param key 파티클 키입니다.
-   * @param frequency 파티클 입자를 다시 뿌리는 간격(ms)입니다. 기본값은 `emitter.frequency`입니다.
-   * @param quantity 파티클 입자를 뿌릴 때, 뿌려지는 입자 갯수입니다. 기본값은 `emitter.quantity`입니다.
+   * @param frequency 파티클 입자를 다시 뿌리는 간격(ms)입니다. 기본값은 `this.get(key).emitter.frequency`입니다.
    */
-  play(key: string, frequency?: number, quantity?: number): this {
+  play(key: string, frequency?: number): this {
     if (!this.emittermap.has(key)) {
       return this
     }
@@ -174,7 +173,6 @@ export class ActorParticle {
     const particle = this.emittermap.get(key)!
 
     let newFrequency = frequency ?? particle.emitter.frequency
-    let newQuantity = quantity ?? particle.emitter.quantity
     
     // explode 메서드로 frequency 속성이 -1이 되었을 경우,
     // 최초 등록했던 frequency로 재설정함.
@@ -183,10 +181,9 @@ export class ActorParticle {
     }
 
     particle.frequency = newFrequency
-    
+
     particle.emitter
       .setFrequency(newFrequency)
-      .setQuantity(newQuantity)
       .start()
     
     return this

@@ -33,13 +33,20 @@ export class ActorParticle {
     return this.actor.scene
   }
 
-  /** 등록된 파티클 목록을 반환합니다. */
-  private get emitters(): Phaser.GameObjects.Particles.ParticleEmitter[] {
+  /** 등록된 파티클의 이미터를 배열로 반환합니다. */
+  get emitters(): Phaser.GameObjects.Particles.ParticleEmitter[] {
     const emitters: Phaser.GameObjects.Particles.ParticleEmitter[] = []
     for (const { emitter } of this.emittermap.values()) {
       emitters.push(emitter)
     }
     return emitters
+  }
+
+  /**
+   * 등록된 모든 파티클의 키를 배열로 반환합니다.
+   */
+  get keys(): string[] {
+    return Array.from(this.emittermap.keys())
   }
 
   /**
@@ -165,7 +172,10 @@ export class ActorParticle {
 
     const { emitter } = this.emittermap.get(key)!
 
-    emitter.setFrequency(emitter.frequency, emitter.quantity).start()
+    emitter
+      .setFrequency(frequency ?? emitter.frequency)
+      .setQuantity(quantity ?? emitter.quantity)
+      .start()
     
     return this
   }

@@ -1,7 +1,7 @@
 import Phaser from 'phaser'
 import { Actor } from '../Actor'
 import { Point2, getAngleBetweenPoints } from '@common/Math/MathUtil'
-import { ActorParticle } from '@common/Phaser/ActorParticle'
+import { ActorParticle } from '../ActorParticle'
 import { CollideHandler, CollideObject, BeforeDestroyHandler } from './types'
 
 export class Bullet extends Phaser.Physics.Matter.Sprite {

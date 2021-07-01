@@ -4,6 +4,7 @@ type ParticleEmitterConfig = Phaser.Types.GameObjects.Particles.ParticleEmitterC
 type Actor = Phaser.GameObjects.GameObject&Phaser.GameObjects.Components.Transform
 
 interface ParticleEmitterOption {
+  frequency: number
   isTop: boolean
   emitter: Phaser.GameObjects.Particles.ParticleEmitter
 }
@@ -20,8 +21,8 @@ export class ActorParticle {
     particle.destroy()
   }
   
-  static createEmitterOption(emitter: Phaser.GameObjects.Particles.ParticleEmitter, isTop: boolean): ParticleEmitterOption {
-    return { isTop, emitter }
+  static createEmitterOption(emitter: Phaser.GameObjects.Particles.ParticleEmitter, isTop: boolean, frequency: number): ParticleEmitterOption {
+    return { isTop, emitter, frequency }
   }
 
   constructor(actor: Actor) {
@@ -76,7 +77,7 @@ export class ActorParticle {
       .createEmitter(configAppended)
       .startFollow(this.actor)
 
-    const option = ActorParticle.createEmitterOption(emitter, isTop)
+    const option = ActorParticle.createEmitterOption(emitter, isTop, configAppended.frequency!)
 
     this.remove(key)
 
@@ -96,7 +97,7 @@ export class ActorParticle {
     const emitter = particle.emitters.first
     emitter.startFollow(this.actor)
     
-    const option = ActorParticle.createEmitterOption(emitter, isTop)
+    const option = ActorParticle.createEmitterOption(emitter, isTop, emitter.frequency)
 
     this.remove(key)
 
@@ -170,11 +171,22 @@ export class ActorParticle {
       return this
     }
 
-    const { emitter } = this.emittermap.get(key)!
+    const particle = this.emittermap.get(key)!
 
-    emitter
-      .setFrequency(frequency ?? emitter.frequency)
-      .setQuantity(quantity ?? emitter.quantity)
+    let newFrequency = frequency ?? particle.emitter.frequency
+    let newQuantity = quantity ?? particle.emitter.quantity
+    
+    // explode 메서드로 frequency 속성이 -1이 되었을 경우,
+    // 최초 등록했던 frequency로 재설정함.
+    if (newFrequency < 0) {
+      newFrequency = particle.frequency
+    }
+
+    particle.frequency = newFrequency
+    
+    particle.emitter
+      .setFrequency(newFrequency)
+      .setQuantity(newQuantity)
       .start()
     
     return this
@@ -203,15 +215,18 @@ export class ActorParticle {
    * @param key 파티클 키입니다.
    * @param count 파티클 입자가 뿌려질 갯수입니다.
    */
-  explode(key: string, quantity: number): this {
+  explode(key: string, count: number): this {
     if (!this.emittermap.has(key)) {
       return this
     }
 
-    const { emitter } = this.emittermap.get(key)!
+    const particle = this.emittermap.get(key)!
     const { x, y } = this.actor
-    emitter.start()
-    emitter.explode(quantity, x, y)
+
+    particle.frequency = particle.emitter.frequency
+
+    particle.emitter.start()
+    particle.emitter.explode(count, x, y)
 
     return this
   }

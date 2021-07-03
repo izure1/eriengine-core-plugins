@@ -15,7 +15,9 @@ import {
 } from '@common/Math/MathUtil'
 
 import { IsometricWall } from './Tiles/Wall'
+export { IsometricWall } from './Tiles/Wall'
 import { IsometricFloor } from './Tiles/Floor'
+export { IsometricFloor } from './Tiles/Floor'
 
 type IsometricObject = Phaser.GameObjects.GameObject&GridObject
 

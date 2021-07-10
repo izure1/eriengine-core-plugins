@@ -86,15 +86,17 @@ export class Item {
   /** 아이템의 고유 키입니다. 이 값은 다른 아이템 종류와 결코 중복되어선 안됩니다. */
   key: string
   /** 아이템이 추가된 시각입니다. `timestamp` 값입니다. */
-  regdate: number
-  /** 아이템의 사용자 정의 데이터입니다. 가령 아이템에 강화 수치 기능을 추가하고 싶다면, 이 속성을 이용하십시오. */
+  timestamp: number
+  /** 아이템의 사용자 정의 데이터입니다. 가령 아이템에 강화 수치 기능을 추가하고 싶다면, 이 속성을 이용하십시오.
+   * 돈, 골드와 같은 많은 갯수를 필요로 하는 아이템 구현에 사용하기에도 좋습니다.
+   */
   data: Json
 
-  constructor(inventoryManager: Plugin, inventory: Inventory, key: string, regdate: number) {
+  constructor(inventoryManager: Plugin, inventory: Inventory, key: string, timestamp: number) {
     this.__inventoryManager = inventoryManager
     this.__inventory = inventory
     this.key = key
-    this.regdate = regdate
+    this.timestamp = timestamp
     this.data = {}
   }
 

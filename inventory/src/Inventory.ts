@@ -145,13 +145,13 @@ export class Inventory {
   }
   
   /**
-   * 현재 인벤토리의 아이템을 `추가된(regdate)` 순으로 정렬합니다.
+   * 현재 인벤토리의 아이템을 `추가된(timestamp)` 순으로 정렬합니다.
    * 이는 `this.items` 속성을 위해 사용됩니다.
    * @param desc 이 값을 `true`로 설정하면 내림차순으로 정렬합니다. 기본값은 `false`입니다.
    */
   sortByAdded(desc: boolean = false): this {
     const sortBy = desc ? -1 : 1
-    this.__items.sort((a, b) => (a.regdate - b.regdate) * sortBy)
+    this.__items.sort((a, b) => (a.timestamp - b.timestamp) * sortBy)
     return this
   }
   

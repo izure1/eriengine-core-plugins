@@ -26,7 +26,7 @@ vec4 vignette(vec4 color) {
   float radius = length(position);
   float vignette = smoothstep(1.0, 1.0 - uCircleScale, radius);
 
-  color.rgb = mix(color.rgb, uAmbientColor.rgb * tRad * uIntensity, 1.0 - vignette);
+  color.rgb = mix(color.rgb, uAmbientColor.rgb * uIntensity, (1.0 - vignette) * tRad);
 
   return color;
 }

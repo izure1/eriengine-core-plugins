@@ -1,6 +1,6 @@
 {
   "name": "@eriengine/plugin-feeling",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "feeling effect plugin for Phaser 3",
   "main": "dist/feeling/src/eriengine-core-plugin-feeling.js",
   "scripts": {

@@ -156,6 +156,7 @@ class Player extends User {
             })
             .addSkill('hit-missile', (target, dot) => {
               let damage = 45
+              this.scene.feeling.wound()
               if (Math.random() > 0.75) {
                 this.scene.feeling.critical()
                 damage *= 2

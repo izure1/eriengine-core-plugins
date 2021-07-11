@@ -2,8 +2,11 @@ import Phaser from 'phaser'
 import { Point2 } from '@common/Math/MathUtil'
 
 import { Bank } from './Bank'
+export { Bank } from './Bank'
 import { Inventory } from './Inventory'
+export { Inventory } from './Inventory'
 import { ItemBlueprint } from './Item'
+export { Item, ItemBlueprint } from './Item'
 
 export class Plugin extends Phaser.Plugins.ScenePlugin {
   private __inventories: Map<any, Inventory> = new Map

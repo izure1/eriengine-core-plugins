@@ -82,21 +82,21 @@ export class Inventory {
   }
 
   private createItem(blueprint: ItemBlueprint): Item {
-    return new Item(this.__inventoryManager, this, blueprint.key, Date.now())
+    return new Item(this.__inventoryManager, blueprint.key, Date.now())
   }
 
   /**
    * 현재 인벤토리에 해당 아이템을 추가할 수 있는지 여부를 반환합니다.
    * 주의하세요. 이 메서드는 아이템의 `onBeforeAdd` 콜백함수의 유효성 검사를 하지 않습니다.
    * 오로지 아이템의 무게, 슬롯 제한에 따른 인벤토리의 여유공간이 있는지만을 확인합니다.
-   * @param key 검사할 아이템의 고유 키값입니다.
+   * @param key 검사할 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 아이템을 직접 검사할 수 있습니다.
    */
-  async addible(key: string): Promise<boolean> {
-    if (!this.__inventoryManager.hasItemBlueprint(key)) {
+  addible(key: string|Item): boolean {
+    const blueprint = this.normalizeBlueprint(key)
+
+    if (blueprint === null) {
       return false
     }
-
-    const blueprint = this.__inventoryManager.getItemBlueprint(key)!
 
     // 무게가 부족하다면
     if (this.availableSpaceWeight < blueprint.weight) {
@@ -119,18 +119,29 @@ export class Inventory {
 
   /**
    * 현재 인벤토리에 아이템을 가지고 있는 여부를 반환합니다.
-   * @param key 아이템의 고유 키값입니다.
+   * @param key 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 해당 아이템이 인벤토리에 있는지 여부를 반환합니다.
    */
-  has(key: string): boolean {
+  has(key: string|Item): boolean {
     return this.get(key).length !== 0
   }
 
   /**
    * 현재 인벤토리에 찾고자 하는 아이템 목록을 배열에 담아 반환합니다.
-   * @param key 찾고자 하는 아이템의 고유 키값입니다.
+   * @param key 찾고자 하는 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 아이템을 가져올 수 있습니다. 만일 인벤토리에 해당 아이템이 존재하지 않는다면 빈 배열을 반환합니다.
    */
-  get(key: string): Item[] {
-    return this.__items.filter((item) => item.key === key)
+  get(key: string|Item): Item[] {
+    const blueprint = this.normalizeBlueprint(key)
+
+    if (blueprint === null) {
+      return []
+    }
+
+    // 아이템 인스턴스를 매개변수로 넘겼을 경우, 해당 아이템과 일치하는 것만을 반환함.
+    if (key instanceof Item) {
+      return this.__items.filter((item) => item === key)
+    }
+
+    return this.__items.filter((item) => item.key === blueprint.key)
   }
 
   /**
@@ -166,31 +177,51 @@ export class Inventory {
     return this
   }
 
+  private normalizeBlueprint(key: string|Item): ItemBlueprint|null {
+    let blueprint: ItemBlueprint
+
+    if (typeof key === 'string') {
+      if (!this.__inventoryManager.hasItemBlueprint(key)) {
+        return null
+      }
+      blueprint = this.__inventoryManager.getItemBlueprint(key)!
+    }
+    else if (key instanceof Item) {
+      blueprint = key.blueprint
+    }
+    else {
+      return null
+    }
+
+    return blueprint
+  }
+
   /**
    * 현재 인벤토리에 아이템을 추가합니다.
    * 추가하고자하는 아이템은 인벤토리 플러그인에서 `addItemBlueprint` 메서드로 등록한 아이템이여야 합니다.
    * 이 메서드는 아이템의 `onBeforeAdd` 콜백함수의 영향을 받으며, `onBeforeAdd` 콜백함수가 `false`를 반환한다면 아이템을 추가하지 않습니다.
    * `onBeforeAdd` 유효성 검사를 통과하더라도, 인벤토리의 `무게 제한(maximumWeight)`, `슬롯 제한(maximumSlot)`에 제한되면 추가하지 않습니다.
-   * @param key 추가할 아이템의 고유 키값입니다.
-   * @returns 인벤토리에 아이템 추가 성공 여부를 반환합니다.
+   * @param key 추가할 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 아이템을 직접 추가할 수 있습니다.
+   * @returns 인벤토리에 아이템 추가한 아이템을 반환합니다. 추가에 실패했다면 `null`을 반환합니다.
    */
-  async add(key: string): Promise<boolean> {
-    if (!this.__inventoryManager.hasItemBlueprint(key)) {
-      return false
+  add(key: string|Item): Item|null {
+    const blueprint = this.normalizeBlueprint(key)
+
+    if (blueprint === null) {
+      return null
     }
 
     // 아이템 추가 유효성 검사 함수를 실행하고, 적합하지 않았을 경우 추가하지 않음
-    const blueprint = this.__inventoryManager.getItemBlueprint(key)!
     if (
       blueprint.onBeforeAdd &&
-      !await blueprint.onBeforeAdd(blueprint, this, this.__owner)
+      !blueprint.onBeforeAdd(blueprint, this, this.__owner)
     ) {
-      return false
+      return null
     }
 
     // 무게, 슬롯 제한으로 인해 추가할 수 없음
-    if (!await this.addible(key)) {
-      return false
+    if (!this.addible(key)) {
+      return null
     }
 
     const item = this.createItem(blueprint)
@@ -198,81 +229,86 @@ export class Inventory {
 
     blueprint.onAdd(item, this, this.__owner)
 
-    return true
+    return item
   }
 
   /**
    * 현재 인벤토리에서 아이템을 제거합니다.
    * 제거하고자하는 아이템은 인벤토리 플러그인에서 `addItemBlueprint` 메서드로 등록한 아이템이여야 합니다.
    * 이 메서드는 아이템의 `onBeforeDrop` 콜백함수의 영향을 받으며, `onBeforeDrop` 콜백함수가 `false`를 반환한다면 아이템을 제거하지 않습니다.
-   * 인벤토리에 아이템이 존재하지 않는다면 `false`를 반환합니다.
-   * @param key 제거할 아이템의 고유 키값입니다.
-   * @returns 인벤토리에서 아이템 제거 성공 여부를 반환합니다.
+   * 인벤토리에 아이템이 존재하지 않는다면 `null`를 반환합니다.
+   * @param key 제거할 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 아이템을 직접 제거할 수 있습니다.
+   * @returns 인벤토리에서 아이템 제거한 아이템을 반환합니다. 제거에 실패했다면 `null`을 반환합니다.
    */
-  async drop(key: string): Promise<boolean> {
-    if (!this.__inventoryManager.hasItemBlueprint(key)) {
-      return false
+  drop(key: string|Item): Item|null {
+    const blueprint = this.normalizeBlueprint(key)
+
+    if (blueprint === null) {
+      return null
     }
 
     // 아이템을 소유하고 있지 않음
     if (!this.has(key)) {
-      return false
+      return null
     }
 
     // 아이템 제거 유효성 검사 함수를 실행하고, 적합하지 않았을 경우 제거하지 않음
-    const blueprint = this.__inventoryManager.getItemBlueprint(key)!
     const oldest = this.get(key)[0]
     if (
       blueprint.onBeforeDrop &&
-      !await blueprint.onBeforeDrop(oldest, this, this.__owner)
+      !blueprint.onBeforeDrop(oldest, this, this.__owner)
     ) {
-      return false
+      return null
     }
 
     const index = this.__items.indexOf(oldest)
-    this.__items.splice(index, 1)
+    const item = this.__items.splice(index, 1)
 
     blueprint.onDrop(oldest, this, this.__owner)
 
-    return true
+    return item.pop()!
   }
 
   /**
    * 현재 인벤토리에 있는 아이템을 사용합니다.
    * 사용하고자하는 아이템은 인벤토리 플러그인에서 `addItemBlueprint` 메서드로 등록한 아이템이여야 합니다.
    * 이 메서드는 아이템의 `onBeforeUse` 콜백함수의 영향을 받으며, `onBeforeUse` 콜백함수가 `false`를 반환한다면 아이템을 사용하지 않습니다.
-   * 인벤토리에 아이템이 존재하지 않는다면 `false`를 반환합니다.
-   * @param key 사용할 아이템의 고유 키값입니다.
-   * @returns 아이템 사용 성공 여부를 반환합니다.
+   * 인벤토리에 아이템이 존재하지 않는다면 `null`를 반환합니다.
+   * @param key 사용할 아이템의 고유 키값입니다. 아이템 인스턴스를 넘기면 아이템을 직접 사용할 수 있습니다.
+   * @returns 사용한 아이템을 반환합니다. 사용에 실패했다면 `null`을 반환합니다.
    */
-  async use(key: string): Promise<boolean> {
-    if (!this.__inventoryManager.hasItemBlueprint(key)) {
-      return false
+  use(key: string|Item): Item|null {
+    const blueprint = this.normalizeBlueprint(key)
+
+    if (blueprint === null) {
+      return null
     }
 
     // 아이템을 소유하고 있지 않음
     if (!this.has(key)) {
-      return false
+      return null
     }
 
     // 아이템 제거 유효성 검사 함수를 실행하고, 적합하지 않았을 경우 제거하지 않음
-    const blueprint = this.__inventoryManager.getItemBlueprint(key)!
     const oldest = this.get(key)[0]
     if (
       blueprint.onBeforeUse &&
-      !await blueprint.onBeforeUse(oldest, this, this.__owner)
+      !blueprint.onBeforeUse(oldest, this, this.__owner)
     ) {
-      return false
+      return null
     }
 
+    let item: Item|null = null
     // 일회성 소모품이라면 1개 제거합니다.
     if (blueprint.disposable) {
       const index = this.__items.indexOf(oldest)
-      this.__items.splice(index, 1)
+      const used = this.__items.splice(index, 1)
+
+      item = used.pop()!
     }
 
     blueprint.onUse(oldest, this, this.__owner)
 
-    return true
+    return item
   }
 }

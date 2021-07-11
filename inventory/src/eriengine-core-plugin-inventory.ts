@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { Point2 } from '@common/Math/MathUtil'
 
+import { Bank } from './Bank'
 import { Inventory } from './Inventory'
 import { ItemBlueprint } from './Item'
 
@@ -67,6 +68,27 @@ export class Plugin extends Phaser.Plugins.ScenePlugin {
    */
   getItemBlueprint(key: string): ItemBlueprint|null {
     return this.__itemBlueprints.get(key) ?? null
+  }
+
+  /**
+   * 두 인벤토리 사이에 안전하게 거래할 수 있는 기능을 제공하기 위한 중개인 인스턴스를 생성합니다.
+   * 이 인스턴스에는 서로 거래할 두 인벤토리 정보가 담겨있습니다. 사용법은 아래 코드를 참고하십시오.
+   * ```
+   * const bank = this.inventory.createBank(inventoryA, inventoryB)
+   * bank.a.offer(inventoryA.get('potion')) // inventoryA는 포션 아이템을 제시합니다.
+   * bank.b.offer(inventoryB.get('gold')) // inventoryB는 골드 아이템을 제시합니다.
+   * 
+   * bank.a.done().then((gold) => { ... }) // 거래가 성사되면 inventoryA는 gold 아이템을 얻습니다.
+   * bank.b.done().then((potion) => { ... }) // 거래가 성사되면 inventoryB는 potion 아이템을 얻습니다.
+   * 
+   * bank.a.cancel() // inventoryA가 거래를 취소했습니다.
+   * ```
+   * @param a 거래할 인벤토리 A입니다.
+   * @param b 거래할 인벤토리 B입니다.
+   * @returns `a`, `b` 인벤토리의 중개를 담당하는 은행 인스턴스를 반환합니다.
+   */
+  createBank(a: Inventory, b: Inventory): Bank {
+    return new Bank(a, b)
   }
 
   destroy(): void {

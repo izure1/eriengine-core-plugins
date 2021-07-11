@@ -243,7 +243,7 @@ class Test extends Phaser.Scene {
         this.load.audio('effect-chicken', '/assets/audio/effect-chicken.mp3')
     }
     
-    create(): void {
+    async create() {
         this.player     = this.actor.addActor(Player, 'izure', this, 0, 0, 'sprite-hannah-stand')
         this.shiftKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         this.ctrlKey    = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.CTRL)
@@ -267,6 +267,67 @@ class Test extends Phaser.Scene {
         const particle = this.particle.addFirefly(0, 0)
 
         this.player.particle.addExists('t', particle).pause('t')
+
+        this.inventory.addItemBlueprint({
+          key: 'potion',
+          type: 'potion',
+          name: '포션',
+          thumbnail: '',
+          description: '체력을 회복합니다',
+          maximumPcs: 1,
+          weight: 1,
+          disposable: true,
+          onAdd: async (item, inventory) => {},
+          onDrop: async (item, inventory) => {},
+          onUse: async (item, inventory) => {},
+        })
+
+        this.inventory.addItemBlueprint({
+          key: 'gold',
+          type: 'gold',
+          name: '골드',
+          thumbnail: '',
+          description: '금화입니다',
+          maximumPcs: 100,
+          weight: 1,
+          disposable: true,
+          // onBeforeAdd: (item, inventory) => {
+          //   if (inventory.owner instanceof Phaser.Scene) {
+          //     console.log('씬에는 추가할 수 없음!')
+          //     return false
+          //   }
+          //   return true
+          // },
+          onAdd: (item, inventory) => {
+            console.log('추가됨')
+          },
+          onDrop: (item, inventory) => {
+            console.log('버릴게')
+          },
+          onUse: (item, inventory) => {},
+        })
+
+        const playerInventory = this.inventory.of(this.player)
+        const sceneInventory = this.inventory.of(this)
+        const bank = this.inventory.createBank(playerInventory, sceneInventory)
+
+        const gold = playerInventory.add('gold')
+        sceneInventory.add('potion')
+
+        if (gold) {
+          gold.data.pcs = 10000
+        }
+
+        bank.on('offer', (list, agent) => {
+          if (agent.owner !== playerInventory.owner) {
+            console.log('상대가 ', list, '을 올렸습니다')
+          }
+        })
+
+        bank.a.offer(playerInventory.get('gold'))
+        bank.b.offer(sceneInventory.get('potion'))
+
+        bank.a.done().then((received) => console.log(`a가 얻은 아이템은.. 쨔잔`, received))
 
         // this.player.particle.addExists('smoke', this.particle.addSmoke(0, 0), true)
         // this.player.particle.addExists('explode', this.particle.addExplode(0, 0, 100), true)
@@ -359,7 +420,7 @@ class Test extends Phaser.Scene {
           }
         })
 
-        console.log(this.player, this, particle)
+        console.log(this.player, this, playerInventory, sceneInventory, bank)
     }
 
     update(): void {

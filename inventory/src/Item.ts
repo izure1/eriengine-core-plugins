@@ -28,7 +28,7 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속한 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onBeforeAdd?(item: ItemBlueprint, inventory: Inventory, owner: any): Promise<boolean>
+  onBeforeAdd?(item: ItemBlueprint, inventory: Inventory, owner: any): boolean
 
   /**
    * 아이템이 인벤토리에 추가됐을 때 호출될 콜백함수입니다.
@@ -37,7 +37,7 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속한 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onAdd(item: Item, inventory: Inventory, owner: any): Promise<void>
+  onAdd(item: Item, inventory: Inventory, owner: any): void
 
   /**
    * 아이템을 인벤토리에서 제거하기 전에, 호출될 콜백함수입니다.  
@@ -48,7 +48,7 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속한 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onBeforeDrop?(item: Item, inventory: Inventory, owner: any): Promise<boolean>
+  onBeforeDrop?(item: Item, inventory: Inventory, owner: any): boolean
 
   /**
    * 아이템을 인벤토리에서 제거했을 때, 호출될 콜백함수입니다.
@@ -57,7 +57,7 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속했던 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onDrop(item: Item, inventory: Inventory, owner: any): Promise<void>
+  onDrop(item: Item, inventory: Inventory, owner: any): void
 
   /**
    * 아이템을 사용하기 전에, 호출될 콜백함수입니다.  
@@ -68,7 +68,7 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속한 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onBeforeUse?(item: Item, inventory: Inventory, owner: any): Promise<boolean>
+  onBeforeUse?(item: Item, inventory: Inventory, owner: any): boolean
 
   /**
    * 아이템을 사용했을 때, 호출될 콜백함수입니다.
@@ -77,12 +77,11 @@ export interface ItemBlueprint {
    * @param inventory 해당 아이템이 속했던 인벤토리 인스턴스입니다.
    * @param owner 아이템의 사용자입니다.
    */
-  onUse(item: Item, inventory: Inventory, owner: any): Promise<void>
+  onUse(item: Item, inventory: Inventory, owner: any): void
 }
 
 export class Item {
   private __inventoryManager: Plugin
-  private __inventory: Inventory
   /** 아이템의 고유 키입니다. 이 값은 다른 아이템 종류와 결코 중복되어선 안됩니다. */
   key: string
   /** 아이템이 추가된 시각입니다. `timestamp` 값입니다. */
@@ -92,9 +91,8 @@ export class Item {
    */
   data: Json
 
-  constructor(inventoryManager: Plugin, inventory: Inventory, key: string, timestamp: number) {
+  constructor(inventoryManager: Plugin, key: string, timestamp: number) {
     this.__inventoryManager = inventoryManager
-    this.__inventory = inventory
     this.key = key
     this.timestamp = timestamp
     this.data = {}

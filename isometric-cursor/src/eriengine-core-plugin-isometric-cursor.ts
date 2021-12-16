@@ -141,6 +141,17 @@ class SelectPlugin extends Phaser.Plugins.ScenePlugin {
         this.rectangle.setDepth(Phaser.Math.MAX_SAFE_INTEGER)
     }
 
+    /**
+     * 드래그 박스의 색상, 두께를 포함한 기타 속성을 수정합니다. 자동으로 호출되며, *직접 호출하지 마십시오.*
+     */
+    private modifyRectangle(): void {
+      if (!this.rectangle) {
+        this.generateRectangle()
+      }
+      this.rectangle?.setStrokeStyle(this.thickness, this.strokeColor, this.strokeAlpha)
+      this.rectangle?.setFillStyle(this.fillColor, this.fillAlpha)
+    }
+
     /** 드래그 박스를 파괴합니다. 자동으로 호출되며, *직접 호출하지 마십시오.* */
     private destroyObject(): void {
         if (!this.rectangle) {

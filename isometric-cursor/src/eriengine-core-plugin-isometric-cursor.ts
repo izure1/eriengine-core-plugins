@@ -317,29 +317,29 @@ class SelectPlugin extends Phaser.Plugins.ScenePlugin {
      */
     setStrokeThickness(thickness: number): this {
         this.thickness = thickness
-        this.generateRectangle()
+        this.modifyRectangle()
         return this
     }
 
     /**
      * 드래그 박스의 테두리 색상을 설정합니다.
-     * @param param0 rgba 값 정보입니다.
+     * @param param0 rgba 값 정보입니다. `red`, `green`, `blue`는 0 ~ 255 사이의 정수를 가집니다. `alpha`는 0 ~ 1 사이의 실수를 가집니다.
      */
     setStrokeColor({ red, green, blue, alpha = 1 }: RGBA): this {
         this.strokeColor = Phaser.Display.Color.GetColor(red, green, blue)
         this.strokeAlpha = alpha
-        this.generateRectangle()
+        this.modifyRectangle()
         return this
     }
 
     /**
      * 드래그 박스의 색상을 설정합니다.
-     * @param param0 rgba 값 정보입니다.
+     * @param param0 rgba 값 정보입니다. `red`, `green`, `blue`는 0 ~ 255 사이의 정수를 가집니다. `alpha`는 0 ~ 1 사이의 실수를 가집니다.
      */
     setFillColor({ red, green, blue, alpha = 1 }: RGBA): this {
         this.fillColor = Phaser.Display.Color.GetColor(red, green, blue)
         this.fillAlpha = alpha
-        this.generateRectangle()
+        this.modifyRectangle()
         return this
     }
 
@@ -474,7 +474,7 @@ class PointerPlugin extends Phaser.Plugins.ScenePlugin {
 
     /**
      * 커서 포인터 테두리 색상을 설정합니다.
-     * @param param0 rgba 값 정보입니다.
+     * @param param0 rgba 값 정보입니다. `red`, `green`, `blue`는 0 ~ 255 사이의 정수를 가집니다. `alpha`는 0 ~ 1 사이의 실수를 가집니다.
      */
     setStrokeColor({ red, green, blue, alpha = 1 }: RGBA): this {
         this.strokeColor = Phaser.Display.Color.GetColor32(red, green, blue, alpha)

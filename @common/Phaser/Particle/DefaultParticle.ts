@@ -68,7 +68,6 @@ export abstract class DefaultParticle extends Phaser.GameObjects.Particles.Parti
     }
     
     this.scene.add.existing(this)
-    this.x = x
-    this.y = y
+    this.setPosition(x, y)
   }
 }

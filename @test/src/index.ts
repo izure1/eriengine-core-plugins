@@ -411,7 +411,6 @@ class Test extends Phaser.Scene {
             repeat: -1
         })
 
-
         this.input.on(Phaser.Input.Events.POINTER_DOWN, async (e: Phaser.Input.Pointer): Promise<void> => {
           if (e.button === 2) {
             if (this.player && this.player.active) {
@@ -441,10 +440,10 @@ class Test extends Phaser.Scene {
               this.player?.battle.addEnemy(user)
           }
           else if (this.shiftKey.isDown) {
-              this.map.setFloortile(x, y, 'dirt')
+              this.map.setFloorTile(`${x}:${y}`, x, y, 'dirt')
           }
           else {
-              this.map.setWalltile(x, y, 'wall-basic-right')
+              this.map.setWallTile(`${x}:${y}`, x, y, 'wall-basic-right')
           }
         }
 

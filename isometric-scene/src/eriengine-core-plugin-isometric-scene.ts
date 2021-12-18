@@ -56,17 +56,17 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     this.easystarset.clear()
   }
 
-  /** `setWalltile` 메서드로 씬에 설치된 벽 목록을 반환합니다. */
+  /** `setWallTile` 메서드로 씬에 설치된 벽 목록을 반환합니다. */
   get walls(): IsometricWall[] {
     return [ ...this.__walls.values() ]
   }
   
-  /** `setFloortile` 메서드로 씬에 설치된 바닥 타일 목록을 반환합니다. */
+  /** `setFloorTile` 메서드로 씬에 설치된 바닥 타일 목록을 반환합니다. */
   get floors(): IsometricFloor[] {
     return [ ...this.__floors.values() ]
   }
 
-  /** `setSensortile` 메서드로 씬에 설치된 센서 목록을 반환합니다. */
+  /** `setSensorTile` 메서드로 씬에 설치된 센서 목록을 반환합니다. */
   get sensors(): MatterJS.BodyType[] {
     return [ ...this.__sensors.values() ]
   }
@@ -233,13 +233,14 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
   /**
    * 씬에 아이소메트릭 물리 충돌체를 생성합니다. 이 충돌체는 고정(`static`)되어 있으며, 벽이나 장애물을 설치하는 용도로 사용됩니다.
+   * @param key 충돌체의 고유값입니다. 이 값이 중복될 경우, 기존의 것에 덮어씌워집니다.
    * @param x 충돌체가 생성될 x좌표입니다.
    * @param y 충돌체가 생성될 y좌표입니다.
    * @param texture 충돌체가 가질 텍스쳐입니다.
    * @param frame 충돌체가 가질 프레임 시작값입니다.
    * @param animation 충돌체가 가질 애니메이션 설정입니다.
    */
-  setWalltile(x: number, y: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): IsometricWall {
+  setWallTile(key: string, x: number, y: number, texture: string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): IsometricWall {
     const wall = new IsometricWall(this.scene.matter.world, x, y, texture, frame)
 
     this.scene.add.existing(wall)
@@ -247,8 +248,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     if (animation) {
       wall.play(animation)
     }
-
-    const key = this.getCoordKey(x, y)
 
     this.__walls.get(key)?.destroy()
     this.__walls.set(key, wall)
@@ -262,13 +261,14 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
   /**
    * 씬에 아이소메트릭 바닥타일 이미지를 생성합니다. 바닥 타일 이미지는 충돌체를 가지지 않은 단순한 이미지입니다.
+   * @param key 바닥 타일의 고유값입니다. 이 값이 중복될 경우, 기존의 것에 덮어씌워집니다.
    * @param x 바닥 타일이 생성될 x좌표입니다.
    * @param y 바닥 타일이 생성될 y좌표입니다.
    * @param texture 바닥 타일이 가질 텍스쳐입니다.
    * @param frame 바닥 타일이 가질 프레임 시작값입니다.
    * @param animation 바닥 타일이 가질 애니메이션 설정입니다.
    */
-  setFloortile(x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): Phaser.GameObjects.Sprite {
+  setFloorTile(key: string, x: number, y: number, texture: Phaser.Textures.Texture|string, frame?: string|number, animation?: string|Phaser.Types.Animations.PlayAnimationConfig): Phaser.GameObjects.Sprite {
     const floor = new IsometricFloor(this.scene, x, y, texture, frame)
     
     this.scene.add.existing(floor)
@@ -276,8 +276,6 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
     if (animation) {
       floor.play(animation, true)
     }
-
-    const key = this.getCoordKey(x, y)
 
     this.__floors.get(key)?.destroy()
     this.__floors.set(key, floor)
@@ -291,20 +289,18 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
 
   /**
    * 씬에 아이소메트릭 센서를 설치합니다. 센서는 물리 충돌체를 가지지 않지만, 물리 충돌 이벤트를 얻어낼 수 있습니다.
+   * @param key 센서의 고유값입니다. 이 값이 중복될 경우, 기존의 것에 덮어씌워집니다.
    * @param x 센서가 생성될 x좌표입니다.
    * @param y 센서가 생성될 y좌표입니다.
    * @param side 센서가 가질 한 변의 크기입니다.
    */
-  setSensortile(x: number, y: number, side: number): MatterJS.BodyType {
+  setSensorTile(key: string, x: number, y: number, side: number): MatterJS.BodyType {
     const width = getIsometricWidth(side) * 2
     const vertices = createIsometricDiamondPoints(width)
     const sensor = this.scene.matter.add.fromVertices(x, y, vertices, { isStatic: true, isSensor: true })
 
-    const key = this.getCoordKey(x, y)
-
     if (this.__sensors.has(key)) {
       const before = this.__sensors.get(key)!
-      
       this.scene.matter.world.remove(before)
     }
     this.__sensors.set(key, sensor)
@@ -317,90 +313,59 @@ class Plugin extends Phaser.Plugins.ScenePlugin {
   }
 
   /**
-   * `setWalltile` 메서드로 해당 좌표에 설치된 아이소메트릭 벽 타일을 제거합니다.
-   * @param x 설치된 벽의 x좌표입니다.
-   * @param y 설치된 벽의 y좌표입니다.
+   * `setWallTile` 메서드로 해당 좌표에 설치된 아이소메트릭 벽 타일을 제거합니다.
+   * @param key 설치된 벽의 고유값입니다.
    */
-  removeWalltile(x: number, y: number): this {
-    const key = this.getCoordKey(x, y)
+  removeWallTile(key: string): this {
     this.__walls.get(key)?.destroy()
-
     return this
   }
 
   /**
-   * `setFloortile` 메서드로 해당 좌표에 설치된 아이소메트릭 바닥 타일을 제거합니다.
-   * @param x 설치된 바닥 타일의 x좌표입니다.
-   * @param y 설치된 바닥 타일의 y좌표입니다.
+   * `setFloorTile` 메서드로 해당 좌표에 설치된 아이소메트릭 바닥 타일을 제거합니다.
+   * @param key 설치된 바닥 타일의 고유값입니다.
    */
-  removeFloortile(x: number, y: number): this {
-    const key = this.getCoordKey(x, y)
+  removeFloorTile(key: string): this {
     this.__floors.get(key)?.destroy()
-
     return this
   }
 
   /**
-   * `setSensortile` 메서드로 해당 좌표에 설치된 아이소메트릭 센서를 제거합니다.
-   * @param x 설치된 센서의 x좌표입니다.
-   * @param y 설치된 센서의 y좌표입니다.
+   * `setSensorTile` 메서드로 해당 좌표에 설치된 아이소메트릭 센서를 제거합니다.
+   * @param key 설치된 센서의 고유값입니다.
    */
-  removeSensortile(x: number, y: number): this {
-    const key = this.getCoordKey(x, y)
+  removeSensorTile(key: string): this {
     if (this.__sensors.has(key)) {
       const sensor = this.__sensors.get(key)!
-
       this.scene.matter.world.remove(sensor)
     }
-
     return this
   }
 
-  /** `setWalltile` 메서드로 설치된 모든 아이소메트릭 벽 타일을 제거합니다. */
+  /** `setWallTile` 메서드로 설치된 모든 아이소메트릭 벽 타일을 제거합니다. */
   destroyWalls(): this {
     for (const key of this.__walls.keys()) {
-      const coord = this.getCoordFromKey(key)
-      if (!coord) {
-        continue
-      }
-
-      this.removeWalltile(coord.x, coord.y)
+      this.removeWallTile(key)
     }
-    
     this.__walls.clear()
-
     return this
   }
 
-  /** `setFloortile` 메서드로 설치된 모든 아이소메트릭 벽 타일을 제거합니다. */
+  /** `setFloorTile` 메서드로 설치된 모든 아이소메트릭 벽 타일을 제거합니다. */
   destroyFloors(): this {
     for (const key of this.__floors.keys()) {
-      const coord = this.getCoordFromKey(key)
-      if (!coord) {
-        continue
-      }
-      
-      this.removeFloortile(coord.x, coord.y)
+      this.removeFloorTile(key)
     }
-
     this.__floors.clear()
-
     return this
   }
 
-  /** `setSensortile` 메서드로 설치된 모든 아이소메트릭 센서를 제거합니다. */
+  /** `setSensorTile` 메서드로 설치된 모든 아이소메트릭 센서를 제거합니다. */
   destroySensors(): this {
     for (const key of this.__sensors.keys()) {
-      const coord = this.getCoordFromKey(key)
-      if (!coord) {
-          continue
-      }
-      
-      this.removeSensortile(coord.x, coord.y)
+      this.removeSensorTile(key)
     }
-
     this.__sensors.clear()
-
     return this
   }
 

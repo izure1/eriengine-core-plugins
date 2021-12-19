@@ -232,24 +232,25 @@ export class ActorRun extends TypedEmitter<ActorRunEvent> {
    * @param method 방향키를 지정합니다. `w` `a` `s` `d`를 방향키로 사용하고 싶다면 `wasd`, 키보드 방향키 `↑`, `←`, `↓`, `→`를 방향키로 사용하고 싶다면 `arrow`를 입력하십시오.
    * @param isStopWhenDepress 방향키를 누르고 있지 않다면 자동으로 캐릭터를 멈추게 할지 여부를 지정합니다. 이 값을 `false`로 지정하면 방향키에서 손을 땠을 때, 액터가 즉시 제자리에 멈추지 않고 남아있는 속도로 인해 미끄러집니다. 얼음판 위를 달리는 효과를 줄 때 유용합니다. 기본값은 `true`입니다.
    * @param reverse 누른 방향키와 반대로 움직이도록 합니다. 이는 액터가 혼란한 상태에 빠졌을 때 효과를 주기에 좋습니다.
+   * @param enableCapture 방향키의 기본 동작을 제거합니다. 이 값을 `true`로 설정하면, `preventDefault`를 호출하여 기본 동작이 작동하지 않습니다. 기본값은 `false`입니다.
    */
-  useMovingKey(method: 'arrow'|'wasd', isStopWhenDepress: boolean = true, reverse: boolean = false): this {
+  useMovingKey(method: 'arrow'|'wasd', isStopWhenDepress: boolean = true, reverse: boolean = false, enableCapture = false): this {
     let up:     Phaser.Input.Keyboard.Key|null
     let down:   Phaser.Input.Keyboard.Key|null
     let left:   Phaser.Input.Keyboard.Key|null
     let right:  Phaser.Input.Keyboard.Key|null
     switch (method) {
       case 'arrow':
-        up      = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP)
-        down    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
-        left    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT)
-        right   = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT)
+        up      = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP, enableCapture)
+        down    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN, enableCapture)
+        left    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT, enableCapture)
+        right   = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT, enableCapture)
         break
       case 'wasd':
-        up      = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
-        down    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S)
-        left    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
-        right   = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
+        up      = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W, enableCapture)
+        down    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S, enableCapture)
+        left    = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A, enableCapture)
+        right   = this.scene.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D, enableCapture)
         break
     }
 
@@ -272,6 +273,11 @@ export class ActorRun extends TypedEmitter<ActorRunEvent> {
 
   /** `useMovingKey` 메서드로 키보드로 액터 움직임을 취소합니다. */
   stopUsingMovingKey(): this {
+    this.upKey?.destroy()
+    this.downKey?.destroy()
+    this.leftKey?.destroy()
+    this.rightKey?.destroy()
+    
     this.upKey      = null
     this.downKey    = null
     this.leftKey    = null
